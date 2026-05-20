@@ -11,6 +11,8 @@ import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
+import { NeonAuthUIProvider } from '@neondatabase/neon-js/auth/react/ui'
+import { authClient } from '../auth';
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -47,6 +49,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <NeonAuthUIProvider authClient={authClient}>
+
         {children}
         <TanStackDevtools
           config={{
@@ -59,7 +63,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             },
             TanStackQueryDevtools,
           ]}
-        />
+          />
+          </NeonAuthUIProvider>
         <Scripts />
       </body>
     </html>
