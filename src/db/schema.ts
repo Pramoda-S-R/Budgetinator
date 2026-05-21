@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -9,5 +9,30 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
+export const accounts = pgTable('accounts', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  accountType: text('account_type').notNull(),
+  currentBalance: numeric('current_balance', { precision: 14, scale: 2 }).notNull().default('0'),
+  includeInNetWorth: boolean('include_in_net_worth').notNull().default(true),
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const accountBalanceHistory = pgTable('account_balance_history', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  accountId: uuid('account_id')
+    .notNull()
+    .references(() => accounts.id, { onDelete: 'cascade' }),
+  balance: numeric('balance', { precision: 14, scale: 2 }).notNull(),
+  recordedAt: timestamp('recorded_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
+export type Account = typeof accounts.$inferSelect
+export type NewAccount = typeof accounts.$inferInsert
+export type AccountBalanceHistory = typeof accountBalanceHistory.$inferSelect

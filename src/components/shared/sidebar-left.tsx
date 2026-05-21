@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "@tanstack/react-router";
 
 import {
   Sidebar,
@@ -6,6 +7,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
@@ -21,7 +23,28 @@ export function SidebarLeft({
           <SidebarMenuItem>Budgetinator</SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>{/* <NavMain items={menuItems} /> */}</SidebarContent>
+      <SidebarContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={(props) => (
+                <Link {...props} to="/dashboard">
+                  Dashboard
+                </Link>
+              )}
+            />
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={(props) => (
+                <Link {...props} to="/accounts">
+                  Accounts
+                </Link>
+              )}
+            />
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarContent>
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>

@@ -18,8 +18,11 @@ import { Route as AuthSignOutRouteImport } from './routes/auth.sign-out'
 import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
 import { Route as AuthLogoutRouteImport } from './routes/auth.logout'
 import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as ApiAccountsRouteImport } from './routes/api.accounts'
 import { Route as AccountPathnameRouteImport } from './routes/account.$pathname'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
+import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/accounts/index'
+import { Route as ApiAccountsIdRouteImport } from './routes/api.accounts.$id'
 
 const MeRoute = MeRouteImport.update({
   id: '/me',
@@ -65,6 +68,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAccountsRoute = ApiAccountsRouteImport.update({
+  id: '/api/accounts',
+  path: '/api/accounts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AccountPathnameRoute = AccountPathnameRouteImport.update({
   id: '/account/$pathname',
   path: '/account/$pathname',
@@ -75,29 +83,45 @@ const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
+  id: '/accounts/',
+  path: '/accounts/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ApiAccountsIdRoute = ApiAccountsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ApiAccountsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
+  '/api/accounts': typeof ApiAccountsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/accounts/': typeof ProtectedAccountsIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
+  '/api/accounts': typeof ApiAccountsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/accounts': typeof ProtectedAccountsIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -106,12 +130,15 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
+  '/api/accounts': typeof ApiAccountsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/signup': typeof AuthSignupRoute
+  '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/_protected/accounts/': typeof ProtectedAccountsIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRouteTypes {
@@ -120,24 +147,30 @@ export interface FileRouteTypes {
     | '/'
     | '/me'
     | '/account/$pathname'
+    | '/api/accounts'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
     | '/auth/signup'
+    | '/api/accounts/$id'
+    | '/accounts/'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/me'
     | '/account/$pathname'
+    | '/api/accounts'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
     | '/auth/signup'
+    | '/api/accounts/$id'
+    | '/accounts'
     | '/dashboard'
   id:
     | '__root__'
@@ -145,12 +178,15 @@ export interface FileRouteTypes {
     | '/_protected'
     | '/me'
     | '/account/$pathname'
+    | '/api/accounts'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
     | '/auth/signup'
+    | '/api/accounts/$id'
+    | '/_protected/accounts/'
     | '/_protected/dashboard/'
   fileRoutesById: FileRoutesById
 }
@@ -159,6 +195,7 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   MeRoute: typeof MeRoute
   AccountPathnameRoute: typeof AccountPathnameRoute
+  ApiAccountsRoute: typeof ApiAccountsRouteWithChildren
   AuthLoginRoute: typeof AuthLoginRoute
   AuthLogoutRoute: typeof AuthLogoutRoute
   AuthSignInRoute: typeof AuthSignInRoute
@@ -232,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/accounts': {
+      id: '/api/accounts'
+      path: '/api/accounts'
+      fullPath: '/api/accounts'
+      preLoaderRoute: typeof ApiAccountsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/account/$pathname': {
       id: '/account/$pathname'
       path: '/account/$pathname'
@@ -246,14 +290,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/accounts/': {
+      id: '/_protected/accounts/'
+      path: '/accounts'
+      fullPath: '/accounts/'
+      preLoaderRoute: typeof ProtectedAccountsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/api/accounts/$id': {
+      id: '/api/accounts/$id'
+      path: '/$id'
+      fullPath: '/api/accounts/$id'
+      preLoaderRoute: typeof ApiAccountsIdRouteImport
+      parentRoute: typeof ApiAccountsRoute
+    }
   }
 }
 
 interface ProtectedRouteChildren {
+  ProtectedAccountsIndexRoute: typeof ProtectedAccountsIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
+  ProtectedAccountsIndexRoute: ProtectedAccountsIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
 }
 
@@ -261,11 +321,24 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
   ProtectedRouteChildren,
 )
 
+interface ApiAccountsRouteChildren {
+  ApiAccountsIdRoute: typeof ApiAccountsIdRoute
+}
+
+const ApiAccountsRouteChildren: ApiAccountsRouteChildren = {
+  ApiAccountsIdRoute: ApiAccountsIdRoute,
+}
+
+const ApiAccountsRouteWithChildren = ApiAccountsRoute._addFileChildren(
+  ApiAccountsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   MeRoute: MeRoute,
   AccountPathnameRoute: AccountPathnameRoute,
+  ApiAccountsRoute: ApiAccountsRouteWithChildren,
   AuthLoginRoute: AuthLoginRoute,
   AuthLogoutRoute: AuthLogoutRoute,
   AuthSignInRoute: AuthSignInRoute,
