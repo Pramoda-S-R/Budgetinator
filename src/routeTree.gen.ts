@@ -9,12 +9,23 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as MeRouteImport } from './routes/me'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthPathnameRouteImport } from './routes/auth.$pathname'
+import { Route as AuthSignupRouteImport } from './routes/auth.signup'
+import { Route as AuthSignUpRouteImport } from './routes/auth.sign-up'
+import { Route as AuthSignOutRouteImport } from './routes/auth.sign-out'
+import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
+import { Route as AuthLogoutRouteImport } from './routes/auth.logout'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
 import { Route as AccountPathnameRouteImport } from './routes/account.$pathname'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
   getParentRoute: () => rootRouteImport,
@@ -24,9 +35,34 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthPathnameRoute = AuthPathnameRouteImport.update({
-  id: '/auth/$pathname',
-  path: '/auth/$pathname',
+const AuthSignupRoute = AuthSignupRouteImport.update({
+  id: '/auth/signup',
+  path: '/auth/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignUpRoute = AuthSignUpRouteImport.update({
+  id: '/auth/sign-up',
+  path: '/auth/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignOutRoute = AuthSignOutRouteImport.update({
+  id: '/auth/sign-out',
+  path: '/auth/sign-out',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/auth/sign-in',
+  path: '/auth/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLogoutRoute = AuthLogoutRouteImport.update({
+  id: '/auth/logout',
+  path: '/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountPathnameRoute = AccountPathnameRouteImport.update({
@@ -42,47 +78,104 @@ const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/auth/$pathname': typeof AuthPathnameRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/auth/$pathname': typeof AuthPathnameRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
+  '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/auth/$pathname': typeof AuthPathnameRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/logout': typeof AuthLogoutRoute
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-out': typeof AuthSignOutRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
+  '/auth/signup': typeof AuthSignupRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/account/$pathname' | '/auth/$pathname' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/me'
+    | '/account/$pathname'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
+    | '/auth/sign-up'
+    | '/auth/signup'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/account/$pathname' | '/auth/$pathname' | '/dashboard'
+  to:
+    | '/'
+    | '/me'
+    | '/account/$pathname'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
+    | '/auth/sign-up'
+    | '/auth/signup'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
     | '/_protected'
+    | '/me'
     | '/account/$pathname'
-    | '/auth/$pathname'
+    | '/auth/login'
+    | '/auth/logout'
+    | '/auth/sign-in'
+    | '/auth/sign-out'
+    | '/auth/sign-up'
+    | '/auth/signup'
     | '/_protected/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
+  MeRoute: typeof MeRoute
   AccountPathnameRoute: typeof AccountPathnameRoute
-  AuthPathnameRoute: typeof AuthPathnameRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthLogoutRoute: typeof AuthLogoutRoute
+  AuthSignInRoute: typeof AuthSignInRoute
+  AuthSignOutRoute: typeof AuthSignOutRoute
+  AuthSignUpRoute: typeof AuthSignUpRoute
+  AuthSignupRoute: typeof AuthSignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_protected': {
       id: '/_protected'
       path: ''
@@ -97,11 +190,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/$pathname': {
-      id: '/auth/$pathname'
-      path: '/auth/$pathname'
-      fullPath: '/auth/$pathname'
-      preLoaderRoute: typeof AuthPathnameRouteImport
+    '/auth/signup': {
+      id: '/auth/signup'
+      path: '/auth/signup'
+      fullPath: '/auth/signup'
+      preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sign-up': {
+      id: '/auth/sign-up'
+      path: '/auth/sign-up'
+      fullPath: '/auth/sign-up'
+      preLoaderRoute: typeof AuthSignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sign-out': {
+      id: '/auth/sign-out'
+      path: '/auth/sign-out'
+      fullPath: '/auth/sign-out'
+      preLoaderRoute: typeof AuthSignOutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/auth/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/logout': {
+      id: '/auth/logout'
+      path: '/auth/logout'
+      fullPath: '/auth/logout'
+      preLoaderRoute: typeof AuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account/$pathname': {
@@ -136,8 +264,14 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
+  MeRoute: MeRoute,
   AccountPathnameRoute: AccountPathnameRoute,
-  AuthPathnameRoute: AuthPathnameRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthLogoutRoute: AuthLogoutRoute,
+  AuthSignInRoute: AuthSignInRoute,
+  AuthSignOutRoute: AuthSignOutRoute,
+  AuthSignUpRoute: AuthSignUpRoute,
+  AuthSignupRoute: AuthSignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

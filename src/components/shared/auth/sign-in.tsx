@@ -54,8 +54,7 @@ export function SignIn({ redirectTo }: { redirectTo?: string }) {
             render={(props) => (
               <Link
                 {...props}
-                to="/auth/$pathname"
-                params={{ pathname: "sign-up" }}
+                to="/auth/sign-up"
                 search={redirectTo ? { redirectTo } : {}}
               >
                 Sign Up

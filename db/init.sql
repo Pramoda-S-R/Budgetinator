@@ -1,14 +1,12 @@
--- Schema for a simple to-do list
-CREATE TABLE IF NOT EXISTS todos (
-    id SERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    is_completed BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    currency_code TEXT NOT NULL DEFAULT 'USD',
+    timezone TEXT NOT NULL DEFAULT 'UTC',
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Initial data for the to-do list
-INSERT INTO todos (title, description, is_completed) VALUES
-('Buy groceries', 'Milk, Bread, Eggs, and Butter', FALSE),
-('Read a book', 'Finish reading "The Great Gatsby"', FALSE),
-('Workout', 'Go for a 30-minute run', FALSE);
+INSERT INTO users (email, name, currency_code, timezone)
+VALUES ('demo@budgetinator.dev', 'Demo User', 'USD', 'UTC')
+ON CONFLICT (email) DO NOTHING;

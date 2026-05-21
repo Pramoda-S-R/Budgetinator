@@ -1,7 +1,13 @@
-import { pgTable, serial, text, timestamp } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
-export const todos = pgTable('todos', {
-  id: serial().primaryKey(),
-  title: text().notNull(),
-  createdAt: timestamp('created_at').defaultNow(),
+export const users = pgTable('users', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: text('email').notNull().unique(),
+  name: text('name').notNull(),
+  currencyCode: text('currency_code').notNull().default('USD'),
+  timezone: text('timezone').notNull().default('UTC'),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
+
+export type User = typeof users.$inferSelect
+export type NewUser = typeof users.$inferInsert

@@ -1,714 +1,1152 @@
-# Expense Tracker + Financial Analytics App — Handoff Specification
+# Target Stack
 
-## Project Goal
+* Fullstack: Tanstack Start
+* ORM: Drizzle ORM
+* Database: PostgreSQL on [Neon](https://neon.tech?utm_source=chatgpt.com)
+* Auth: NeonAuth
 
-Build a modern personal finance dashboard and expense tracker focused on:
+The best approach here is:
 
-* Fast expense logging
-* Budget allocation tracking
-* Investment tracking
-* Chit fund tracking
-* Monthly financial analytics
-* Future extensibility with minimal code changes
-* Clear visual insights
-* Mobile-first usability
+```text
+Feature slices
++
+Database-first development
++
+Incremental migrations
++
+Strict testing after every phase
+```
 
-The app should feel closer to a lightweight personal finance operating system rather than a simple expense logger.
+Do NOT build analytics or ML first.
 
----
+Build:
 
-# Core User Profile
+1. financial primitives
+2. budgeting engine
+3. dashboard math
+4. analytics layer
 
-Target user:
-
-* Young salaried professional
-* Actively investing monthly
-* Tracks SIPs, savings, family support, lifestyle spending
-* Wants financial discipline without excessive friction
-* Wants analytics and budgeting insights
-* Wants to understand spending behavior over time
-
----
-
-# Primary Features
-
-## 1. Dashboard
-
-The dashboard is the central screen.
-
-### Dashboard Cards
-
-Show:
-
-* Current month income
-* Total spent this month
-* Total invested this month
-* Remaining buffer
-* Emergency fund status
-* Current savings balance
-* Chit fund progress
-* Budget usage percentage
-* Net worth estimate
-
-### Dashboard Graphs
-
-Include:
-
-* Spending by category
-* Investments over time
-* Cash flow graph
-* Budget utilization graph
-* Monthly comparison graph
-* Savings rate trend
-* Expense heatmap/calendar
+in that order.
 
 ---
 
-# 2. Quick Allocation References
+# Guiding Architecture
 
-The user wants quick access references to planned allocations.
+## Core principle
 
-Create a dedicated "Financial Allocation" section.
+Everything financial is an event.
 
-## Monthly Allocation Reference
+Examples:
 
-Display:
+* salary credited
+* EMI paid
+* SIP invested
+* friend repayment
+* electricity bill
 
-| Category                | Planned Amount |
-| ----------------------- | -------------- |
-| Essential Expenses      | ₹10,000        |
-| Chit Fund               | ₹10,000        |
-| SIP Investments         | ₹18,000        |
-| Emergency Reserve       | ₹5,000         |
-| Lifestyle               | ₹7,000         |
-| Family Support          | ₹3,000         |
-| Travel/Future Purchases | ₹1,500         |
+The app should derive:
 
-These should be editable from settings/admin.
+* balances
+* insights
+* trends
+* overspending
 
----
-
-## SIP Allocation Reference
-
-The app should also include a dedicated SIP allocation reference section.
-
-Display:
-
-| SIP Type                 | Planned Amount |
-| ------------------------ | -------------- |
-| Nifty 50 Index Fund      | ₹7,000         |
-| Nifty Next 50 Index Fund | ₹4,000         |
-| Flexi Cap Fund           | ₹4,000         |
-| Mid Cap Fund             | ₹3,000         |
-
-Requirements:
-
-* Editable from settings/admin
-* Track planned vs actual SIP investments
-* Show SIP consistency streaks
-* Show missed SIP months
-* Show monthly and yearly investment totals
-* Future-proof for adding additional investment instruments later
-* Allow tagging SIPs under broader investment categories
-* Include charts for SIP growth and contribution history
+from immutable records.
 
 ---
 
-# 3. Expense Tracking
-
-Core functionality.
-
-## Add Expense Modal
-
-Fields:
-
-* Amount
-* Category
-* Subcategory
-* Notes
-* Date
-* Payment method
-* Tags
-* Recurring toggle
-* Attachment/image upload (optional)
-* Linked budget allocation
-
-## Categories
-
-Default categories:
-
-* Food
-* Transport
-* Rent
-* Utilities
-* Entertainment
-* Shopping
-* Health
-* Investments
-* Family
-* Travel
-* Education
-* Gadgets
-* Subscriptions
-* Miscellaneous
-
-Must support dynamic category creation.
+# 10-Phase Incremental Build Plan
 
 ---
 
-# 4. Investment Tracking
+# Phase 1 — Foundation & Authentication
 
-## Investment Types
+## Goal
 
-Support:
+Get:
 
-* SIPs
-* Mutual funds
-* Stocks
-* Gold
-* Chit funds
-* Fixed deposits
-* Emergency fund
-* Savings account balances
-
-## Investment Fields
-
-* Name
-* Investment type
-* Amount invested
-* Current value
-* Expected maturity
-* ROI estimate
-* Monthly contribution
-* Notes
+* app bootstrapped
+* auth working
+* Neon + Drizzle connected
+* migrations working
+* protected routes working
 
 ---
 
-# 5. Chit Fund Tracking
+## Deliverables
 
-This is a special requirement.
+* Neon database setup
+* Drizzle setup
+* auth
+* user session
+* environment config
+* migration pipeline
+* seed script
 
-## Chit Dashboard
+---
+
+# Tables
+
+## users
+
+```ts
+users
+```
+
+| column       | type        |
+| ------------ | ----------- |
+| id           | uuid pk     |
+| email        | text unique |
+| name         | text        |
+| currencyCode | text        |
+| timezone     | text        |
+| createdAt    | timestamp   |
+
+---
+
+# APIs
+
+```text
+POST /auth/signup
+POST /auth/login
+POST /auth/logout
+GET  /me
+```
+
+---
+
+# Tests
+
+## Must verify
+
+* user can signup/login
+* migrations run cleanly
+* auth protected routes work
+
+---
+
+# Commit
+
+```text
+feat: initialize auth and database foundation
+```
+
+---
+
+# Phase 2 — Accounts & Net Worth Core
+
+## Goal
 
 Track:
 
-* Total chit value
-* Amount already invested
-* Remaining contribution
-* Monthly contribution
-* Expected maturity amount
-* Remaining months
-* Effective profit
-* ROI estimate
-
-## Chit Visualization
-
-Progress bar:
-
-Example:
-
-₹90k invested of ₹130k total obligation
-Expected maturity: ₹150k
+* bank balances
+* wallets
+* liabilities
+* net worth
 
 ---
 
-# 6. Budget Intelligence System
+# Tables
 
-This is one of the most important features.
+## accounts
 
-The app should not just track expenses.
-It should provide financial insights.
+```ts
+accounts
+```
 
-## Analytics Engine
-
-The app should calculate:
-
-* Over-budget categories
-* Underused allocations
-* Monthly savings rate
-* Lifestyle inflation trend
-* Spending spikes
-* Subscription leakage
-* Investment consistency
-* Emergency reserve health
-* Spending prediction
-* Average daily spend
-* Weekend vs weekday spending
-* Recurring purchase patterns
+| column            | type      |
+| ----------------- | --------- |
+| id                | uuid pk   |
+| userId            | fk        |
+| name              | text      |
+| accountType       | text      |
+| currentBalance    | numeric   |
+| includeInNetWorth | boolean   |
+| isActive          | boolean   |
+| createdAt         | timestamp |
 
 ---
 
-# 7. Budget Variance Analysis
+## account_balance_history
 
-Example insights:
+```ts
+accountBalanceHistory
+```
 
-* "You exceeded Lifestyle budget by ₹2,100"
-* "Food expenses increased 18% vs last month"
-* "Investment rate dropped below target"
-* "You saved 42% of income this month"
-* "Subscriptions consumed 9% of discretionary budget"
-
----
-
-# 8. Monthly Financial Review Screen
-
-Generate automated summaries.
-
-## Example
-
-### April 2026 Summary
-
-* Income: ₹54,749
-* Total Expenses: ₹26,300
-* Investments: ₹28,000
-* Savings Rate: 51%
-* Highest Spend Category: Gadgets
-* Most Efficient Category: Food
-* Net Positive Cash Flow: ₹13,200
-
-Add a visual monthly report.
-
-Potential future feature:
-
-* PDF export
+| column     | type      |
+| ---------- | --------- |
+| id         | uuid pk   |
+| accountId  | fk        |
+| balance    | numeric   |
+| recordedAt | timestamp |
 
 ---
 
-# 9. Future-Proof Data Architecture
+# APIs
 
-VERY IMPORTANT.
-
-The application should be designed so new financial instruments and expense types can be added without major rewrites.
-
-## Use Generic Models
-
-Avoid hardcoded logic.
-
-Prefer:
-
-* transaction types
-* allocation types
-* configurable categories
-* metadata-driven structures
-* dynamic analytics
+```text
+GET    /accounts
+POST   /accounts
+PATCH  /accounts/:id
+DELETE /accounts/:id
+```
 
 ---
 
-# Suggested Data Models
+# UI
 
-## User
+## Pages
 
-Fields:
+```text
+/accounts
+```
 
-* id
-* name
-* email
-* currency
-* preferences
+Features:
 
----
-
-## Transaction
-
-Fields:
-
-* id
-* amount
-* type
-* categoryId
-* subcategoryId
-* notes
-* tags
-* paymentMethod
-* transactionDate
-* recurring
-* linkedAllocationId
-* createdAt
-* updatedAt
-
-Types:
-
-* expense
-* income
-* investment
-* transfer
-* savings
+* add account
+* edit balance
+* see total wealth
 
 ---
 
-## BudgetAllocation
+# Tests
 
-Fields:
-
-* id
-* name
-* monthlyLimit
-* color
-* icon
-* active
-* carryForward
+* balance updates properly
+* net worth calculation correct
 
 ---
 
-## Investment
+# Commit
 
-Fields:
-
-* id
-* name
-* type
-* investedAmount
-* currentValue
-* monthlyContribution
-* maturityDate
-* roi
-* notes
+```text
+feat: add accounts and net worth tracking
+```
 
 ---
 
-## ChitFund
+# Phase 3 — Fully Customizable Categories System
 
-Fields:
+CRITICAL PHASE.
 
-* id
-* totalValue
-* totalContribution
-* investedAmount
-* monthlyContribution
-* maturityAmount
-* monthsRemaining
-* expectedProfit
+Everything depends on this.
 
 ---
 
-# Tech Stack Recommendation
+# Goal
 
-## Frontend
+User can:
 
-Preferred:
-
-* Tanstack ecosystem
-* TypeScript
-* Tailwind CSS
-* shadcn/ui
-* Recharts
-* Framer Motion
+* create groups
+* create categories
+* reorder
+* archive
+* customize colors/icons
 
 ---
 
-## Backend
+# Tables
 
-Preferred:
+## category_groups
 
-* Tanstack Start
-* Drizzle ORM
-* Neon PostgreSQL
+```ts
+categoryGroups
+```
+
+| column     | type      |
+| ---------- | --------- |
+| id         | uuid pk   |
+| userId     | fk        |
+| name       | text      |
+| type       | text      |
+| icon       | text      |
+| color      | text      |
+| sortOrder  | int       |
+| isArchived | boolean   |
+| createdAt  | timestamp |
 
 ---
 
-## Authentication
+## categories
+
+```ts
+categories
+```
+
+| column          | type      |
+| --------------- | --------- |
+| id              | uuid pk   |
+| userId          | fk        |
+| groupId         | fk        |
+| name            | text      |
+| icon            | text      |
+| color           | text      |
+| transactionType | text      |
+| sortOrder       | int       |
+| isArchived      | boolean   |
+| createdAt       | timestamp |
+
+---
+
+# APIs
+
+## Category Groups
+
+```text
+GET    /category-groups
+POST   /category-groups
+PATCH  /category-groups/:id
+DELETE /category-groups/:id
+```
+
+---
+
+## Categories
+
+```text
+GET    /categories
+POST   /categories
+PATCH  /categories/:id
+DELETE /categories/:id
+```
+
+---
+
+# Important Constraint
+
+Never hardcode:
+
+* Essential
+* Lifestyle
+* Investments
+
+They should be seed presets only.
+
+---
+
+# Tests
+
+* CRUD works
+* sorting persists
+* archived items hidden
+* categories belong to user only
+
+---
+
+# Commit
+
+```text
+feat: implement customizable category system
+```
+
+---
+
+# Phase 4 — Transactions Engine
+
+MOST IMPORTANT PHASE.
+
+---
+
+# Goal
+
+Financial ledger system.
+
+---
+
+# Tables
+
+## transactions
+
+```ts
+transactions
+```
+
+| column          | type        |
+| --------------- | ----------- |
+| id              | uuid pk     |
+| userId          | fk          |
+| accountId       | fk          |
+| categoryId      | fk nullable |
+| amount          | numeric     |
+| transactionType | text        |
+| transactionDate | timestamp   |
+| merchant        | text        |
+| notes           | text        |
+| isRecurring     | boolean     |
+| createdAt       | timestamp   |
+
+---
+
+## transaction_tags
+
+```ts
+transactionTags
+```
+
+| column        | type    |
+| ------------- | ------- |
+| id            | uuid pk |
+| transactionId | fk      |
+| tag           | text    |
+
+---
+
+# APIs
+
+```text
+GET    /transactions
+POST   /transactions
+PATCH  /transactions/:id
+DELETE /transactions/:id
+```
+
+---
+
+# Rules
+
+## On transaction creation:
+
+* expense → deduct balance
+* income → increase balance
+* transfer → move between accounts
+
+Use database transaction wrappers.
+
+---
+
+# UI
+
+Transaction entry modal:
+
+* quick add
+* keyboard-first UX
+* recent categories
+
+---
+
+# Tests
+
+* balances update correctly
+* deletion reverses balance
+* transfer integrity works
+
+---
+
+# Commit
+
+```text
+feat: implement transaction ledger system
+```
+
+---
+
+# Phase 5 — Budget Presets & Monthly Budgets
+
+---
+
+# Goal
+
+Reusable monthly planning system.
+
+---
+
+# Tables
+
+## budget_presets
+
+```ts
+budgetPresets
+```
+
+| column      | type      |
+| ----------- | --------- |
+| id          | uuid pk   |
+| userId      | fk        |
+| name        | text      |
+| description | text      |
+| createdAt   | timestamp |
+
+---
+
+## preset_allocations
+
+```ts
+presetAllocations
+```
+
+| column            | type             |
+| ----------------- | ---------------- |
+| id                | uuid pk          |
+| presetId          | fk               |
+| categoryGroupId   | fk nullable      |
+| categoryId        | fk nullable      |
+| allocatedAmount   | numeric          |
+| allocationPercent | numeric nullable |
+
+---
+
+## monthly_budgets
+
+```ts
+monthlyBudgets
+```
+
+| column         | type        |
+| -------------- | ----------- |
+| id             | uuid pk     |
+| userId         | fk          |
+| year           | int         |
+| month          | int         |
+| presetId       | fk nullable |
+| expectedIncome | numeric     |
+| createdAt      | timestamp   |
+
+---
+
+## monthly_budget_allocations
+
+```ts
+monthlyBudgetAllocations
+```
+
+| column          | type        |
+| --------------- | ----------- |
+| id              | uuid pk     |
+| monthlyBudgetId | fk          |
+| categoryGroupId | fk nullable |
+| categoryId      | fk nullable |
+| allocatedAmount | numeric     |
+
+---
+
+# Important Logic
+
+When applying preset:
+
+* COPY allocations into monthly snapshot
+
+Never reference live preset dynamically.
+
+---
+
+# APIs
+
+```text
+POST /budget-presets
+POST /monthly-budgets/apply-preset
+GET  /monthly-budgets/:month
+```
+
+---
+
+# Tests
+
+* presets reusable
+* old months unaffected
+* budget calculations correct
+
+---
+
+# Commit
+
+```text
+feat: add reusable budget preset engine
+```
+
+---
+
+# Phase 6 — Dashboard & Insights Engine
+
+---
+
+# Goal
+
+Realtime financial awareness.
+
+---
+
+# Derived Metrics
+
+* remaining budget
+* burn rate
+* overspending
+* savings rate
+* category utilization
+* investment ratio
+
+---
+
+# Tables
+
+No major tables needed.
 
 Use:
 
-* Clerk
+* SQL aggregations
+* materialized views later
 
 ---
 
-## Database
+# APIs
 
-PostgreSQL preferred.
-
-Reason:
-
-* relational structure
-* analytics queries
-* scalable
-* future-proof
+```text
+GET /dashboard/summary
+GET /dashboard/budget-status
+GET /dashboard/cashflow
+```
 
 ---
 
-# Analytics Requirements
+# Dashboard Widgets
 
-## Must Include
+## Top cards
 
-### Spending Analytics
-
-* Monthly totals
-* Yearly totals
-* Category breakdowns
-* Top spending categories
-* Moving averages
-
-### Investment Analytics
-
-* Monthly invested amount
-* Portfolio allocation
-* Growth tracking
-* Investment consistency
-
-### Budget Analytics
-
-* Planned vs actual
-* Variance percentages
-* Historical trends
-
-### Predictive Analytics (Future Scope)
-
-Potential future modules:
-
-* ML spending prediction
-* Cash flow forecasting
-* Investment growth simulation
-* Smart alerts
+* net worth
+* current cash
+* remaining budget
+* monthly savings
 
 ---
 
-# UI/UX Requirements
+## Budget utilization
 
-## Design Goals
-
-* Clean
-* Minimal
-* Premium feel
-* Fast interactions
-* Mobile-first
-* Financial dashboard aesthetic
-
-Avoid:
-
-* clutter
-* excessive gradients
-* enterprise-looking UI
-* overcomplicated navigation
+```text
+Groceries 72%
+Lifestyle 120%
+```
 
 ---
 
-# Navigation Structure
+## Overspend alerts
 
-## Sidebar / Bottom Nav
-
-Sections:
-
-* Dashboard
-* Expenses
-* Investments
-* Budgets
-* Analytics
-* Chit Funds
-* Reports
-* Settings
+```text
+You exceeded Lifestyle by ₹4,200
+```
 
 ---
 
-# Quick Add System
+# Tests
 
-The app should prioritize speed.
-
-## Quick Add Bar
-
-Examples:
-
-* * Expense
-* * Investment
-* * SIP
-* * Family Support
-* * Chit Payment
-
-Should work in under 3 taps.
+* calculations accurate
+* month switching works
+* edge cases handled
 
 ---
 
-# Smart Features
+# Commit
 
-## Recommended Enhancements
-
-### 1. Auto Categorization
-
-Detect categories from notes.
-
-Example:
-
-"Swiggy" → Food
-"Uber" → Transport
+```text
+feat: build dashboard insights engine
+```
 
 ---
 
-### 2. Recurring Expense Detection
-
-Detect:
-
-* subscriptions
-* rent
-* SIPs
-* recurring utility bills
+# Phase 7 — Investments & SIP Tracking
 
 ---
 
-### 3. Budget Warnings
+# Goal
 
-Examples:
-
-* "Lifestyle budget at 85%"
-* "Food expenses unusually high this week"
+Manual portfolio management.
 
 ---
 
-### 4. Investment Milestones
+# Tables
 
-Examples:
+## investments
 
-* First ₹1L invested
-* 6 months SIP streak
-* Emergency fund complete
+```ts
+investments
+```
 
----
-
-# Reporting System
-
-## Export Support
-
-Future-ready:
-
-* CSV export
-* PDF reports
-* Monthly summary reports
-* Investment reports
+| column         | type          |
+| -------------- | ------------- |
+| id             | uuid pk       |
+| userId         | fk            |
+| name           | text          |
+| investmentType | text          |
+| symbol         | text nullable |
+| createdAt      | timestamp     |
 
 ---
 
-# Notifications
+## investment_entries
 
-Optional future module:
+```ts
+investmentEntries
+```
 
-* SIP reminders
-* Budget warnings
-* Chit due dates
-* Savings milestones
-* Weekly summaries
-
----
-
-# Suggested Architecture Principles
-
-## Use:
-
-* reusable components
-* centralized transaction engine
-* modular analytics system
-* configurable categories
-* abstraction layers
-
-Avoid:
-
-* hardcoded categories
-* hardcoded allocation logic
-* tightly coupled analytics
-* duplicated financial calculations
+| column         | type             |
+| -------------- | ---------------- |
+| id             | uuid pk          |
+| investmentId   | fk               |
+| amountInvested | numeric          |
+| units          | numeric nullable |
+| investedAt     | timestamp        |
+| notes          | text             |
 
 ---
 
-# MVP Requirements
+## investment_valuations
 
-## Phase 1
+```ts
+investmentValuations
+```
 
-Must have:
-
-* Dashboard
-* Expense tracking
-* Budget allocations
-* Investment tracking
-* Chit tracking
-* Analytics basics
-* Monthly summaries
+| column          | type      |
+| --------------- | --------- |
+| id              | uuid pk   |
+| investmentId    | fk        |
+| valuationAmount | numeric   |
+| valuationDate   | timestamp |
 
 ---
 
-# Phase 2
+# Features
+
+* SIP tracking
+* gain/loss
+* portfolio allocation
+* manual valuation updates
+
+---
+
+# Tests
+
+* gain calculations accurate
+* charts update correctly
+
+---
+
+# Commit
+
+```text
+feat: add investment and sip tracking
+```
+
+---
+
+# Phase 8 — Lending, Borrowing, EMI & Loans
+
+This becomes your liabilities module.
+
+---
+
+# Tables
+
+## contacts
+
+```ts
+contacts
+```
+
+| column | type    |
+| ------ | ------- |
+| id     | uuid pk |
+| userId | fk      |
+| name   | text    |
+| phone  | text    |
+| notes  | text    |
+
+---
+
+## loans
+
+```ts
+loans
+```
+
+| column          | type             |
+| --------------- | ---------------- |
+| id              | uuid pk          |
+| userId          | fk               |
+| contactId       | fk nullable      |
+| loanType        | text             |
+| principalAmount | numeric          |
+| remainingAmount | numeric          |
+| interestRate    | numeric nullable |
+| startedAt       | timestamp        |
+| expectedEndDate | timestamp        |
+| status          | text             |
+
+---
+
+## loan_payments
+
+```ts
+loanPayments
+```
+
+| column | type      |
+| ------ | --------- |
+| id     | uuid pk   |
+| loanId | fk        |
+| amount | numeric   |
+| paidAt | timestamp |
+
+---
+
+## emis
+
+```ts
+emis
+```
+
+| column        | type      |
+| ------------- | --------- |
+| id            | uuid pk   |
+| userId        | fk        |
+| name          | text      |
+| principal     | numeric   |
+| interestRate  | numeric   |
+| monthlyAmount | numeric   |
+| startDate     | timestamp |
+| endDate       | timestamp |
+| nextDueDate   | timestamp |
+| lenderName    | text      |
+| status        | text      |
+
+---
+
+## emi_payments
+
+```ts
+emiPayments
+```
+
+| column | type      |
+| ------ | --------- |
+| id     | uuid pk   |
+| emiId  | fk        |
+| amount | numeric   |
+| paidAt | timestamp |
+
+---
+
+# Features
+
+* outstanding debt
+* due reminders
+* repayment history
+* liability tracking
+
+---
+
+# Tests
+
+* remaining balance correct
+* overdue detection works
+
+---
+
+# Commit
+
+```text
+feat: add loans emi and lending tracker
+```
+
+---
+
+# Phase 9 — Analytics & Interactive Charts
+
+---
+
+# Goal
+
+Deep financial insight layer.
+
+---
+
+# Tables
+
+Optional analytics cache.
+
+## monthly_category_summary
+
+```ts
+monthlyCategorySummary
+```
+
+| column     | type    |
+| ---------- | ------- |
+| userId     | fk      |
+| year       | int     |
+| month      | int     |
+| categoryId | fk      |
+| totalSpent | numeric |
+
+---
+
+# Charts
+
+* category trends
+* moving averages
+* seasonal spikes
+* savings rate
+* sankey flow
+* investment growth
+
+---
+
+# APIs
+
+```text
+GET /analytics/spending-trends
+GET /analytics/category-breakdown
+GET /analytics/cashflow
+GET /analytics/networth
+```
+
+---
+
+# Tests
+
+* aggregation accuracy
+* chart filtering
+* performance under large datasets
+
+---
+
+# Commit
+
+```text
+feat: implement analytics and visualization layer
+```
+
+---
+
+# Phase 10 — Forecasting, Automation & Production Hardening
+
+---
+
+# Goal
+
+Prepare for intelligent finance assistant features.
+
+---
+
+# Tables
+
+## recurring_rules
+
+```ts
+recurringRules
+```
+
+| column      | type      |
+| ----------- | --------- |
+| id          | uuid pk   |
+| userId      | fk        |
+| categoryId  | fk        |
+| amount      | numeric   |
+| frequency   | text      |
+| nextRunDate | timestamp |
+
+---
+
+## forecast_snapshots
+
+```ts
+forecastSnapshots
+```
+
+| column           | type      |
+| ---------------- | --------- |
+| id               | uuid pk   |
+| userId           | fk        |
+| forecastMonth    | timestamp |
+| predictedSpend   | numeric   |
+| predictedSavings | numeric   |
+| createdAt        | timestamp |
+
+---
+
+# Future ML Inputs
+
+Store:
+
+* weekday
+* month
+* salary cycle
+* recurring patterns
+* category seasonality
+
+---
+
+# Features
+
+* recurring transaction suggestions
+* projected overspending
+* cashflow forecasting
+* anomaly alerts
+
+---
+
+# Production Hardening
 
 Add:
 
-* predictive analytics
-* AI insights
-* smart categorization
-* notifications
-* report exports
-* portfolio tracking APIs
+* optimistic UI
+* pagination
+* audit logs
+* rate limiting
+* caching
+* indexes
+* db backups
 
 ---
 
-# Stretch Features
+# Critical PostgreSQL Indexes
 
-Potential future features:
-
-* Bank sync integrations
-* UPI SMS parsing
-* AI financial assistant
-* Voice expense entry
-* Shared family budgeting
-* Goal planning
-* FIRE calculator
-* Net worth forecasting
+You WILL need these.
 
 ---
 
-# Important Product Philosophy
+# Transactions
 
-The app should help the user:
-
-* understand financial behavior
-* improve spending decisions
-* increase investment consistency
-* reduce financial anxiety
-* make intentional purchases
-* visualize long-term progress
-
-The app should feel:
-
-"analytical but motivating"
-
-not:
-
-"punishing or restrictive"
+```sql
+(user_id, transaction_date)
+(user_id, category_id)
+(account_id, transaction_date)
+```
 
 ---
 
-# Suggested Development Priority
+# Budgets
 
-1. Data models
-2. Transaction engine
-3. Dashboard
-4. Budget system
-5. Analytics layer
-6. Investment tracking
-7. Chit tracking
-8. Reporting
-9. Automation features
+```sql
+(user_id, year, month)
+```
 
 ---
 
-# Deliverables Expected From OpenCode
+# Investments
 
-* Full stack application
-* Modular architecture
-* Clean reusable components
-* Responsive UI
-* Database schema
-* Seed/demo data
-* Analytics engine
-* Setup instructions
-* Environment variable template
-* Deployment guide
+```sql
+(investment_id, valuation_date)
+```
 
 ---
 
-# Final Note
+# Loans
 
-This app is intended to scale from:
+```sql
+(user_id, status)
+(next_due_date)
+```
 
-"simple personal expense tracker"
+---
 
-to:
+# Important Drizzle Recommendations
 
-"full personal financial intelligence dashboard"
+## Use enums
 
-without requiring major rewrites in the future.
+```ts
+pgEnum()
+```
+
+For:
+
+* transaction types
+* account types
+* loan status
+* EMI status
+
+---
+
+# Use numeric()
+
+Never float for money.
+
+```ts
+numeric("amount", {
+  precision: 12,
+  scale: 2
+})
+```
+
+---
+
+# Use soft deletes selectively
+
+Prefer:
+
+* `isArchived`
+  instead of delete
+
+for:
+
+* categories
+* groups
+* accounts
+
+---
+
+# Recommended Testing Strategy
+
+Every phase should include:
+
+## 1. DB tests
+
+* constraints
+* cascade behavior
+* integrity
+
+## 2. API tests
+
+* auth
+* validation
+* business logic
+
+## 3. UI tests
+
+* forms
+* optimistic updates
+* loading states
+
+---
+
+# Recommended Commit Discipline
+
+Each phase:
+
+```text
+feat(scope): concise description
+```
+
+Example:
+
+```text
+feat(budgets): implement preset snapshot system
+```
+
+Never combine:
+
+* schema
+* analytics
+* UI redesign
+  in one commit.
+
+---
+
+# Final Recommendation
+
+Your most important engineering decision is this:
+
+## Build derived state, not stored state
+
+Meaning:
+
+Store:
+
+* transactions
+* valuations
+* loan payments
+
+Derive:
+
+* totals
+* insights
+* remaining budgets
+* forecasts
+
+This prevents synchronization bugs later.
