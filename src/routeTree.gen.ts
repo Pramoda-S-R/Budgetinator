@@ -20,9 +20,14 @@ import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AccountPathnameRouteImport } from './routes/account/$pathname'
 import { Route as ApiProfileIndexRouteImport } from './routes/api/profile/index'
+import { Route as ApiCategoryGroupsIndexRouteImport } from './routes/api/category-groups/index'
+import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
 import { Route as ApiAccountsIndexRouteImport } from './routes/api/accounts/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
+import { Route as ProtectedCategoriesIndexRouteImport } from './routes/_protected/categories/index'
 import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/accounts/index'
+import { Route as ApiCategoryGroupsIdRouteImport } from './routes/api/category-groups/$id'
+import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
 import { Route as ApiAccountsIdRouteImport } from './routes/api/accounts/$id'
 
 const MeRoute = MeRouteImport.update({
@@ -79,6 +84,16 @@ const ApiProfileIndexRoute = ApiProfileIndexRouteImport.update({
   path: '/api/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCategoryGroupsIndexRoute = ApiCategoryGroupsIndexRouteImport.update({
+  id: '/api/category-groups/',
+  path: '/api/category-groups/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCategoriesIndexRoute = ApiCategoriesIndexRouteImport.update({
+  id: '/api/categories/',
+  path: '/api/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAccountsIndexRoute = ApiAccountsIndexRouteImport.update({
   id: '/api/accounts/',
   path: '/api/accounts/',
@@ -89,10 +104,26 @@ const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedCategoriesIndexRoute =
+  ProtectedCategoriesIndexRouteImport.update({
+    id: '/categories/',
+    path: '/categories/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
   id: '/accounts/',
   path: '/accounts/',
   getParentRoute: () => ProtectedRoute,
+} as any)
+const ApiCategoryGroupsIdRoute = ApiCategoryGroupsIdRouteImport.update({
+  id: '/api/category-groups/$id',
+  path: '/api/category-groups/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCategoriesIdRoute = ApiCategoriesIdRouteImport.update({
+  id: '/api/categories/$id',
+  path: '/api/categories/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccountsIdRoute = ApiAccountsIdRouteImport.update({
   id: '/api/accounts/$id',
@@ -111,9 +142,14 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/signup': typeof AuthSignupRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
   '/accounts/': typeof ProtectedAccountsIndexRoute
+  '/categories/': typeof ProtectedCategoriesIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
+  '/api/categories/': typeof ApiCategoriesIndexRoute
+  '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
 }
 export interface FileRoutesByTo {
@@ -127,9 +163,14 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/signup': typeof AuthSignupRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
   '/accounts': typeof ProtectedAccountsIndexRoute
+  '/categories': typeof ProtectedCategoriesIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
   '/api/accounts': typeof ApiAccountsIndexRoute
+  '/api/categories': typeof ApiCategoriesIndexRoute
+  '/api/category-groups': typeof ApiCategoryGroupsIndexRoute
   '/api/profile': typeof ApiProfileIndexRoute
 }
 export interface FileRoutesById {
@@ -145,9 +186,14 @@ export interface FileRoutesById {
   '/auth/sign-up': typeof AuthSignUpRoute
   '/auth/signup': typeof AuthSignupRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/categories/$id': typeof ApiCategoriesIdRoute
+  '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
   '/_protected/accounts/': typeof ProtectedAccountsIndexRoute
+  '/_protected/categories/': typeof ProtectedCategoriesIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
+  '/api/categories/': typeof ApiCategoriesIndexRoute
+  '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
 }
 export interface FileRouteTypes {
@@ -163,9 +209,14 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/signup'
     | '/api/accounts/$id'
+    | '/api/categories/$id'
+    | '/api/category-groups/$id'
     | '/accounts/'
+    | '/categories/'
     | '/dashboard/'
     | '/api/accounts/'
+    | '/api/categories/'
+    | '/api/category-groups/'
     | '/api/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -179,9 +230,14 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/signup'
     | '/api/accounts/$id'
+    | '/api/categories/$id'
+    | '/api/category-groups/$id'
     | '/accounts'
+    | '/categories'
     | '/dashboard'
     | '/api/accounts'
+    | '/api/categories'
+    | '/api/category-groups'
     | '/api/profile'
   id:
     | '__root__'
@@ -196,9 +252,14 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/auth/signup'
     | '/api/accounts/$id'
+    | '/api/categories/$id'
+    | '/api/category-groups/$id'
     | '/_protected/accounts/'
+    | '/_protected/categories/'
     | '/_protected/dashboard/'
     | '/api/accounts/'
+    | '/api/categories/'
+    | '/api/category-groups/'
     | '/api/profile/'
   fileRoutesById: FileRoutesById
 }
@@ -214,7 +275,11 @@ export interface RootRouteChildren {
   AuthSignUpRoute: typeof AuthSignUpRoute
   AuthSignupRoute: typeof AuthSignupRoute
   ApiAccountsIdRoute: typeof ApiAccountsIdRoute
+  ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
+  ApiCategoryGroupsIdRoute: typeof ApiCategoryGroupsIdRoute
   ApiAccountsIndexRoute: typeof ApiAccountsIndexRoute
+  ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
+  ApiCategoryGroupsIndexRoute: typeof ApiCategoryGroupsIndexRoute
   ApiProfileIndexRoute: typeof ApiProfileIndexRoute
 }
 
@@ -297,6 +362,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/category-groups/': {
+      id: '/api/category-groups/'
+      path: '/api/category-groups'
+      fullPath: '/api/category-groups/'
+      preLoaderRoute: typeof ApiCategoryGroupsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/categories/': {
+      id: '/api/categories/'
+      path: '/api/categories'
+      fullPath: '/api/categories/'
+      preLoaderRoute: typeof ApiCategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/accounts/': {
       id: '/api/accounts/'
       path: '/api/accounts'
@@ -311,12 +390,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/categories/': {
+      id: '/_protected/categories/'
+      path: '/categories'
+      fullPath: '/categories/'
+      preLoaderRoute: typeof ProtectedCategoriesIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/accounts/': {
       id: '/_protected/accounts/'
       path: '/accounts'
       fullPath: '/accounts/'
       preLoaderRoute: typeof ProtectedAccountsIndexRouteImport
       parentRoute: typeof ProtectedRoute
+    }
+    '/api/category-groups/$id': {
+      id: '/api/category-groups/$id'
+      path: '/api/category-groups/$id'
+      fullPath: '/api/category-groups/$id'
+      preLoaderRoute: typeof ApiCategoryGroupsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/categories/$id': {
+      id: '/api/categories/$id'
+      path: '/api/categories/$id'
+      fullPath: '/api/categories/$id'
+      preLoaderRoute: typeof ApiCategoriesIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/accounts/$id': {
       id: '/api/accounts/$id'
@@ -330,11 +430,13 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteChildren {
   ProtectedAccountsIndexRoute: typeof ProtectedAccountsIndexRoute
+  ProtectedCategoriesIndexRoute: typeof ProtectedCategoriesIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAccountsIndexRoute: ProtectedAccountsIndexRoute,
+  ProtectedCategoriesIndexRoute: ProtectedCategoriesIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
 }
 
@@ -354,7 +456,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignUpRoute: AuthSignUpRoute,
   AuthSignupRoute: AuthSignupRoute,
   ApiAccountsIdRoute: ApiAccountsIdRoute,
+  ApiCategoriesIdRoute: ApiCategoriesIdRoute,
+  ApiCategoryGroupsIdRoute: ApiCategoryGroupsIdRoute,
   ApiAccountsIndexRoute: ApiAccountsIndexRoute,
+  ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,
+  ApiCategoryGroupsIndexRoute: ApiCategoryGroupsIndexRoute,
   ApiProfileIndexRoute: ApiProfileIndexRoute,
 }
 export const routeTree = rootRouteImport

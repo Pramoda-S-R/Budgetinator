@@ -15,6 +15,13 @@
       "when": 1779348355465,
       "tag": "0001_cooing_tony_stark",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779360318466,
+      "tag": "0002_rapid_maverick",
+      "breakpoints": true
     }
   ]
 }

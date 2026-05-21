@@ -1,5 +1,5 @@
 import type { MenuItem } from "#/types";
-import { LayoutDashboard, Users } from "lucide-react";
+import { LayoutDashboard, Tags, Users } from "lucide-react";
 
 export const menuItems: MenuItem[] = [
   {
@@ -11,5 +11,10 @@ export const menuItems: MenuItem[] = [
     title: "Accounts",
     url: "/accounts",
     icon: Users,
+  },
+  {
+    title: "Categories",
+    url: "/categories",
+    icon: Tags,
   },
 ];

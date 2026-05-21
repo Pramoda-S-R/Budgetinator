@@ -2,9 +2,28 @@ import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  Banknote,
+  Briefcase,
+  ChevronDown,
+  Circle,
+  CreditCard,
+  HandCoins,
+  Landmark,
+  PiggyBank,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react'
 
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from '#/components/ui/dropdown-menu'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { calculateNetWorth } from '#/features/accounts/net-worth'
@@ -14,8 +33,73 @@ import {
   fetchAccounts,
   updateAccount,
 } from '#/features/accounts/data-access'
+import { fetchProfile } from '#/features/profile/data-access'
 import useCurrentUser from '#/hooks/use-current-user'
 import type { Account } from '#/features/accounts/data-access'
+
+const ACCOUNT_TYPE_OPTIONS = [
+  { value: 'bank', label: 'Bank' },
+  { value: 'cash', label: 'Cash' },
+  { value: 'wallet', label: 'Wallet' },
+  { value: 'credit_card', label: 'Credit Card' },
+  { value: 'investment', label: 'Investment' },
+  { value: 'salary', label: 'Salary' },
+  { value: 'loan', label: 'Loan' },
+]
+
+const ACCOUNT_TYPE_ICONS: Record<string, LucideIcon> = {
+  bank: Landmark,
+  cash: Banknote,
+  wallet: Wallet,
+  credit_card: CreditCard,
+  investment: PiggyBank,
+  salary: Briefcase,
+  loan: HandCoins,
+}
+
+function getAccountTypeIcon(accountType: string): LucideIcon {
+  return ACCOUNT_TYPE_ICONS[accountType] ?? Circle
+}
+
+function AccountTypeIcon({ accountType }: { accountType: string }) {
+  const Icon = getAccountTypeIcon(accountType)
+  return <Icon className="size-4" />
+}
+
+function AccountTypeSelect({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const selected = ACCOUNT_TYPE_OPTIONS.find((option) => option.value === value)
+  const SelectedIcon = getAccountTypeIcon(selected?.value ?? '')
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button type="button" variant="outline" className="h-9 w-full justify-between rounded-none px-3 text-sm font-normal">
+            <span className="flex items-center gap-2">
+              <SelectedIcon className="size-4" />
+              <span>{selected?.label ?? 'Select type'}</span>
+            </span>
+            <ChevronDown className="size-4 text-muted-foreground" />
+          </Button>
+        }
+      />
+      <DropdownMenuContent className="w-56 rounded-none p-1.5" align="start">
+        <DropdownMenuRadioGroup value={value} onValueChange={(nextValue) => onChange(nextValue)}>
+          {ACCOUNT_TYPE_OPTIONS.map((option) => {
+            const OptionIcon = getAccountTypeIcon(option.value)
+
+            return (
+              <DropdownMenuRadioItem key={option.value} value={option.value} className="normal-case tracking-normal text-sm">
+                <OptionIcon className="size-4" />
+                <span>{option.label}</span>
+              </DropdownMenuRadioItem>
+            )
+          })}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 
 export const Route = createFileRoute('/_protected/accounts/')({
   component: AccountsPage,
@@ -32,6 +116,12 @@ function AccountsPage() {
   const accountsQuery = useQuery({
     queryKey: ['accounts', currentUser?.id],
     queryFn: () => fetchAccounts(currentUser),
+    enabled: Boolean(currentUser?.id),
+  })
+
+  const profileQuery = useQuery({
+    queryKey: ['profile', currentUser?.id],
+    queryFn: () => fetchProfile(currentUser),
     enabled: Boolean(currentUser?.id),
   })
 
@@ -62,6 +152,7 @@ function AccountsPage() {
 
   const accounts = accountsQuery.data?.accounts ?? []
   const totalNetWorth = accountsQuery.data?.totalNetWorth ?? '0'
+  const currencyCode = profileQuery.data?.profile.currencyCode ?? 'USD'
 
   const totalNetWorthLabel = useMemo(() => {
     const value = Number(totalNetWorth)
@@ -126,7 +217,7 @@ function AccountsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">Total Net Worth</p>
-          <p className="text-3xl font-semibold">${totalNetWorthLabel}</p>
+          <p className="text-3xl font-semibold">{currencyCode} {totalNetWorthLabel}</p>
 
           <form onSubmit={onCreateAccount} className="grid gap-3 md:grid-cols-4">
             <div className="space-y-2">
@@ -141,13 +232,7 @@ function AccountsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="account-type">Type</Label>
-              <Input
-                id="account-type"
-                value={accountType}
-                onChange={(event) => setAccountType(event.target.value)}
-                placeholder="bank"
-                required
-              />
+              <AccountTypeSelect value={accountType} onChange={setAccountType} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="account-balance">Current Balance</Label>
@@ -186,9 +271,9 @@ function AccountsPage() {
             {accounts.map((account) => (
               <div key={account.id} className="flex items-center justify-between border p-3">
                 <div>
-                  <p className="font-medium">{account.name}</p>
+                  <p className="flex items-center gap-2 font-medium"><AccountTypeIcon accountType={account.accountType} />{account.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {account.accountType} • ${Number(account.currentBalance).toFixed(2)}
+                    {account.accountType} • {currencyCode} {Number(account.currentBalance).toFixed(2)}
                   </p>
                 </div>
                 <div className="flex gap-2">

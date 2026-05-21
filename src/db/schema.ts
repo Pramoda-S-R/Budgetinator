@@ -1,4 +1,4 @@
-import { boolean, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { boolean, integer, numeric, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -31,8 +31,43 @@ export const accountBalanceHistory = pgTable('account_balance_history', {
   recordedAt: timestamp('recorded_at', { withTimezone: true }).defaultNow().notNull(),
 })
 
+export const categoryGroups = pgTable('category_groups', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  type: text('type').notNull(),
+  icon: text('icon').notNull().default('folder'),
+  color: text('color').notNull().default('#475569'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  isArchived: boolean('is_archived').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
+export const categories = pgTable('categories', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  groupId: uuid('group_id')
+    .notNull()
+    .references(() => categoryGroups.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  icon: text('icon').notNull().default('tag'),
+  color: text('color').notNull().default('#64748b'),
+  transactionType: text('transaction_type').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  isArchived: boolean('is_archived').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
+
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
 export type Account = typeof accounts.$inferSelect
 export type NewAccount = typeof accounts.$inferInsert
 export type AccountBalanceHistory = typeof accountBalanceHistory.$inferSelect
+export type CategoryGroup = typeof categoryGroups.$inferSelect
+export type NewCategoryGroup = typeof categoryGroups.$inferInsert
+export type Category = typeof categories.$inferSelect
+export type NewCategory = typeof categories.$inferInsert
