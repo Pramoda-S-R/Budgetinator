@@ -110,7 +110,7 @@ export function NavUser() {
                     <span className="truncate font-medium">
                       {currentUser.name}
                     </span>
-                    <span className="truncate text-xs text-muted-foreground">
+                    <span className="truncate lowercase text-xs text-muted-foreground">
                       {currentUser.email}
                     </span>
                   </div>

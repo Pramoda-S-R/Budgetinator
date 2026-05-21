@@ -12,6 +12,8 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { NavUser } from "./sidebar/nav-user";
+import { NavMain } from "./sidebar/nav-main";
+import { menuItems } from "#/constants";
 
 export function SidebarLeft({
   ...props
@@ -24,26 +26,7 @@ export function SidebarLeft({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={(props) => (
-                <Link {...props} to="/dashboard">
-                  Dashboard
-                </Link>
-              )}
-            />
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              render={(props) => (
-                <Link {...props} to="/accounts">
-                  Accounts
-                </Link>
-              )}
-            />
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <NavMain items={menuItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

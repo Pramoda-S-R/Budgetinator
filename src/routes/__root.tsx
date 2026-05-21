@@ -14,6 +14,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { NeonAuthUIProvider } from "@neondatabase/neon-js/auth/react/ui";
 import { authClient } from "../auth";
 import { TooltipProvider } from "#/components/ui/tooltip";
+import TanstackQueryProvider from "#/integrations/tanstack-query/root-provider";
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -44,29 +45,33 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const { queryClient } = Route.useRouteContext();
+
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body>
-        <TooltipProvider>
-          <NeonAuthUIProvider authClient={authClient}>
-            {children}
-            <TanStackDevtools
-              config={{
-                position: "bottom-right",
-              }}
-              plugins={[
-                {
-                  name: "Tanstack Router",
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-                TanStackQueryDevtools,
-              ]}
-            />
-          </NeonAuthUIProvider>
-        </TooltipProvider>
+        <TanstackQueryProvider queryClient={queryClient}>
+          <TooltipProvider>
+            <NeonAuthUIProvider authClient={authClient} persistClient>
+              {children}
+              <TanStackDevtools
+                config={{
+                  position: "bottom-right",
+                }}
+                plugins={[
+                  {
+                    name: "Tanstack Router",
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                  TanStackQueryDevtools,
+                ]}
+              />
+            </NeonAuthUIProvider>
+          </TooltipProvider>
+        </TanstackQueryProvider>
         <Scripts />
       </body>
     </html>

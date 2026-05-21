@@ -25,7 +25,7 @@ function toNumericString(value: number) {
   return value.toFixed(2)
 }
 
-export const Route = createFileRoute('/api/accounts')({
+export const Route = createFileRoute('/api/accounts/')({
   server: {
     handlers: {
       GET: async ({ request }) => {

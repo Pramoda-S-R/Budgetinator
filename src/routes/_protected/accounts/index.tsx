@@ -1,60 +1,67 @@
-import { FormEvent, useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import type { FormEvent } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { Button } from '#/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '#/components/ui/card'
 import { Input } from '#/components/ui/input'
 import { Label } from '#/components/ui/label'
 import { calculateNetWorth } from '#/features/accounts/net-worth'
-
-type Account = {
-  id: string
-  name: string
-  accountType: string
-  currentBalance: string
-  includeInNetWorth: boolean
-  isActive: boolean
-  createdAt: string
-}
-
-type AccountsResponse = {
-  accounts: Account[]
-  totalNetWorth: string
-}
+import {
+  createAccount,
+  deleteAccount,
+  fetchAccounts,
+  updateAccount,
+} from '#/features/accounts/data-access'
+import useCurrentUser from '#/hooks/use-current-user'
+import type { Account } from '#/features/accounts/data-access'
 
 export const Route = createFileRoute('/_protected/accounts/')({
   component: AccountsPage,
 })
 
 function AccountsPage() {
-  const [accounts, setAccounts] = useState<Account[]>([])
-  const [totalNetWorth, setTotalNetWorth] = useState('0')
+  const currentUser = useCurrentUser()
+  const queryClient = useQueryClient()
   const [name, setName] = useState('')
   const [accountType, setAccountType] = useState('bank')
   const [currentBalance, setCurrentBalance] = useState('0')
-  const [isBusy, setIsBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function loadAccounts() {
-    setIsBusy(true)
-    setError(null)
+  const accountsQuery = useQuery({
+    queryKey: ['accounts', currentUser?.id],
+    queryFn: () => fetchAccounts(currentUser),
+    enabled: Boolean(currentUser?.id),
+  })
 
-    const response = await fetch('/api/accounts')
-    if (!response.ok) {
-      setError('Unable to load accounts')
-      setIsBusy(false)
-      return
-    }
+  const createAccountMutation = useMutation({
+    mutationFn: (input: { name: string; accountType: string; currentBalance: number }) =>
+      createAccount(input, currentUser),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['accounts', currentUser?.id] })
+      setName('')
+      setCurrentBalance('0')
+    },
+  })
 
-    const data = (await response.json()) as AccountsResponse
-    setAccounts(data.accounts)
-    setTotalNetWorth(data.totalNetWorth)
-    setIsBusy(false)
-  }
+  const updateAccountMutation = useMutation({
+    mutationFn: (payload: { accountId: string; currentBalance: number }) =>
+      updateAccount(payload.accountId, { currentBalance: payload.currentBalance }, currentUser),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['accounts', currentUser?.id] })
+    },
+  })
 
-  useEffect(() => {
-    loadAccounts()
-  }, [])
+  const deleteAccountMutation = useMutation({
+    mutationFn: (accountId: string) => deleteAccount(accountId, currentUser),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['accounts', currentUser?.id] })
+    },
+  })
+
+  const accounts = accountsQuery.data?.accounts ?? []
+  const totalNetWorth = accountsQuery.data?.totalNetWorth ?? '0'
 
   const totalNetWorthLabel = useMemo(() => {
     const value = Number(totalNetWorth)
@@ -71,40 +78,24 @@ function AccountsPage() {
     event.preventDefault()
     setError(null)
 
-    const response = await fetch('/api/accounts', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
+    try {
+      await createAccountMutation.mutateAsync({
         name,
         accountType,
         currentBalance: Number(currentBalance),
-        includeInNetWorth: true,
-        isActive: true,
-      }),
-    })
-
-    if (!response.ok) {
+      })
+    } catch {
       setError('Unable to create account')
-      return
     }
-
-    setName('')
-    setCurrentBalance('0')
-    await loadAccounts()
   }
 
   async function onDeleteAccount(accountId: string) {
     setError(null)
-    const response = await fetch(`/api/accounts/${accountId}`, { method: 'DELETE' })
-
-    if (!response.ok) {
+    try {
+      await deleteAccountMutation.mutateAsync(accountId)
+    } catch {
       setError('Unable to delete account')
-      return
     }
-
-    await loadAccounts()
   }
 
   async function onUpdateBalance(account: Account) {
@@ -119,24 +110,16 @@ function AccountsPage() {
       return
     }
 
-    const response = await fetch(`/api/accounts/${account.id}`, {
-      method: 'PATCH',
-      headers: {
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({ currentBalance: value }),
-    })
-
-    if (!response.ok) {
+    try {
+      await updateAccountMutation.mutateAsync({ accountId: account.id, currentBalance: value })
+    } catch {
       setError('Unable to update balance')
-      return
     }
-
-    await loadAccounts()
   }
 
   return (
     <div className="p-6 space-y-6">
+      {!currentUser ? <p className="text-sm text-muted-foreground">Loading your session...</p> : null}
       <Card>
         <CardHeader>
           <CardTitle>Accounts</CardTitle>
@@ -191,9 +174,11 @@ function AccountsPage() {
           <CardTitle>My Accounts</CardTitle>
         </CardHeader>
         <CardContent>
-          {isBusy ? <p className="text-sm text-muted-foreground">Loading accounts...</p> : null}
+          {accountsQuery.isLoading ? <p className="text-sm text-muted-foreground">Loading accounts...</p> : null}
 
-          {!isBusy && accounts.length === 0 ? (
+          {accountsQuery.isError ? <p className="text-sm text-destructive">Unable to load accounts</p> : null}
+
+          {!accountsQuery.isLoading && accounts.length === 0 ? (
             <p className="text-sm text-muted-foreground">No accounts yet. Add your first account above.</p>
           ) : null}
 

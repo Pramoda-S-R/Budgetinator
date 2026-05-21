@@ -12,17 +12,17 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthSignupRouteImport } from './routes/auth.signup'
-import { Route as AuthSignUpRouteImport } from './routes/auth.sign-up'
-import { Route as AuthSignOutRouteImport } from './routes/auth.sign-out'
-import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
-import { Route as AuthLogoutRouteImport } from './routes/auth.logout'
-import { Route as AuthLoginRouteImport } from './routes/auth.login'
-import { Route as ApiAccountsRouteImport } from './routes/api.accounts'
-import { Route as AccountPathnameRouteImport } from './routes/account.$pathname'
+import { Route as AuthSignupRouteImport } from './routes/auth/signup'
+import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
+import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AccountPathnameRouteImport } from './routes/account/$pathname'
+import { Route as ApiAccountsIndexRouteImport } from './routes/api/accounts/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/accounts/index'
-import { Route as ApiAccountsIdRouteImport } from './routes/api.accounts.$id'
+import { Route as ApiAccountsIdRouteImport } from './routes/api/accounts/$id'
 
 const MeRoute = MeRouteImport.update({
   id: '/me',
@@ -68,14 +68,14 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAccountsRoute = ApiAccountsRouteImport.update({
-  id: '/api/accounts',
-  path: '/api/accounts',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AccountPathnameRoute = AccountPathnameRouteImport.update({
   id: '/account/$pathname',
   path: '/account/$pathname',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAccountsIndexRoute = ApiAccountsIndexRouteImport.update({
+  id: '/api/accounts/',
+  path: '/api/accounts/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
@@ -89,16 +89,15 @@ const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
   getParentRoute: () => ProtectedRoute,
 } as any)
 const ApiAccountsIdRoute = ApiAccountsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ApiAccountsRoute,
+  id: '/api/accounts/$id',
+  path: '/api/accounts/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/api/accounts': typeof ApiAccountsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
@@ -108,12 +107,12 @@ export interface FileRoutesByFullPath {
   '/api/accounts/$id': typeof ApiAccountsIdRoute
   '/accounts/': typeof ProtectedAccountsIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/api/accounts/': typeof ApiAccountsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/api/accounts': typeof ApiAccountsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
@@ -123,6 +122,7 @@ export interface FileRoutesByTo {
   '/api/accounts/$id': typeof ApiAccountsIdRoute
   '/accounts': typeof ProtectedAccountsIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
+  '/api/accounts': typeof ApiAccountsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -130,7 +130,6 @@ export interface FileRoutesById {
   '/_protected': typeof ProtectedRouteWithChildren
   '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/api/accounts': typeof ApiAccountsRouteWithChildren
   '/auth/login': typeof AuthLoginRoute
   '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
@@ -140,6 +139,7 @@ export interface FileRoutesById {
   '/api/accounts/$id': typeof ApiAccountsIdRoute
   '/_protected/accounts/': typeof ProtectedAccountsIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/api/accounts/': typeof ApiAccountsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -147,7 +147,6 @@ export interface FileRouteTypes {
     | '/'
     | '/me'
     | '/account/$pathname'
-    | '/api/accounts'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/sign-in'
@@ -157,12 +156,12 @@ export interface FileRouteTypes {
     | '/api/accounts/$id'
     | '/accounts/'
     | '/dashboard/'
+    | '/api/accounts/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/me'
     | '/account/$pathname'
-    | '/api/accounts'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/sign-in'
@@ -172,13 +171,13 @@ export interface FileRouteTypes {
     | '/api/accounts/$id'
     | '/accounts'
     | '/dashboard'
+    | '/api/accounts'
   id:
     | '__root__'
     | '/'
     | '/_protected'
     | '/me'
     | '/account/$pathname'
-    | '/api/accounts'
     | '/auth/login'
     | '/auth/logout'
     | '/auth/sign-in'
@@ -188,6 +187,7 @@ export interface FileRouteTypes {
     | '/api/accounts/$id'
     | '/_protected/accounts/'
     | '/_protected/dashboard/'
+    | '/api/accounts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -195,13 +195,14 @@ export interface RootRouteChildren {
   ProtectedRoute: typeof ProtectedRouteWithChildren
   MeRoute: typeof MeRoute
   AccountPathnameRoute: typeof AccountPathnameRoute
-  ApiAccountsRoute: typeof ApiAccountsRouteWithChildren
   AuthLoginRoute: typeof AuthLoginRoute
   AuthLogoutRoute: typeof AuthLogoutRoute
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignOutRoute: typeof AuthSignOutRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  ApiAccountsIdRoute: typeof ApiAccountsIdRoute
+  ApiAccountsIndexRoute: typeof ApiAccountsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -269,18 +270,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/accounts': {
-      id: '/api/accounts'
-      path: '/api/accounts'
-      fullPath: '/api/accounts'
-      preLoaderRoute: typeof ApiAccountsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/account/$pathname': {
       id: '/account/$pathname'
       path: '/account/$pathname'
       fullPath: '/account/$pathname'
       preLoaderRoute: typeof AccountPathnameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/accounts/': {
+      id: '/api/accounts/'
+      path: '/api/accounts'
+      fullPath: '/api/accounts/'
+      preLoaderRoute: typeof ApiAccountsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_protected/dashboard/': {
@@ -299,10 +300,10 @@ declare module '@tanstack/react-router' {
     }
     '/api/accounts/$id': {
       id: '/api/accounts/$id'
-      path: '/$id'
+      path: '/api/accounts/$id'
       fullPath: '/api/accounts/$id'
       preLoaderRoute: typeof ApiAccountsIdRouteImport
-      parentRoute: typeof ApiAccountsRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -321,30 +322,19 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
   ProtectedRouteChildren,
 )
 
-interface ApiAccountsRouteChildren {
-  ApiAccountsIdRoute: typeof ApiAccountsIdRoute
-}
-
-const ApiAccountsRouteChildren: ApiAccountsRouteChildren = {
-  ApiAccountsIdRoute: ApiAccountsIdRoute,
-}
-
-const ApiAccountsRouteWithChildren = ApiAccountsRoute._addFileChildren(
-  ApiAccountsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
   MeRoute: MeRoute,
   AccountPathnameRoute: AccountPathnameRoute,
-  ApiAccountsRoute: ApiAccountsRouteWithChildren,
   AuthLoginRoute: AuthLoginRoute,
   AuthLogoutRoute: AuthLogoutRoute,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignOutRoute: AuthSignOutRoute,
   AuthSignUpRoute: AuthSignUpRoute,
   AuthSignupRoute: AuthSignupRoute,
+  ApiAccountsIdRoute: ApiAccountsIdRoute,
+  ApiAccountsIndexRoute: ApiAccountsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
