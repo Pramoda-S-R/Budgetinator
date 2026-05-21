@@ -19,6 +19,7 @@ import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AccountPathnameRouteImport } from './routes/account/$pathname'
+import { Route as ApiProfileIndexRouteImport } from './routes/api/profile/index'
 import { Route as ApiAccountsIndexRouteImport } from './routes/api/accounts/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/accounts/index'
@@ -73,6 +74,11 @@ const AccountPathnameRoute = AccountPathnameRouteImport.update({
   path: '/account/$pathname',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProfileIndexRoute = ApiProfileIndexRouteImport.update({
+  id: '/api/profile/',
+  path: '/api/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAccountsIndexRoute = ApiAccountsIndexRouteImport.update({
   id: '/api/accounts/',
   path: '/api/accounts/',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/accounts/': typeof ProtectedAccountsIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
+  '/api/profile/': typeof ApiProfileIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/accounts': typeof ProtectedAccountsIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
   '/api/accounts': typeof ApiAccountsIndexRoute
+  '/api/profile': typeof ApiProfileIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/_protected/accounts/': typeof ProtectedAccountsIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
+  '/api/profile/': typeof ApiProfileIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/accounts/'
     | '/dashboard/'
     | '/api/accounts/'
+    | '/api/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/dashboard'
     | '/api/accounts'
+    | '/api/profile'
   id:
     | '__root__'
     | '/'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/_protected/accounts/'
     | '/_protected/dashboard/'
     | '/api/accounts/'
+    | '/api/profile/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   AuthSignupRoute: typeof AuthSignupRoute
   ApiAccountsIdRoute: typeof ApiAccountsIdRoute
   ApiAccountsIndexRoute: typeof ApiAccountsIndexRoute
+  ApiProfileIndexRoute: typeof ApiProfileIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -277,6 +290,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountPathnameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/profile/': {
+      id: '/api/profile/'
+      path: '/api/profile'
+      fullPath: '/api/profile/'
+      preLoaderRoute: typeof ApiProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/accounts/': {
       id: '/api/accounts/'
       path: '/api/accounts'
@@ -335,6 +355,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignupRoute: AuthSignupRoute,
   ApiAccountsIdRoute: ApiAccountsIdRoute,
   ApiAccountsIndexRoute: ApiAccountsIndexRoute,
+  ApiProfileIndexRoute: ApiProfileIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
