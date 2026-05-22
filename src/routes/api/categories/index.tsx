@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "#/db";
 import { categories, categoryGroups } from "#/db/schema";
 import { requireCurrentUser } from "#/lib/server-auth";
+import { resolveSortOrder } from "#/routes/api/shared/-sort-order";
 
 const createCategorySchema = z.object({
 	groupId: z.string().uuid(),
@@ -100,19 +101,23 @@ export const Route = createFileRoute("/api/categories/")({
 					.orderBy(desc(categories.sortOrder))
 					.limit(1);
 
-				const [created] = await db
-					.insert(categories)
-					.values({
-						userId: user.id,
-						groupId: parsed.data.groupId,
-						name: parsed.data.name,
-						icon: parsed.data.icon ?? "tag",
-						color: parsed.data.color ?? "#64748b",
-						transactionType: parsed.data.transactionType,
-						sortOrder:
-							parsed.data.sortOrder ?? (lastCategory?.sortOrder ?? -1) + 1,
-					})
-					.returning();
+                const nextSortOrder = resolveSortOrder(
+                    lastCategory?.sortOrder ?? null,
+                    parsed.data.sortOrder,
+                );
+
+                const [created] = await db
+                    .insert(categories)
+                    .values({
+                        userId: user.id,
+                        groupId: parsed.data.groupId,
+                        name: parsed.data.name,
+                        icon: parsed.data.icon ?? "tag",
+                        color: parsed.data.color ?? "#64748b",
+                        transactionType: parsed.data.transactionType,
+                        sortOrder: nextSortOrder,
+                    })
+                    .returning();
 
 				return json({ category: created }, 201);
 			},

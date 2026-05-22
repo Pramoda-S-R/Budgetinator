@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import {
 	ArrowDownCircle,
 	ArrowUpCircle,
-	Calendar,
+	Calendar as CalendarIcon,
 	ListChecks,
 	Tag,
 	Wallet,
@@ -466,16 +466,34 @@ function TransactionsPage() {
 												/>
 											</div>
 											<div className="space-y-2">
-												<Label htmlFor="transaction-date">Date</Label>
-												<Input
-													id="transaction-date"
-													type="date"
-													value={transactionDate}
-													onChange={(event) =>
-														setTransactionDate(event.target.value)
-													}
-													required
-												/>
+                                        <Label htmlFor="transaction-date">Date</Label>
+                                        <Popover>
+                                          <PopoverTrigger
+                                            render={
+                                              <Input
+                                                id="transaction-date"
+                                                readOnly
+                                                value={transactionDate}
+                                                required
+                                              />
+                                            }
+                                          />
+                                          <PopoverContent sideOffset={4} align="start">
+                                            <Calendar
+                                              mode="single"
+                                              selected={new Date(
+                                                `${transactionDate}T00:00:00`
+                                              )}
+                                              onSelect={(date) =>
+                                                date &&
+                                                setTransactionDate(
+                                                  date.toISOString().slice(0, 10)
+                                                )
+                                              }
+                                              showOutsideDays={false}
+                                            />
+                                          </PopoverContent>
+                                        </Popover>
 											</div>
 										</div>
 										<div className="space-y-2">
@@ -582,7 +600,7 @@ function TransactionsPage() {
 											</p>
 										</div>
 										<div className="flex items-center gap-2 text-sm text-muted-foreground">
-											<Calendar className="size-4" />
+							<CalendarIcon className="size-4" />
 											<span>
 												{new Date(
 													transaction.transactionDate,
@@ -631,3 +649,5 @@ function TransactionsPage() {
 		</div>
 	);
 }
+import { Popover, PopoverTrigger, PopoverContent } from "#/components/ui/popover";
+import { Calendar } from "#/components/ui/calendar";

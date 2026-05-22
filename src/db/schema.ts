@@ -125,3 +125,60 @@ export type NewCategory = typeof categories.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
 export type TransactionTag = typeof transactionTags.$inferSelect;
+export const budgetPresets = pgTable("budget_presets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const presetAllocations = pgTable("preset_allocations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  presetId: uuid("preset_id")
+    .notNull()
+    .references(() => budgetPresets.id, { onDelete: "cascade" }),
+  categoryGroupId: uuid("category_group_id").references(() => categoryGroups.id, { onDelete: "set null" }),
+  categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
+  allocatedAmount: numeric("allocated_amount", { precision: 14, scale: 2 }).notNull(),
+  allocationPercent: numeric("allocation_percent", { precision: 5, scale: 2 }),
+});
+
+export const monthlyBudgets = pgTable("monthly_budgets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  year: integer("year").notNull(),
+  month: integer("month").notNull(),
+  presetId: uuid("preset_id").references(() => budgetPresets.id, { onDelete: "set null" }),
+  expectedIncome: numeric("expected_income", { precision: 14, scale: 2 })
+    .notNull()
+    .default("0"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
+export const monthlyBudgetAllocations = pgTable("monthly_budget_allocations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  monthlyBudgetId: uuid("monthly_budget_id")
+    .notNull()
+    .references(() => monthlyBudgets.id, { onDelete: "cascade" }),
+  categoryGroupId: uuid("category_group_id").references(() => categoryGroups.id, { onDelete: "set null" }),
+  categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
+  allocatedAmount: numeric("allocated_amount", { precision: 14, scale: 2 }).notNull(),
+});
+
+export type BudgetPreset = typeof budgetPresets.$inferSelect;
+export type NewBudgetPreset = typeof budgetPresets.$inferInsert;
+export type PresetAllocation = typeof presetAllocations.$inferSelect;
+export type NewPresetAllocation = typeof presetAllocations.$inferInsert;
+export type MonthlyBudget = typeof monthlyBudgets.$inferSelect;
+export type NewMonthlyBudget = typeof monthlyBudgets.$inferInsert;
+export type MonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferSelect;
+export type NewMonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferInsert;

@@ -14,17 +14,20 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AccountPathnameRouteImport } from './routes/account/$pathname'
 import { Route as ApiTransactionsIndexRouteImport } from './routes/api/transactions/index'
 import { Route as ApiProfileIndexRouteImport } from './routes/api/profile/index'
 import { Route as ApiCategoryGroupsIndexRouteImport } from './routes/api/category-groups/index'
 import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
+import { Route as ApiBudgetPresetsIndexRouteImport } from './routes/api/budget-presets/index'
 import { Route as ApiAccountsIndexRouteImport } from './routes/api/accounts/index'
 import { Route as ProtectedTransactionsIndexRouteImport } from './routes/_protected/transactions/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 import { Route as ProtectedCategoriesIndexRouteImport } from './routes/_protected/categories/index'
+import { Route as ProtectedBudgetsIndexRouteImport } from './routes/_protected/budgets/index'
 import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/accounts/index'
 import { Route as ApiTransactionsIdRouteImport } from './routes/api/transactions/$id'
+import { Route as ApiMonthlyBudgetsApplyPresetRouteImport } from './routes/api/monthly-budgets/apply-preset'
+import { Route as ApiMonthlyBudgetsMonthRouteImport } from './routes/api/monthly-budgets/$month'
 import { Route as ApiCategoryGroupsIdRouteImport } from './routes/api/category-groups/$id'
 import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -54,11 +57,6 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/auth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountPathnameRoute = AccountPathnameRouteImport.update({
-  id: '/account/$pathname',
-  path: '/account/$pathname',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiTransactionsIndexRoute = ApiTransactionsIndexRouteImport.update({
   id: '/api/transactions/',
   path: '/api/transactions/',
@@ -77,6 +75,11 @@ const ApiCategoryGroupsIndexRoute = ApiCategoryGroupsIndexRouteImport.update({
 const ApiCategoriesIndexRoute = ApiCategoriesIndexRouteImport.update({
   id: '/api/categories/',
   path: '/api/categories/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBudgetPresetsIndexRoute = ApiBudgetPresetsIndexRouteImport.update({
+  id: '/api/budget-presets/',
+  path: '/api/budget-presets/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccountsIndexRoute = ApiAccountsIndexRouteImport.update({
@@ -101,6 +104,11 @@ const ProtectedCategoriesIndexRoute =
     path: '/categories/',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedBudgetsIndexRoute = ProtectedBudgetsIndexRouteImport.update({
+  id: '/budgets/',
+  path: '/budgets/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
   id: '/accounts/',
   path: '/accounts/',
@@ -109,6 +117,17 @@ const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
 const ApiTransactionsIdRoute = ApiTransactionsIdRouteImport.update({
   id: '/api/transactions/$id',
   path: '/api/transactions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMonthlyBudgetsApplyPresetRoute =
+  ApiMonthlyBudgetsApplyPresetRouteImport.update({
+    id: '/api/monthly-budgets/apply-preset',
+    path: '/api/monthly-budgets/apply-preset',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiMonthlyBudgetsMonthRoute = ApiMonthlyBudgetsMonthRouteImport.update({
+  id: '/api/monthly-budgets/$month',
+  path: '/api/monthly-budgets/$month',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCategoryGroupsIdRoute = ApiCategoryGroupsIdRouteImport.update({
@@ -134,7 +153,6 @@ const ApiAccountsIdRoute = ApiAccountsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/account/$pathname': typeof AccountPathnameRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
@@ -142,12 +160,16 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
+  '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/accounts/': typeof ProtectedAccountsIndexRoute
+  '/budgets/': typeof ProtectedBudgetsIndexRoute
   '/categories/': typeof ProtectedCategoriesIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
   '/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
+  '/api/budget-presets/': typeof ApiBudgetPresetsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
@@ -155,7 +177,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/account/$pathname': typeof AccountPathnameRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
@@ -163,12 +184,16 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
+  '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/accounts': typeof ProtectedAccountsIndexRoute
+  '/budgets': typeof ProtectedBudgetsIndexRoute
   '/categories': typeof ProtectedCategoriesIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
   '/transactions': typeof ProtectedTransactionsIndexRoute
   '/api/accounts': typeof ApiAccountsIndexRoute
+  '/api/budget-presets': typeof ApiBudgetPresetsIndexRoute
   '/api/categories': typeof ApiCategoriesIndexRoute
   '/api/category-groups': typeof ApiCategoryGroupsIndexRoute
   '/api/profile': typeof ApiProfileIndexRoute
@@ -178,7 +203,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
-  '/account/$pathname': typeof AccountPathnameRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
@@ -186,12 +210,16 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
+  '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/_protected/accounts/': typeof ProtectedAccountsIndexRoute
+  '/_protected/budgets/': typeof ProtectedBudgetsIndexRoute
   '/_protected/categories/': typeof ProtectedCategoriesIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
   '/_protected/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
+  '/api/budget-presets/': typeof ApiBudgetPresetsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
@@ -201,7 +229,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/account/$pathname'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
@@ -209,12 +236,16 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/monthly-budgets/$month'
+    | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
     | '/accounts/'
+    | '/budgets/'
     | '/categories/'
     | '/dashboard/'
     | '/transactions/'
     | '/api/accounts/'
+    | '/api/budget-presets/'
     | '/api/categories/'
     | '/api/category-groups/'
     | '/api/profile/'
@@ -222,7 +253,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/account/$pathname'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
@@ -230,12 +260,16 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/monthly-budgets/$month'
+    | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
     | '/accounts'
+    | '/budgets'
     | '/categories'
     | '/dashboard'
     | '/transactions'
     | '/api/accounts'
+    | '/api/budget-presets'
     | '/api/categories'
     | '/api/category-groups'
     | '/api/profile'
@@ -244,7 +278,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_protected'
-    | '/account/$pathname'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
@@ -252,12 +285,16 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/monthly-budgets/$month'
+    | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
     | '/_protected/accounts/'
+    | '/_protected/budgets/'
     | '/_protected/categories/'
     | '/_protected/dashboard/'
     | '/_protected/transactions/'
     | '/api/accounts/'
+    | '/api/budget-presets/'
     | '/api/categories/'
     | '/api/category-groups/'
     | '/api/profile/'
@@ -267,7 +304,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
-  AccountPathnameRoute: typeof AccountPathnameRoute
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignOutRoute: typeof AuthSignOutRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
@@ -275,8 +311,11 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiCategoryGroupsIdRoute: typeof ApiCategoryGroupsIdRoute
+  ApiMonthlyBudgetsMonthRoute: typeof ApiMonthlyBudgetsMonthRoute
+  ApiMonthlyBudgetsApplyPresetRoute: typeof ApiMonthlyBudgetsApplyPresetRoute
   ApiTransactionsIdRoute: typeof ApiTransactionsIdRoute
   ApiAccountsIndexRoute: typeof ApiAccountsIndexRoute
+  ApiBudgetPresetsIndexRoute: typeof ApiBudgetPresetsIndexRoute
   ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
   ApiCategoryGroupsIndexRoute: typeof ApiCategoryGroupsIndexRoute
   ApiProfileIndexRoute: typeof ApiProfileIndexRoute
@@ -320,13 +359,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/account/$pathname': {
-      id: '/account/$pathname'
-      path: '/account/$pathname'
-      fullPath: '/account/$pathname'
-      preLoaderRoute: typeof AccountPathnameRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/transactions/': {
       id: '/api/transactions/'
       path: '/api/transactions'
@@ -353,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/api/categories'
       fullPath: '/api/categories/'
       preLoaderRoute: typeof ApiCategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/budget-presets/': {
+      id: '/api/budget-presets/'
+      path: '/api/budget-presets'
+      fullPath: '/api/budget-presets/'
+      preLoaderRoute: typeof ApiBudgetPresetsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/accounts/': {
@@ -383,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedCategoriesIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/budgets/': {
+      id: '/_protected/budgets/'
+      path: '/budgets'
+      fullPath: '/budgets/'
+      preLoaderRoute: typeof ProtectedBudgetsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/accounts/': {
       id: '/_protected/accounts/'
       path: '/accounts'
@@ -395,6 +441,20 @@ declare module '@tanstack/react-router' {
       path: '/api/transactions/$id'
       fullPath: '/api/transactions/$id'
       preLoaderRoute: typeof ApiTransactionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/monthly-budgets/apply-preset': {
+      id: '/api/monthly-budgets/apply-preset'
+      path: '/api/monthly-budgets/apply-preset'
+      fullPath: '/api/monthly-budgets/apply-preset'
+      preLoaderRoute: typeof ApiMonthlyBudgetsApplyPresetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/monthly-budgets/$month': {
+      id: '/api/monthly-budgets/$month'
+      path: '/api/monthly-budgets/$month'
+      fullPath: '/api/monthly-budgets/$month'
+      preLoaderRoute: typeof ApiMonthlyBudgetsMonthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/category-groups/$id': {
@@ -430,6 +490,7 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteChildren {
   ProtectedAccountsIndexRoute: typeof ProtectedAccountsIndexRoute
+  ProtectedBudgetsIndexRoute: typeof ProtectedBudgetsIndexRoute
   ProtectedCategoriesIndexRoute: typeof ProtectedCategoriesIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
   ProtectedTransactionsIndexRoute: typeof ProtectedTransactionsIndexRoute
@@ -437,6 +498,7 @@ interface ProtectedRouteChildren {
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAccountsIndexRoute: ProtectedAccountsIndexRoute,
+  ProtectedBudgetsIndexRoute: ProtectedBudgetsIndexRoute,
   ProtectedCategoriesIndexRoute: ProtectedCategoriesIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
   ProtectedTransactionsIndexRoute: ProtectedTransactionsIndexRoute,
@@ -449,7 +511,6 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
-  AccountPathnameRoute: AccountPathnameRoute,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignOutRoute: AuthSignOutRoute,
   AuthSignUpRoute: AuthSignUpRoute,
@@ -457,8 +518,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiCategoryGroupsIdRoute: ApiCategoryGroupsIdRoute,
+  ApiMonthlyBudgetsMonthRoute: ApiMonthlyBudgetsMonthRoute,
+  ApiMonthlyBudgetsApplyPresetRoute: ApiMonthlyBudgetsApplyPresetRoute,
   ApiTransactionsIdRoute: ApiTransactionsIdRoute,
   ApiAccountsIndexRoute: ApiAccountsIndexRoute,
+  ApiBudgetPresetsIndexRoute: ApiBudgetPresetsIndexRoute,
   ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,
   ApiCategoryGroupsIndexRoute: ApiCategoryGroupsIndexRoute,
   ApiProfileIndexRoute: ApiProfileIndexRoute,

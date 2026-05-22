@@ -1,4 +1,4 @@
-import { LayoutDashboard, Tags, Users, Wallet } from "lucide-react";
+import { LayoutDashboard, Tags, Users, Wallet, Calendar } from "lucide-react";
 import type { MenuItem } from "#/types";
 
 export const menuItems: MenuItem[] = [
@@ -17,9 +17,14 @@ export const menuItems: MenuItem[] = [
 		url: "/transactions",
 		icon: Wallet,
 	},
-	{
-		title: "Categories",
-		url: "/categories",
-		icon: Tags,
-	},
+  {
+    title: "Categories",
+    url: "/categories",
+    icon: Tags,
+  },
+  {
+    title: "Budgets",
+    url: "/budgets",
+    icon: Calendar,
+  },
 ];
