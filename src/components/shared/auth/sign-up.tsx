@@ -52,13 +52,13 @@ export function SignUp({ redirectTo }: { redirectTo?: string }) {
 					<Button
 						nativeButton={false}
 						variant="link"
-							render={(props) => (
-								<Link
-									{...props}
-									to="/auth/sign-in"
-									search={redirectTo ? { redirectTo } : {}}
-								>
-									Sign In
+						render={(props) => (
+							<Link
+								{...props}
+								to="/auth/sign-in"
+								search={redirectTo ? { redirectTo } : {}}
+							>
+								Sign In
 							</Link>
 						)}
 					/>

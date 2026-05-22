@@ -1,20 +1,24 @@
-import { useEffect } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 
-import { authClient } from '#/auth'
+import { authClient } from "#/auth";
 
-export const Route = createFileRoute('/auth/sign-out')({
-  component: SignOutPage,
-})
+export const Route = createFileRoute("/auth/sign-out")({
+	component: SignOutPage,
+});
 
 function SignOutPage() {
-  const navigate = useNavigate()
+	const navigate = useNavigate();
 
-  useEffect(() => {
-    authClient.signOut().finally(() => {
-      navigate({ to: '/' })
-    })
-  }, [navigate])
+	useEffect(() => {
+		authClient.signOut().finally(() => {
+			navigate({ to: "/" });
+		});
+	}, [navigate]);
 
-  return <div className="flex min-h-screen items-center justify-center">Signing out...</div>
+	return (
+		<div className="flex min-h-screen items-center justify-center">
+			Signing out...
+		</div>
+	);
 }

@@ -1,52 +1,54 @@
-const AUTH_HEADER_ALLOWLIST = ['content-type', 'cookie']
+const AUTH_HEADER_ALLOWLIST = ["content-type", "cookie", "origin", "referer"];
 
-function getNeonAuthBaseUrl() {
-  const authUrl = process.env.VITE_NEON_AUTH_URL ?? import.meta.env.VITE_NEON_AUTH_URL
+export function getNeonAuthBaseUrl() {
+	const authUrl =
+		process.env.VITE_NEON_AUTH_URL ?? import.meta.env.VITE_NEON_AUTH_URL;
 
-  if (!authUrl) {
-    throw new Error('VITE_NEON_AUTH_URL is required')
-  }
+	if (!authUrl) {
+		throw new Error("VITE_NEON_AUTH_URL is required");
+	}
 
-  return authUrl
+	return authUrl.replace(/\/$/, "");
 }
 
 function buildHeaders(requestHeaders: Headers) {
-  const headers = new Headers()
+	const headers = new Headers();
 
-  for (const headerName of AUTH_HEADER_ALLOWLIST) {
-    const value = requestHeaders.get(headerName)
-    if (value) {
-      headers.set(headerName, value)
-    }
-  }
+	for (const headerName of AUTH_HEADER_ALLOWLIST) {
+		const value = requestHeaders.get(headerName);
+		if (value) {
+			headers.set(headerName, value);
+		}
+	}
 
-  return headers
+	return headers;
 }
 
+// path must start with '/', e.g. '/sign-in/email' or '/get-session?foo=bar'
 export async function proxyNeonAuth(request: Request, path: string) {
-  const upstreamUrl = new URL(path, getNeonAuthBaseUrl())
+	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+	const upstreamUrl = `${getNeonAuthBaseUrl()}${normalizedPath}`;
 
-  const body = request.method === 'GET' ? undefined : await request.text()
-  const upstreamResponse = await fetch(upstreamUrl, {
-    method: request.method,
-    headers: buildHeaders(request.headers),
-    body,
-  })
+	const body =
+		request.method === "GET" || request.method === "HEAD"
+			? undefined
+			: await request.text();
 
-  const headers = new Headers()
-  const contentType = upstreamResponse.headers.get('content-type')
-  const setCookie = upstreamResponse.headers.get('set-cookie')
+	const upstreamResponse = await fetch(upstreamUrl, {
+		method: request.method,
+		headers: buildHeaders(request.headers),
+		body,
+	});
 
-  if (contentType) {
-    headers.set('content-type', contentType)
-  }
+	const headers = new Headers();
+	const contentType = upstreamResponse.headers.get("content-type");
+	const setCookie = upstreamResponse.headers.get("set-cookie");
 
-  if (setCookie) {
-    headers.set('set-cookie', setCookie)
-  }
+	if (contentType) headers.set("content-type", contentType);
+	if (setCookie) headers.set("set-cookie", setCookie);
 
-  return new Response(upstreamResponse.body, {
-    status: upstreamResponse.status,
-    headers,
-  })
+	return new Response(upstreamResponse.body, {
+		status: upstreamResponse.status,
+		headers,
+	});
 }

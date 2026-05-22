@@ -1,2 +1,2 @@
-export { db } from './db/index'
-export * as schema from './db/schema'
+export { db } from "./db/index";
+export * as schema from "./db/schema";

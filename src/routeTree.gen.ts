@@ -9,32 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MeRouteImport } from './routes/me'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthSignupRouteImport } from './routes/auth/signup'
 import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
-import { Route as AuthLogoutRouteImport } from './routes/auth/logout'
-import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AccountPathnameRouteImport } from './routes/account/$pathname'
+import { Route as ApiTransactionsIndexRouteImport } from './routes/api/transactions/index'
 import { Route as ApiProfileIndexRouteImport } from './routes/api/profile/index'
 import { Route as ApiCategoryGroupsIndexRouteImport } from './routes/api/category-groups/index'
 import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
 import { Route as ApiAccountsIndexRouteImport } from './routes/api/accounts/index'
+import { Route as ProtectedTransactionsIndexRouteImport } from './routes/_protected/transactions/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 import { Route as ProtectedCategoriesIndexRouteImport } from './routes/_protected/categories/index'
 import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/accounts/index'
+import { Route as ApiTransactionsIdRouteImport } from './routes/api/transactions/$id'
 import { Route as ApiCategoryGroupsIdRouteImport } from './routes/api/category-groups/$id'
 import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAccountsIdRouteImport } from './routes/api/accounts/$id'
 
-const MeRoute = MeRouteImport.update({
-  id: '/me',
-  path: '/me',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ProtectedRoute = ProtectedRouteImport.update({
   id: '/_protected',
   getParentRoute: () => rootRouteImport,
@@ -42,11 +37,6 @@ const ProtectedRoute = ProtectedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthSignupRoute = AuthSignupRouteImport.update({
-  id: '/auth/signup',
-  path: '/auth/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignUpRoute = AuthSignUpRouteImport.update({
@@ -64,19 +54,14 @@ const AuthSignInRoute = AuthSignInRouteImport.update({
   path: '/auth/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthLogoutRoute = AuthLogoutRouteImport.update({
-  id: '/auth/logout',
-  path: '/auth/logout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/auth/login',
-  path: '/auth/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AccountPathnameRoute = AccountPathnameRouteImport.update({
   id: '/account/$pathname',
   path: '/account/$pathname',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTransactionsIndexRoute = ApiTransactionsIndexRouteImport.update({
+  id: '/api/transactions/',
+  path: '/api/transactions/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiProfileIndexRoute = ApiProfileIndexRouteImport.update({
@@ -99,6 +84,12 @@ const ApiAccountsIndexRoute = ApiAccountsIndexRouteImport.update({
   path: '/api/accounts/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProtectedTransactionsIndexRoute =
+  ProtectedTransactionsIndexRouteImport.update({
+    id: '/transactions/',
+    path: '/transactions/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
   id: '/dashboard/',
   path: '/dashboard/',
@@ -115,6 +106,11 @@ const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
   path: '/accounts/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ApiTransactionsIdRoute = ApiTransactionsIdRouteImport.update({
+  id: '/api/transactions/$id',
+  path: '/api/transactions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCategoryGroupsIdRoute = ApiCategoryGroupsIdRouteImport.update({
   id: '/api/category-groups/$id',
   path: '/api/category-groups/$id',
@@ -125,6 +121,11 @@ const ApiCategoriesIdRoute = ApiCategoriesIdRouteImport.update({
   path: '/api/categories/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAccountsIdRoute = ApiAccountsIdRouteImport.update({
   id: '/api/accounts/$id',
   path: '/api/accounts/$id',
@@ -133,165 +134,157 @@ const ApiAccountsIdRoute = ApiAccountsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/signup': typeof AuthSignupRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/accounts/': typeof ProtectedAccountsIndexRoute
   '/categories/': typeof ProtectedCategoriesIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
+  '/api/transactions/': typeof ApiTransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/signup': typeof AuthSignupRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/accounts': typeof ProtectedAccountsIndexRoute
   '/categories': typeof ProtectedCategoriesIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
+  '/transactions': typeof ProtectedTransactionsIndexRoute
   '/api/accounts': typeof ApiAccountsIndexRoute
   '/api/categories': typeof ApiCategoriesIndexRoute
   '/api/category-groups': typeof ApiCategoryGroupsIndexRoute
   '/api/profile': typeof ApiProfileIndexRoute
+  '/api/transactions': typeof ApiTransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_protected': typeof ProtectedRouteWithChildren
-  '/me': typeof MeRoute
   '/account/$pathname': typeof AccountPathnameRoute
-  '/auth/login': typeof AuthLoginRoute
-  '/auth/logout': typeof AuthLogoutRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
-  '/auth/signup': typeof AuthSignupRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/_protected/accounts/': typeof ProtectedAccountsIndexRoute
   '/_protected/categories/': typeof ProtectedCategoriesIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/_protected/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
+  '/api/transactions/': typeof ApiTransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/me'
     | '/account/$pathname'
-    | '/auth/login'
-    | '/auth/logout'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
-    | '/auth/signup'
     | '/api/accounts/$id'
+    | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/transactions/$id'
     | '/accounts/'
     | '/categories/'
     | '/dashboard/'
+    | '/transactions/'
     | '/api/accounts/'
     | '/api/categories/'
     | '/api/category-groups/'
     | '/api/profile/'
+    | '/api/transactions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/me'
     | '/account/$pathname'
-    | '/auth/login'
-    | '/auth/logout'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
-    | '/auth/signup'
     | '/api/accounts/$id'
+    | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/transactions/$id'
     | '/accounts'
     | '/categories'
     | '/dashboard'
+    | '/transactions'
     | '/api/accounts'
     | '/api/categories'
     | '/api/category-groups'
     | '/api/profile'
+    | '/api/transactions'
   id:
     | '__root__'
     | '/'
     | '/_protected'
-    | '/me'
     | '/account/$pathname'
-    | '/auth/login'
-    | '/auth/logout'
     | '/auth/sign-in'
     | '/auth/sign-out'
     | '/auth/sign-up'
-    | '/auth/signup'
     | '/api/accounts/$id'
+    | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/transactions/$id'
     | '/_protected/accounts/'
     | '/_protected/categories/'
     | '/_protected/dashboard/'
+    | '/_protected/transactions/'
     | '/api/accounts/'
     | '/api/categories/'
     | '/api/category-groups/'
     | '/api/profile/'
+    | '/api/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProtectedRoute: typeof ProtectedRouteWithChildren
-  MeRoute: typeof MeRoute
   AccountPathnameRoute: typeof AccountPathnameRoute
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthLogoutRoute: typeof AuthLogoutRoute
   AuthSignInRoute: typeof AuthSignInRoute
   AuthSignOutRoute: typeof AuthSignOutRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
-  AuthSignupRoute: typeof AuthSignupRoute
   ApiAccountsIdRoute: typeof ApiAccountsIdRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiCategoryGroupsIdRoute: typeof ApiCategoryGroupsIdRoute
+  ApiTransactionsIdRoute: typeof ApiTransactionsIdRoute
   ApiAccountsIndexRoute: typeof ApiAccountsIndexRoute
   ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
   ApiCategoryGroupsIndexRoute: typeof ApiCategoryGroupsIndexRoute
   ApiProfileIndexRoute: typeof ApiProfileIndexRoute
+  ApiTransactionsIndexRoute: typeof ApiTransactionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/me': {
-      id: '/me'
-      path: '/me'
-      fullPath: '/me'
-      preLoaderRoute: typeof MeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_protected': {
       id: '/_protected'
       path: ''
@@ -304,13 +297,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/signup': {
-      id: '/auth/signup'
-      path: '/auth/signup'
-      fullPath: '/auth/signup'
-      preLoaderRoute: typeof AuthSignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/sign-up': {
@@ -334,25 +320,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/logout': {
-      id: '/auth/logout'
-      path: '/auth/logout'
-      fullPath: '/auth/logout'
-      preLoaderRoute: typeof AuthLogoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/login': {
-      id: '/auth/login'
-      path: '/auth/login'
-      fullPath: '/auth/login'
-      preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/account/$pathname': {
       id: '/account/$pathname'
       path: '/account/$pathname'
       fullPath: '/account/$pathname'
       preLoaderRoute: typeof AccountPathnameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/transactions/': {
+      id: '/api/transactions/'
+      path: '/api/transactions'
+      fullPath: '/api/transactions/'
+      preLoaderRoute: typeof ApiTransactionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/profile/': {
@@ -383,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAccountsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_protected/transactions/': {
+      id: '/_protected/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions/'
+      preLoaderRoute: typeof ProtectedTransactionsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/dashboard/': {
       id: '/_protected/dashboard/'
       path: '/dashboard'
@@ -404,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedAccountsIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/api/transactions/$id': {
+      id: '/api/transactions/$id'
+      path: '/api/transactions/$id'
+      fullPath: '/api/transactions/$id'
+      preLoaderRoute: typeof ApiTransactionsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/category-groups/$id': {
       id: '/api/category-groups/$id'
       path: '/api/category-groups/$id'
@@ -416,6 +409,13 @@ declare module '@tanstack/react-router' {
       path: '/api/categories/$id'
       fullPath: '/api/categories/$id'
       preLoaderRoute: typeof ApiCategoriesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/accounts/$id': {
@@ -432,12 +432,14 @@ interface ProtectedRouteChildren {
   ProtectedAccountsIndexRoute: typeof ProtectedAccountsIndexRoute
   ProtectedCategoriesIndexRoute: typeof ProtectedCategoriesIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
+  ProtectedTransactionsIndexRoute: typeof ProtectedTransactionsIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAccountsIndexRoute: ProtectedAccountsIndexRoute,
   ProtectedCategoriesIndexRoute: ProtectedCategoriesIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
+  ProtectedTransactionsIndexRoute: ProtectedTransactionsIndexRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
@@ -447,21 +449,20 @@ const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProtectedRoute: ProtectedRouteWithChildren,
-  MeRoute: MeRoute,
   AccountPathnameRoute: AccountPathnameRoute,
-  AuthLoginRoute: AuthLoginRoute,
-  AuthLogoutRoute: AuthLogoutRoute,
   AuthSignInRoute: AuthSignInRoute,
   AuthSignOutRoute: AuthSignOutRoute,
   AuthSignUpRoute: AuthSignUpRoute,
-  AuthSignupRoute: AuthSignupRoute,
   ApiAccountsIdRoute: ApiAccountsIdRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiCategoryGroupsIdRoute: ApiCategoryGroupsIdRoute,
+  ApiTransactionsIdRoute: ApiTransactionsIdRoute,
   ApiAccountsIndexRoute: ApiAccountsIndexRoute,
   ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,
   ApiCategoryGroupsIndexRoute: ApiCategoryGroupsIndexRoute,
   ApiProfileIndexRoute: ApiProfileIndexRoute,
+  ApiTransactionsIndexRoute: ApiTransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

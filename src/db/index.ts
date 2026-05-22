@@ -1,14 +1,14 @@
-import { neon } from '@neondatabase/serverless'
-import { drizzle } from 'drizzle-orm/neon-http'
+import { Pool } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
 
-import * as schema from './schema.ts'
+import * as schema from "./schema.ts";
 
-const databaseUrl = process.env.DATABASE_URL
+const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
-  throw new Error('DATABASE_URL is not set')
+	throw new Error("DATABASE_URL is not set");
 }
 
-const sql = neon(databaseUrl)
+const pool = new Pool({ connectionString: databaseUrl });
 
-export const db = drizzle({ client: sql, schema })
+export const db = drizzle({ client: pool, schema });

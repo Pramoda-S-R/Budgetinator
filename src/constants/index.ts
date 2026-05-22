@@ -1,20 +1,25 @@
+import { LayoutDashboard, Tags, Users, Wallet } from "lucide-react";
 import type { MenuItem } from "#/types";
-import { LayoutDashboard, Tags, Users } from "lucide-react";
 
 export const menuItems: MenuItem[] = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Accounts",
-    url: "/accounts",
-    icon: Users,
-  },
-  {
-    title: "Categories",
-    url: "/categories",
-    icon: Tags,
-  },
+	{
+		title: "Dashboard",
+		url: "/dashboard",
+		icon: LayoutDashboard,
+	},
+	{
+		title: "Accounts",
+		url: "/accounts",
+		icon: Users,
+	},
+	{
+		title: "Transactions",
+		url: "/transactions",
+		icon: Wallet,
+	},
+	{
+		title: "Categories",
+		url: "/categories",
+		icon: Tags,
+	},
 ];
