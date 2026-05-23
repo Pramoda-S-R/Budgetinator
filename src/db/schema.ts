@@ -182,3 +182,36 @@ export type MonthlyBudget = typeof monthlyBudgets.$inferSelect;
 export type NewMonthlyBudget = typeof monthlyBudgets.$inferInsert;
 export type MonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferSelect;
 export type NewMonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferInsert;
+
+// Phase 7: Investments & SIP Tracking
+export const investments = pgTable("investments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  investmentType: text("investment_type").notNull(),
+  symbol: text("symbol"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const investmentEntries = pgTable("investment_entries", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  investmentId: uuid("investment_id").notNull().references(() => investments.id, { onDelete: "cascade" }),
+  amountInvested: numeric("amount_invested", { precision: 14, scale: 2 }).notNull(),
+  units: numeric("units", { precision: 14, scale: 4 }),
+  investedAt: timestamp("invested_at", { withTimezone: true }).defaultNow().notNull(),
+  notes: text("notes").notNull().default(""),
+});
+
+export const investmentValuations = pgTable("investment_valuations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  investmentId: uuid("investment_id").notNull().references(() => investments.id, { onDelete: "cascade" }),
+  valuationAmount: numeric("valuation_amount", { precision: 14, scale: 2 }).notNull(),
+  valuationDate: timestamp("valuation_date", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type Investment = typeof investments.$inferSelect;
+export type NewInvestment = typeof investments.$inferInsert;
+export type InvestmentEntry = typeof investmentEntries.$inferSelect;
+export type NewInvestmentEntry = typeof investmentEntries.$inferInsert;
+export type InvestmentValuation = typeof investmentValuations.$inferSelect;
+export type NewInvestmentValuation = typeof investmentValuations.$inferInsert;
