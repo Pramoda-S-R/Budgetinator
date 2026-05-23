@@ -9,7 +9,7 @@ import { requireCurrentUser } from "#/lib/server-auth";
 const createInvestmentSchema = z.object({
   name: z.string().trim().min(1),
   investmentType: z.string().trim().min(1),
-  symbol: z.string().trim().optional(),
+  symbol: z.string().trim().nullable().optional(),
 });
 
 function json(data: unknown, status = 200) {

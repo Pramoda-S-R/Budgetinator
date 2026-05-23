@@ -16,11 +16,15 @@ import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as ApiTransactionsIndexRouteImport } from './routes/api/transactions/index'
 import { Route as ApiProfileIndexRouteImport } from './routes/api/profile/index'
+import { Route as ApiInvestmentsIndexRouteImport } from './routes/api/investments/index'
+import { Route as ApiInvestmentValuationsIndexRouteImport } from './routes/api/investment-valuations/index'
+import { Route as ApiInvestmentEntriesIndexRouteImport } from './routes/api/investment-entries/index'
 import { Route as ApiCategoryGroupsIndexRouteImport } from './routes/api/category-groups/index'
 import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
 import { Route as ApiBudgetPresetsIndexRouteImport } from './routes/api/budget-presets/index'
 import { Route as ApiAccountsIndexRouteImport } from './routes/api/accounts/index'
 import { Route as ProtectedTransactionsIndexRouteImport } from './routes/_protected/transactions/index'
+import { Route as ProtectedInvestmentsIndexRouteImport } from './routes/_protected/investments/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 import { Route as ProtectedCategoriesIndexRouteImport } from './routes/_protected/categories/index'
 import { Route as ProtectedBudgetsIndexRouteImport } from './routes/_protected/budgets/index'
@@ -28,6 +32,9 @@ import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/
 import { Route as ApiTransactionsIdRouteImport } from './routes/api/transactions/$id'
 import { Route as ApiMonthlyBudgetsApplyPresetRouteImport } from './routes/api/monthly-budgets/apply-preset'
 import { Route as ApiMonthlyBudgetsMonthRouteImport } from './routes/api/monthly-budgets/$month'
+import { Route as ApiInvestmentsIdRouteImport } from './routes/api/investments/$id'
+import { Route as ApiInvestmentValuationsIdRouteImport } from './routes/api/investment-valuations/$id'
+import { Route as ApiInvestmentEntriesIdRouteImport } from './routes/api/investment-entries/$id'
 import { Route as ApiDashboardSummaryRouteImport } from './routes/api/dashboard/summary'
 import { Route as ApiDashboardCashflowRouteImport } from './routes/api/dashboard/cashflow'
 import { Route as ApiDashboardBudgetStatusRouteImport } from './routes/api/dashboard/budget-status'
@@ -70,6 +77,23 @@ const ApiProfileIndexRoute = ApiProfileIndexRouteImport.update({
   path: '/api/profile/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiInvestmentsIndexRoute = ApiInvestmentsIndexRouteImport.update({
+  id: '/api/investments/',
+  path: '/api/investments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiInvestmentValuationsIndexRoute =
+  ApiInvestmentValuationsIndexRouteImport.update({
+    id: '/api/investment-valuations/',
+    path: '/api/investment-valuations/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiInvestmentEntriesIndexRoute =
+  ApiInvestmentEntriesIndexRouteImport.update({
+    id: '/api/investment-entries/',
+    path: '/api/investment-entries/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCategoryGroupsIndexRoute = ApiCategoryGroupsIndexRouteImport.update({
   id: '/api/category-groups/',
   path: '/api/category-groups/',
@@ -94,6 +118,12 @@ const ProtectedTransactionsIndexRoute =
   ProtectedTransactionsIndexRouteImport.update({
     id: '/transactions/',
     path: '/transactions/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+const ProtectedInvestmentsIndexRoute =
+  ProtectedInvestmentsIndexRouteImport.update({
+    id: '/investments/',
+    path: '/investments/',
     getParentRoute: () => ProtectedRoute,
   } as any)
 const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
@@ -131,6 +161,22 @@ const ApiMonthlyBudgetsApplyPresetRoute =
 const ApiMonthlyBudgetsMonthRoute = ApiMonthlyBudgetsMonthRouteImport.update({
   id: '/api/monthly-budgets/$month',
   path: '/api/monthly-budgets/$month',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiInvestmentsIdRoute = ApiInvestmentsIdRouteImport.update({
+  id: '/api/investments/$id',
+  path: '/api/investments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiInvestmentValuationsIdRoute =
+  ApiInvestmentValuationsIdRouteImport.update({
+    id: '/api/investment-valuations/$id',
+    path: '/api/investment-valuations/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiInvestmentEntriesIdRoute = ApiInvestmentEntriesIdRouteImport.update({
+  id: '/api/investment-entries/$id',
+  path: '/api/investment-entries/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiDashboardSummaryRoute = ApiDashboardSummaryRouteImport.update({
@@ -182,6 +228,9 @@ export interface FileRoutesByFullPath {
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
+  '/api/investment-entries/$id': typeof ApiInvestmentEntriesIdRoute
+  '/api/investment-valuations/$id': typeof ApiInvestmentValuationsIdRoute
+  '/api/investments/$id': typeof ApiInvestmentsIdRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
@@ -189,11 +238,15 @@ export interface FileRoutesByFullPath {
   '/budgets/': typeof ProtectedBudgetsIndexRoute
   '/categories/': typeof ProtectedCategoriesIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/investments/': typeof ProtectedInvestmentsIndexRoute
   '/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
   '/api/budget-presets/': typeof ApiBudgetPresetsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
+  '/api/investment-entries/': typeof ApiInvestmentEntriesIndexRoute
+  '/api/investment-valuations/': typeof ApiInvestmentValuationsIndexRoute
+  '/api/investments/': typeof ApiInvestmentsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
   '/api/transactions/': typeof ApiTransactionsIndexRoute
 }
@@ -209,6 +262,9 @@ export interface FileRoutesByTo {
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
+  '/api/investment-entries/$id': typeof ApiInvestmentEntriesIdRoute
+  '/api/investment-valuations/$id': typeof ApiInvestmentValuationsIdRoute
+  '/api/investments/$id': typeof ApiInvestmentsIdRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
@@ -216,11 +272,15 @@ export interface FileRoutesByTo {
   '/budgets': typeof ProtectedBudgetsIndexRoute
   '/categories': typeof ProtectedCategoriesIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
+  '/investments': typeof ProtectedInvestmentsIndexRoute
   '/transactions': typeof ProtectedTransactionsIndexRoute
   '/api/accounts': typeof ApiAccountsIndexRoute
   '/api/budget-presets': typeof ApiBudgetPresetsIndexRoute
   '/api/categories': typeof ApiCategoriesIndexRoute
   '/api/category-groups': typeof ApiCategoryGroupsIndexRoute
+  '/api/investment-entries': typeof ApiInvestmentEntriesIndexRoute
+  '/api/investment-valuations': typeof ApiInvestmentValuationsIndexRoute
+  '/api/investments': typeof ApiInvestmentsIndexRoute
   '/api/profile': typeof ApiProfileIndexRoute
   '/api/transactions': typeof ApiTransactionsIndexRoute
 }
@@ -238,6 +298,9 @@ export interface FileRoutesById {
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
+  '/api/investment-entries/$id': typeof ApiInvestmentEntriesIdRoute
+  '/api/investment-valuations/$id': typeof ApiInvestmentValuationsIdRoute
+  '/api/investments/$id': typeof ApiInvestmentsIdRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
@@ -245,11 +308,15 @@ export interface FileRoutesById {
   '/_protected/budgets/': typeof ProtectedBudgetsIndexRoute
   '/_protected/categories/': typeof ProtectedCategoriesIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/_protected/investments/': typeof ProtectedInvestmentsIndexRoute
   '/_protected/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
   '/api/budget-presets/': typeof ApiBudgetPresetsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
+  '/api/investment-entries/': typeof ApiInvestmentEntriesIndexRoute
+  '/api/investment-valuations/': typeof ApiInvestmentValuationsIndexRoute
+  '/api/investments/': typeof ApiInvestmentsIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
   '/api/transactions/': typeof ApiTransactionsIndexRoute
 }
@@ -267,6 +334,9 @@ export interface FileRouteTypes {
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
+    | '/api/investment-entries/$id'
+    | '/api/investment-valuations/$id'
+    | '/api/investments/$id'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
@@ -274,11 +344,15 @@ export interface FileRouteTypes {
     | '/budgets/'
     | '/categories/'
     | '/dashboard/'
+    | '/investments/'
     | '/transactions/'
     | '/api/accounts/'
     | '/api/budget-presets/'
     | '/api/categories/'
     | '/api/category-groups/'
+    | '/api/investment-entries/'
+    | '/api/investment-valuations/'
+    | '/api/investments/'
     | '/api/profile/'
     | '/api/transactions/'
   fileRoutesByTo: FileRoutesByTo
@@ -294,6 +368,9 @@ export interface FileRouteTypes {
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
+    | '/api/investment-entries/$id'
+    | '/api/investment-valuations/$id'
+    | '/api/investments/$id'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
@@ -301,11 +378,15 @@ export interface FileRouteTypes {
     | '/budgets'
     | '/categories'
     | '/dashboard'
+    | '/investments'
     | '/transactions'
     | '/api/accounts'
     | '/api/budget-presets'
     | '/api/categories'
     | '/api/category-groups'
+    | '/api/investment-entries'
+    | '/api/investment-valuations'
+    | '/api/investments'
     | '/api/profile'
     | '/api/transactions'
   id:
@@ -322,6 +403,9 @@ export interface FileRouteTypes {
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
+    | '/api/investment-entries/$id'
+    | '/api/investment-valuations/$id'
+    | '/api/investments/$id'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
@@ -329,11 +413,15 @@ export interface FileRouteTypes {
     | '/_protected/budgets/'
     | '/_protected/categories/'
     | '/_protected/dashboard/'
+    | '/_protected/investments/'
     | '/_protected/transactions/'
     | '/api/accounts/'
     | '/api/budget-presets/'
     | '/api/categories/'
     | '/api/category-groups/'
+    | '/api/investment-entries/'
+    | '/api/investment-valuations/'
+    | '/api/investments/'
     | '/api/profile/'
     | '/api/transactions/'
   fileRoutesById: FileRoutesById
@@ -351,6 +439,9 @@ export interface RootRouteChildren {
   ApiDashboardBudgetStatusRoute: typeof ApiDashboardBudgetStatusRoute
   ApiDashboardCashflowRoute: typeof ApiDashboardCashflowRoute
   ApiDashboardSummaryRoute: typeof ApiDashboardSummaryRoute
+  ApiInvestmentEntriesIdRoute: typeof ApiInvestmentEntriesIdRoute
+  ApiInvestmentValuationsIdRoute: typeof ApiInvestmentValuationsIdRoute
+  ApiInvestmentsIdRoute: typeof ApiInvestmentsIdRoute
   ApiMonthlyBudgetsMonthRoute: typeof ApiMonthlyBudgetsMonthRoute
   ApiMonthlyBudgetsApplyPresetRoute: typeof ApiMonthlyBudgetsApplyPresetRoute
   ApiTransactionsIdRoute: typeof ApiTransactionsIdRoute
@@ -358,6 +449,9 @@ export interface RootRouteChildren {
   ApiBudgetPresetsIndexRoute: typeof ApiBudgetPresetsIndexRoute
   ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
   ApiCategoryGroupsIndexRoute: typeof ApiCategoryGroupsIndexRoute
+  ApiInvestmentEntriesIndexRoute: typeof ApiInvestmentEntriesIndexRoute
+  ApiInvestmentValuationsIndexRoute: typeof ApiInvestmentValuationsIndexRoute
+  ApiInvestmentsIndexRoute: typeof ApiInvestmentsIndexRoute
   ApiProfileIndexRoute: typeof ApiProfileIndexRoute
   ApiTransactionsIndexRoute: typeof ApiTransactionsIndexRoute
 }
@@ -413,6 +507,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiProfileIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/investments/': {
+      id: '/api/investments/'
+      path: '/api/investments'
+      fullPath: '/api/investments/'
+      preLoaderRoute: typeof ApiInvestmentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/investment-valuations/': {
+      id: '/api/investment-valuations/'
+      path: '/api/investment-valuations'
+      fullPath: '/api/investment-valuations/'
+      preLoaderRoute: typeof ApiInvestmentValuationsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/investment-entries/': {
+      id: '/api/investment-entries/'
+      path: '/api/investment-entries'
+      fullPath: '/api/investment-entries/'
+      preLoaderRoute: typeof ApiInvestmentEntriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/category-groups/': {
       id: '/api/category-groups/'
       path: '/api/category-groups'
@@ -446,6 +561,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions'
       fullPath: '/transactions/'
       preLoaderRoute: typeof ProtectedTransactionsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/investments/': {
+      id: '/_protected/investments/'
+      path: '/investments'
+      fullPath: '/investments/'
+      preLoaderRoute: typeof ProtectedInvestmentsIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
     '/_protected/dashboard/': {
@@ -495,6 +617,27 @@ declare module '@tanstack/react-router' {
       path: '/api/monthly-budgets/$month'
       fullPath: '/api/monthly-budgets/$month'
       preLoaderRoute: typeof ApiMonthlyBudgetsMonthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/investments/$id': {
+      id: '/api/investments/$id'
+      path: '/api/investments/$id'
+      fullPath: '/api/investments/$id'
+      preLoaderRoute: typeof ApiInvestmentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/investment-valuations/$id': {
+      id: '/api/investment-valuations/$id'
+      path: '/api/investment-valuations/$id'
+      fullPath: '/api/investment-valuations/$id'
+      preLoaderRoute: typeof ApiInvestmentValuationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/investment-entries/$id': {
+      id: '/api/investment-entries/$id'
+      path: '/api/investment-entries/$id'
+      fullPath: '/api/investment-entries/$id'
+      preLoaderRoute: typeof ApiInvestmentEntriesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/dashboard/summary': {
@@ -554,6 +697,7 @@ interface ProtectedRouteChildren {
   ProtectedBudgetsIndexRoute: typeof ProtectedBudgetsIndexRoute
   ProtectedCategoriesIndexRoute: typeof ProtectedCategoriesIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
+  ProtectedInvestmentsIndexRoute: typeof ProtectedInvestmentsIndexRoute
   ProtectedTransactionsIndexRoute: typeof ProtectedTransactionsIndexRoute
 }
 
@@ -562,6 +706,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedBudgetsIndexRoute: ProtectedBudgetsIndexRoute,
   ProtectedCategoriesIndexRoute: ProtectedCategoriesIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
+  ProtectedInvestmentsIndexRoute: ProtectedInvestmentsIndexRoute,
   ProtectedTransactionsIndexRoute: ProtectedTransactionsIndexRoute,
 }
 
@@ -582,6 +727,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDashboardBudgetStatusRoute: ApiDashboardBudgetStatusRoute,
   ApiDashboardCashflowRoute: ApiDashboardCashflowRoute,
   ApiDashboardSummaryRoute: ApiDashboardSummaryRoute,
+  ApiInvestmentEntriesIdRoute: ApiInvestmentEntriesIdRoute,
+  ApiInvestmentValuationsIdRoute: ApiInvestmentValuationsIdRoute,
+  ApiInvestmentsIdRoute: ApiInvestmentsIdRoute,
   ApiMonthlyBudgetsMonthRoute: ApiMonthlyBudgetsMonthRoute,
   ApiMonthlyBudgetsApplyPresetRoute: ApiMonthlyBudgetsApplyPresetRoute,
   ApiTransactionsIdRoute: ApiTransactionsIdRoute,
@@ -589,6 +737,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBudgetPresetsIndexRoute: ApiBudgetPresetsIndexRoute,
   ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,
   ApiCategoryGroupsIndexRoute: ApiCategoryGroupsIndexRoute,
+  ApiInvestmentEntriesIndexRoute: ApiInvestmentEntriesIndexRoute,
+  ApiInvestmentValuationsIndexRoute: ApiInvestmentValuationsIndexRoute,
+  ApiInvestmentsIndexRoute: ApiInvestmentsIndexRoute,
   ApiProfileIndexRoute: ApiProfileIndexRoute,
   ApiTransactionsIndexRoute: ApiTransactionsIndexRoute,
 }

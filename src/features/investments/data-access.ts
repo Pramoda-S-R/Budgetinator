@@ -33,3 +33,95 @@ export async function fetchInvestmentValuations(user?: User) {
     headers: createAuthHeaders(user),
   });
 }
+
+export type CreateInvestmentEntryInput = {
+  investmentId: string;
+  amountInvested: number;
+  units?: number;
+  investedAt?: Date;
+  notes?: string;
+};
+export async function createInvestmentEntry(
+  input: CreateInvestmentEntryInput,
+  user?: User,
+) {
+  return request<{ entry: any }>("/api/investment-entries", {
+    method: "POST",
+    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
+    body: JSON.stringify(input),
+  });
+}
+
+export type CreateInvestmentValuationInput = {
+  investmentId: string;
+  valuationAmount: number;
+  valuationDate?: Date;
+};
+export async function createInvestmentValuation(
+  input: CreateInvestmentValuationInput,
+  user?: User,
+) {
+  return request<{ valuation: any }>("/api/investment-valuations", {
+    method: "POST",
+    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
+    body: JSON.stringify(input),
+  });
+}
+
+/** Fetch a single investment by id */
+export async function fetchInvestmentById(
+  id: string,
+  user?: User,
+): Promise<{ investment: any }> {
+  return request(`/api/investments/${id}`, {
+    headers: createAuthHeaders(user),
+  });
+}
+
+export type UpdateInvestmentInput = {
+  name?: string;
+  investmentType?: string;
+  symbol?: string | null;
+};
+/** Update an existing investment */
+export async function updateInvestmentById(
+  id: string,
+  input: UpdateInvestmentInput,
+  user?: User,
+): Promise<{ investment: any }> {
+  return request(`/api/investments/${id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
+    body: JSON.stringify(input),
+  });
+}
+
+/** Delete an investment */
+export async function deleteInvestmentById(
+  id: string,
+  user?: User,
+): Promise<{ success: boolean }> {
+  return request(`/api/investments/${id}`, {
+    method: "DELETE",
+    headers: createAuthHeaders(user),
+  });
+}
+
+/**
+ * Create a new investment
+ */
+export type CreateInvestmentInput = {
+  name: string;
+  investmentType: string;
+  symbol?: string | null;
+};
+export async function createInvestment(
+  input: CreateInvestmentInput,
+  user?: User,
+): Promise<{ investment: any }> {
+  return request<{ investment: any }>("/api/investments", {
+    method: "POST",
+    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
+    body: JSON.stringify(input),
+  });
+}
