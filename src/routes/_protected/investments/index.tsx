@@ -1,30 +1,41 @@
-import { createRoute } from "@tanstack/react-router";
-import { useLoader } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import useCurrentUser from "#/hooks/use-current-user";
+import {
+  fetchInvestments,
+  fetchInvestmentEntries,
+  fetchInvestmentValuations,
+} from "#/features/investments/data-access";
 import { calculateGainLoss, calculatePortfolioAllocation } from "#/lib/investment-analytics";
-import { useMatches } from "../../hooks.js";
 
-const loader = async () => {
-  const [invRes, entryRes, valRes] = await Promise.all([
-    fetch("/api/investments/").then((res) => res.json()),
-    fetch("/api/investment-entries/").then((res) => res.json()),
-    fetch("/api/investment-valuations/").then((res) => res.json()),
-  ]);
-  return {
-    investments: invRes.investments,
-    entries: entryRes.entries,
-    valuations: valRes.valuations,
-  };
-};
+export const Route = createFileRoute("/_protected/investments/")({
+  component: InvestmentsPage,
+});
 
-export const Route = createRoute({
-  getParentRoute: () => ProtectedRoute,
-  path: "/investments/",
-  loader,
-  component: function InvestmentsPage() {
-    const { investments, entries, valuations } = useLoader<typeof loader>();
-    const gainLoss = calculateGainLoss(entries, valuations);
-    const allocation = calculatePortfolioAllocation(valuations);
+function InvestmentsPage() {
+  const currentUser = useCurrentUser();
+  const invQuery = useQuery({
+    queryKey: ["investments", currentUser?.id],
+    queryFn: () => fetchInvestments(currentUser),
+    enabled: Boolean(currentUser?.id),
+  });
+  const entryQuery = useQuery({
+    queryKey: ["investmentEntries", currentUser?.id],
+    queryFn: () => fetchInvestmentEntries(currentUser),
+    enabled: Boolean(currentUser?.id),
+  });
+  const valQuery = useQuery({
+    queryKey: ["investmentValuations", currentUser?.id],
+    queryFn: () => fetchInvestmentValuations(currentUser),
+    enabled: Boolean(currentUser?.id),
+  });
+
+  const investments = invQuery.data?.investments ?? [];
+  const entries = entryQuery.data?.entries ?? [];
+  const valuations = valQuery.data?.valuations ?? [];
+  const gainLoss = calculateGainLoss(entries, valuations);
+  const allocation = calculatePortfolioAllocation(valuations);
 
     return (
       <div className="p-6 bg-gradient-to-br from-blue-50 to-green-50 min-h-screen">
@@ -39,7 +50,7 @@ export const Route = createRoute({
                   dataKey="allocationPercent"
                   nameKey="investmentId"
                   labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent = 0 }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
                 >
                   {allocation.map((_, idx) => (

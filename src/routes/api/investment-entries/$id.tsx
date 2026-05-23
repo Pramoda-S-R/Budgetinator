@@ -80,7 +80,8 @@ export const Route = createFileRoute("/api/investment-entries/$id")({
           updates.amountInvested = toNumericString(parsedBody.data.amountInvested);
         }
         if ("units" in parsedBody.data) {
-          updates.units = parsedBody.data.units ?? null;
+          updates.units =
+            parsedBody.data.units !== undefined ? toNumericString(parsedBody.data.units) : null;
         }
         if (
           "investedAt" in parsedBody.data &&

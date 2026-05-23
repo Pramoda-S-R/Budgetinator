@@ -81,7 +81,7 @@ export const Route = createFileRoute("/api/investment-entries/")({
           .values({
             investmentId,
             amountInvested: toNumericString(amountInvested),
-            units: units ?? null,
+            units: units !== undefined ? toNumericString(units) : null,
             investedAt: investedAt ?? new Date(),
             notes,
           })
