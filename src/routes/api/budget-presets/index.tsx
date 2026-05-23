@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { db } from "#/db";
 import { requireCurrentUser } from "#/lib/server-auth";
@@ -93,15 +93,15 @@ export const Route = createFileRoute("/api/budget-presets/")({
               description: description ?? "",
             })
             .returning();
-          await tx.insert(presetAllocations).values(
+           await tx.insert(presetAllocations).values(
             allocations.map((a) => ({
               presetId: preset.id,
               categoryGroupId: a.categoryGroupId ?? null,
               categoryId: a.categoryId ?? null,
-              allocatedAmount: a.allocatedAmount,
-              allocationPercent: a.allocationPercent ?? null,
-            }))
-          );
+              allocatedAmount: String(a.allocatedAmount),
+              allocationPercent: a.allocationPercent != null ? String(a.allocationPercent) : null,
+            })),
+           );
           return preset;
         });
         return json({ preset: result }, 201);

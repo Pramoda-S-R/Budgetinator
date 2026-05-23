@@ -53,7 +53,7 @@ export const Route = createFileRoute("/api/monthly-budgets/apply-preset")({
                     presetId,
                     year,
                     month,
-                    expectedIncome: expectedIncome ?? 0,
+                    expectedIncome: String(expectedIncome ?? 0),
                   })
                   .returning()
               )[0].id;
@@ -71,10 +71,10 @@ export const Route = createFileRoute("/api/monthly-budgets/apply-preset")({
           await tx.insert(monthlyBudgetAllocations).values(
             presetRows.map((a) => ({
               monthlyBudgetId: budgetId,
-              categoryGroupId: a.categoryGroupId,
-              categoryId: a.categoryId,
-              allocatedAmount: a.allocatedAmount,
-            }))
+              categoryGroupId: a.categoryGroupId ?? null,
+              categoryId: a.categoryId ?? null,
+              allocatedAmount: String(a.allocatedAmount),
+            })),
           );
           const [monthlyBudget] = await tx
             .select()

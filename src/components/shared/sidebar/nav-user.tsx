@@ -131,10 +131,11 @@ export function NavUser() {
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem
-							nativeButton={true}
+							<DropdownMenuItem
+							nativeButton={false}
 							render={(params) => (
 								<Button
+									nativeButton={false}
 									{...params}
 									variant="destructive"
 									className="w-full justify-start cursor-pointer rounded-none h-9"

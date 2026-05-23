@@ -1,5 +1,4 @@
 import { pgTable, foreignKey, uuid, text, numeric, boolean, timestamp, unique, integer } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
 
 
 
@@ -95,8 +94,8 @@ export const transactions = pgTable("transactions", {
 	amount: numeric({ precision: 14, scale:  2 }).notNull(),
 	transactionType: text("transaction_type").notNull(),
 	transactionDate: timestamp("transaction_date", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	merchant: text().default(').notNull(),
-	notes: text().default(').notNull(),
+ 	merchant: text().default('').notNull(),
+ 	notes: text().default('').notNull(),
 	isRecurring: boolean("is_recurring").default(false).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [

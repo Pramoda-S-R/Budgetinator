@@ -28,6 +28,9 @@ import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/
 import { Route as ApiTransactionsIdRouteImport } from './routes/api/transactions/$id'
 import { Route as ApiMonthlyBudgetsApplyPresetRouteImport } from './routes/api/monthly-budgets/apply-preset'
 import { Route as ApiMonthlyBudgetsMonthRouteImport } from './routes/api/monthly-budgets/$month'
+import { Route as ApiDashboardSummaryRouteImport } from './routes/api/dashboard/summary'
+import { Route as ApiDashboardCashflowRouteImport } from './routes/api/dashboard/cashflow'
+import { Route as ApiDashboardBudgetStatusRouteImport } from './routes/api/dashboard/budget-status'
 import { Route as ApiCategoryGroupsIdRouteImport } from './routes/api/category-groups/$id'
 import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -130,6 +133,22 @@ const ApiMonthlyBudgetsMonthRoute = ApiMonthlyBudgetsMonthRouteImport.update({
   path: '/api/monthly-budgets/$month',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDashboardSummaryRoute = ApiDashboardSummaryRouteImport.update({
+  id: '/api/dashboard/summary',
+  path: '/api/dashboard/summary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardCashflowRoute = ApiDashboardCashflowRouteImport.update({
+  id: '/api/dashboard/cashflow',
+  path: '/api/dashboard/cashflow',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardBudgetStatusRoute =
+  ApiDashboardBudgetStatusRouteImport.update({
+    id: '/api/dashboard/budget-status',
+    path: '/api/dashboard/budget-status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCategoryGroupsIdRoute = ApiCategoryGroupsIdRouteImport.update({
   id: '/api/category-groups/$id',
   path: '/api/category-groups/$id',
@@ -160,6 +179,9 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
+  '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
+  '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
@@ -184,6 +206,9 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
+  '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
+  '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
@@ -210,6 +235,9 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
+  '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
+  '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
@@ -236,6 +264,9 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/dashboard/budget-status'
+    | '/api/dashboard/cashflow'
+    | '/api/dashboard/summary'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
@@ -260,6 +291,9 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/dashboard/budget-status'
+    | '/api/dashboard/cashflow'
+    | '/api/dashboard/summary'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
@@ -285,6 +319,9 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/dashboard/budget-status'
+    | '/api/dashboard/cashflow'
+    | '/api/dashboard/summary'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
     | '/api/transactions/$id'
@@ -311,6 +348,9 @@ export interface RootRouteChildren {
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiCategoryGroupsIdRoute: typeof ApiCategoryGroupsIdRoute
+  ApiDashboardBudgetStatusRoute: typeof ApiDashboardBudgetStatusRoute
+  ApiDashboardCashflowRoute: typeof ApiDashboardCashflowRoute
+  ApiDashboardSummaryRoute: typeof ApiDashboardSummaryRoute
   ApiMonthlyBudgetsMonthRoute: typeof ApiMonthlyBudgetsMonthRoute
   ApiMonthlyBudgetsApplyPresetRoute: typeof ApiMonthlyBudgetsApplyPresetRoute
   ApiTransactionsIdRoute: typeof ApiTransactionsIdRoute
@@ -457,6 +497,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMonthlyBudgetsMonthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/dashboard/summary': {
+      id: '/api/dashboard/summary'
+      path: '/api/dashboard/summary'
+      fullPath: '/api/dashboard/summary'
+      preLoaderRoute: typeof ApiDashboardSummaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/cashflow': {
+      id: '/api/dashboard/cashflow'
+      path: '/api/dashboard/cashflow'
+      fullPath: '/api/dashboard/cashflow'
+      preLoaderRoute: typeof ApiDashboardCashflowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/budget-status': {
+      id: '/api/dashboard/budget-status'
+      path: '/api/dashboard/budget-status'
+      fullPath: '/api/dashboard/budget-status'
+      preLoaderRoute: typeof ApiDashboardBudgetStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/category-groups/$id': {
       id: '/api/category-groups/$id'
       path: '/api/category-groups/$id'
@@ -518,6 +579,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiCategoryGroupsIdRoute: ApiCategoryGroupsIdRoute,
+  ApiDashboardBudgetStatusRoute: ApiDashboardBudgetStatusRoute,
+  ApiDashboardCashflowRoute: ApiDashboardCashflowRoute,
+  ApiDashboardSummaryRoute: ApiDashboardSummaryRoute,
   ApiMonthlyBudgetsMonthRoute: ApiMonthlyBudgetsMonthRoute,
   ApiMonthlyBudgetsApplyPresetRoute: ApiMonthlyBudgetsApplyPresetRoute,
   ApiTransactionsIdRoute: ApiTransactionsIdRoute,

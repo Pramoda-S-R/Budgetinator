@@ -38,10 +38,7 @@ import {
 import useCurrentUser from "#/hooks/use-current-user";
 import { Popover, PopoverTrigger, PopoverContent } from "#/components/ui/popover";
 import { Calendar } from "#/components/ui/calendar";
-import {
-  fetchCategoryGroups,
-  type CategoryGroup,
-} from "#/features/categories/data-access";
+import { fetchCategoryGroups } from "#/features/categories/data-access";
 import {
   fetchBudgetPresets,
   createBudgetPreset,
@@ -246,9 +243,9 @@ function BudgetsPage() {
                   key={row.id}
                   className="grid gap-2 sm:grid-cols-[1fr_auto_auto] items-end"
                 >
-                  <Select
-                    value={row.groupId || ""}
-                    onValueChange={(v) => updateRow(row.id, { groupId: v })}
+                   <Select
+                     value={row.groupId || ""}
+                      onValueChange={(v) => updateRow(row.id, { groupId: v ?? "" })}
                   >
                     <SelectTrigger>
                       {(() => {
@@ -295,12 +292,12 @@ function BudgetsPage() {
               <p className="text-sm text-destructive">{presetError}</p>
             )}
             <div className="flex gap-2">
-              <Button variant="outline" type="button" onClick={addRow}>
+               <Button variant="outline" type="button" onClick={addRow}>
                 Add Allocation
               </Button>
-              <Button type="submit" disabled={createMutation.isLoading}>
-                Save Preset
-              </Button>
+               <Button type="submit" disabled={createMutation.isPending}>
+                 Save Preset
+               </Button>
             </div>
           </form>
         </CardContent>
@@ -318,8 +315,9 @@ function BudgetsPage() {
             <div className="space-y-2">
               <Label htmlFor="month">Month</Label>
               <Popover>
-                <PopoverTrigger
-                  render={<Input id="month" readOnly value={monthKey} />}
+               <PopoverTrigger
+                   nativeButton={false}
+                   render={<Input id="month" readOnly value={monthKey} />}
                 />
                 <PopoverContent sideOffset={4} align="start">
                   <Calendar
@@ -334,7 +332,7 @@ function BudgetsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="preset">Preset</Label>
-              <Select value={selectedPreset} onValueChange={setSelectedPreset}>
+                <Select value={selectedPreset} onValueChange={(v) => setSelectedPreset(v ?? "")}>
                 <SelectTrigger>
                   {(() => {
                     const p = presets.find((pp) => pp.id === selectedPreset);
@@ -367,9 +365,9 @@ function BudgetsPage() {
               />
             </div>
           </div>
-          <Button onClick={handleApply} disabled={applyMutation.isLoading}>
-            Apply Preset
-          </Button>
+           <Button onClick={handleApply} disabled={applyMutation.isPending}>
+             Apply Preset
+           </Button>
           {applyMutation.isError && (
             <p className="text-sm text-destructive">Unable to apply preset</p>
           )}

@@ -468,8 +468,9 @@ function TransactionsPage() {
 											<div className="space-y-2">
                                         <Label htmlFor="transaction-date">Date</Label>
                                         <Popover>
-                                          <PopoverTrigger
-                                            render={
+                                           <PopoverTrigger
+                                             nativeButton={false}
+                                             render={
                                               <Input
                                                 id="transaction-date"
                                                 readOnly
