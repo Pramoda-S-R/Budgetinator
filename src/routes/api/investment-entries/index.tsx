@@ -48,7 +48,10 @@ export const Route = createFileRoute("/api/investment-entries/")({
 						notes: investmentEntries.notes,
 					})
 					.from(investmentEntries)
-					.innerJoin(investments, eq(investmentEntries.investmentId, investments.id))
+					.innerJoin(
+						investments,
+						eq(investmentEntries.investmentId, investments.id),
+					)
 					.where(eq(investments.userId, user.id))
 					.orderBy(desc(investmentEntries.investedAt));
 				return json({ entries });
@@ -59,15 +62,31 @@ export const Route = createFileRoute("/api/investment-entries/")({
 				const parsed = createInvestmentEntrySchema.safeParse(payload);
 
 				if (!parsed.success) {
-					return json({ error: "Invalid request body", issues: parsed.error.flatten() }, 400);
+					return json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						400,
+					);
 				}
 
-				const { investmentId, accountId, categoryId, amountInvested, units, investedAt, notes } = parsed.data;
+				const {
+					investmentId,
+					accountId,
+					categoryId,
+					amountInvested,
+					units,
+					investedAt,
+					notes,
+				} = parsed.data;
 
 				const [investment] = await db
 					.select()
 					.from(investments)
-					.where(and(eq(investments.id, investmentId), eq(investments.userId, user.id)))
+					.where(
+						and(
+							eq(investments.id, investmentId),
+							eq(investments.userId, user.id),
+						),
+					)
 					.limit(1);
 
 				if (!investment) return json({ error: "Investment not found" }, 404);

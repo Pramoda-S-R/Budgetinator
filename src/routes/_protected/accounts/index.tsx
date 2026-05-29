@@ -16,6 +16,7 @@ import type { FormEvent } from "react";
 import { useMemo, useState } from "react";
 
 import { Button } from "#/components/ui/button";
+import { Calendar } from "#/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
 	DropdownMenu,
@@ -26,11 +27,17 @@ import {
 } from "#/components/ui/dropdown-menu";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "#/components/ui/popover";
 import type { Account } from "#/features/accounts/data-access";
 import { createAccountsDataAccess } from "#/features/accounts/data-access";
 import { calculateNetWorth } from "#/features/accounts/net-worth";
 import { createProfileDataAccess } from "#/features/profile/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
+import { toLocalDateInputValue } from "#/lib/date";
 
 const ACCOUNT_TYPE_OPTIONS = [
 	{ value: "bank", label: "Bank" },
@@ -40,6 +47,21 @@ const ACCOUNT_TYPE_OPTIONS = [
 	{ value: "investment", label: "Investment" },
 	{ value: "salary", label: "Salary" },
 	{ value: "loan", label: "Loan" },
+];
+
+const ACCOUNT_TYPE_LABELS = ACCOUNT_TYPE_OPTIONS.reduce<Record<string, string>>(
+	(labels, option) => {
+		labels[option.value] = option.label;
+		return labels;
+	},
+	{},
+);
+
+const ACCOUNT_TYPE_ORDER = [
+	"bank",
+	...ACCOUNT_TYPE_OPTIONS.map((option) => option.value).filter(
+		(value) => value !== "bank",
+	),
 ];
 
 const ACCOUNT_TYPE_ICONS: Record<string, LucideIcon> = {
@@ -54,6 +76,10 @@ const ACCOUNT_TYPE_ICONS: Record<string, LucideIcon> = {
 
 function getAccountTypeIcon(accountType: string): LucideIcon {
 	return ACCOUNT_TYPE_ICONS[accountType] ?? Circle;
+}
+
+function getAccountTypeLabel(accountType: string): string {
+	return ACCOUNT_TYPE_LABELS[accountType] ?? accountType;
 }
 
 function AccountTypeIcon({ accountType }: { accountType: string }) {
@@ -115,6 +141,44 @@ function AccountTypeSelect({
 	);
 }
 
+function DatePicker({
+	id,
+	value,
+	onChange,
+	placeholder = "Select date",
+}: {
+	id?: string;
+	value: string;
+	onChange: (value: string) => void;
+	placeholder?: string;
+}) {
+	return (
+		<Popover>
+			<PopoverTrigger
+				nativeButton={false}
+				render={
+					<Input
+						id={id}
+						readOnly
+						value={value}
+						placeholder={placeholder}
+						className="cursor-pointer"
+						required
+					/>
+				}
+			/>
+			<PopoverContent sideOffset={4} align="start">
+				<Calendar
+					mode="single"
+					selected={value ? new Date(`${value}T00:00:00`) : undefined}
+					onSelect={(date) => date && onChange(toLocalDateInputValue(date))}
+					showOutsideDays={false}
+				/>
+			</PopoverContent>
+		</Popover>
+	);
+}
+
 export const Route = createFileRoute("/_protected/accounts/")({
 	component: AccountsPage,
 });
@@ -133,6 +197,9 @@ function AccountsPage() {
 	const [name, setName] = useState("");
 	const [accountType, setAccountType] = useState("bank");
 	const [currentBalance, setCurrentBalance] = useState("0");
+	const [recordedAt, setRecordedAt] = useState(
+		toLocalDateInputValue(new Date()),
+	);
 	const [error, setError] = useState<string | null>(null);
 
 	const accountsQuery = useQuery({
@@ -152,6 +219,7 @@ function AccountsPage() {
 			name: string;
 			accountType: string;
 			currentBalance: number;
+			recordedAt: string;
 		}) => accountsApi.createAccount(input),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
@@ -159,6 +227,7 @@ function AccountsPage() {
 			});
 			setName("");
 			setCurrentBalance("0");
+			setRecordedAt(toLocalDateInputValue(new Date()));
 		},
 	});
 
@@ -187,6 +256,42 @@ function AccountsPage() {
 	const totalNetWorth = accountsQuery.data?.totalNetWorth ?? "0";
 	const currencyCode = profileQuery.data?.profile.currencyCode ?? "USD";
 
+	const groupedAccounts = useMemo(() => {
+		const accountsByType = new Map<string, Account[]>();
+
+		for (const account of accounts) {
+			const existing = accountsByType.get(account.accountType) ?? [];
+			existing.push(account);
+			accountsByType.set(account.accountType, existing);
+		}
+
+		const orderByType = new Map<string, number>(
+			ACCOUNT_TYPE_ORDER.map((accountType, index) => [accountType, index]),
+		);
+
+		return Array.from(accountsByType.entries())
+			.sort(([leftType], [rightType]) => {
+				const leftOrder = orderByType.get(leftType) ?? Number.MAX_SAFE_INTEGER;
+				const rightOrder =
+					orderByType.get(rightType) ?? Number.MAX_SAFE_INTEGER;
+
+				if (leftOrder !== rightOrder) {
+					return leftOrder - rightOrder;
+				}
+
+				return getAccountTypeLabel(leftType).localeCompare(
+					getAccountTypeLabel(rightType),
+				);
+			})
+			.map(([type, typeAccounts]) => ({
+				type,
+				label: getAccountTypeLabel(type),
+				accounts: [...typeAccounts].sort((left, right) =>
+					left.name.localeCompare(right.name),
+				),
+			}));
+	}, [accounts]);
+
 	const totalNetWorthLabel = useMemo(() => {
 		const value = Number(totalNetWorth);
 		const fallback = calculateNetWorth(accounts);
@@ -207,6 +312,7 @@ function AccountsPage() {
 				name,
 				accountType,
 				currentBalance: Number(currentBalance),
+				recordedAt,
 			});
 		} catch {
 			setError("Unable to create account");
@@ -264,7 +370,7 @@ function AccountsPage() {
 
 					<form
 						onSubmit={onCreateAccount}
-						className="grid gap-3 md:grid-cols-4"
+						className="grid gap-3 md:grid-cols-5"
 					>
 						<div className="space-y-2">
 							<Label htmlFor="account-name">Name</Label>
@@ -292,6 +398,14 @@ function AccountsPage() {
 								value={currentBalance}
 								onChange={(event) => setCurrentBalance(event.target.value)}
 								required
+							/>
+						</div>
+						<div className="space-y-2">
+							<Label htmlFor="account-recorded-at">Recorded At</Label>
+							<DatePicker
+								id="account-recorded-at"
+								value={recordedAt}
+								onChange={setRecordedAt}
 							/>
 						</div>
 						<div className="flex items-end">
@@ -324,35 +438,44 @@ function AccountsPage() {
 						</p>
 					) : null}
 
-					<div className="space-y-3">
-						{accounts.map((account) => (
-							<div
-								key={account.id}
-								className="flex items-center justify-between border p-3"
-							>
-								<div>
-									<p className="flex items-center gap-2 font-medium">
-										<AccountTypeIcon accountType={account.accountType} />
-										{account.name}
-									</p>
-									<p className="text-xs text-muted-foreground">
-										{account.accountType} • {currencyCode}{" "}
-										{Number(account.currentBalance).toFixed(2)}
-									</p>
-								</div>
-								<div className="flex gap-2">
-									<Button
-										variant="outline"
-										onClick={() => onUpdateBalance(account)}
-									>
-										Edit Balance
-									</Button>
-									<Button
-										variant="destructive"
-										onClick={() => onDeleteAccount(account.id)}
-									>
-										Delete
-									</Button>
+					<div className="space-y-4">
+						{groupedAccounts.map((group) => (
+							<div key={group.type} className="space-y-2">
+								<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+									{group.label}
+								</p>
+								<div className="space-y-3">
+									{group.accounts.map((account) => (
+										<div
+											key={account.id}
+											className="flex items-center justify-between border p-3"
+										>
+											<div>
+												<p className="flex items-center gap-2 font-medium">
+													<AccountTypeIcon accountType={account.accountType} />
+													{account.name}
+												</p>
+												<p className="text-xs text-muted-foreground">
+													{currencyCode}{" "}
+													{Number(account.currentBalance).toFixed(2)}
+												</p>
+											</div>
+											<div className="flex gap-2">
+												<Button
+													variant="outline"
+													onClick={() => onUpdateBalance(account)}
+												>
+													Edit Balance
+												</Button>
+												<Button
+													variant="destructive"
+													onClick={() => onDeleteAccount(account.id)}
+												>
+													Delete
+												</Button>
+											</div>
+										</div>
+									))}
 								</div>
 							</div>
 						))}

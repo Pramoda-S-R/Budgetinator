@@ -38,21 +38,36 @@ export const Route = createFileRoute("/api/investments/$id")({
 		handlers: {
 			PATCH: async ({ request, params }) => {
 				const parsedParams = investmentIdSchema.safeParse(params);
-				if (!parsedParams.success) return json({ error: "Invalid investment id" }, 400);
+				if (!parsedParams.success)
+					return json({ error: "Invalid investment id" }, 400);
 
 				const payload = await request.json();
 				const parsedBody = updateInvestmentSchema.safeParse(payload);
 				if (!parsedBody.success) {
-					return json({ error: "Invalid request body", issues: parsedBody.error.flatten() }, 400);
+					return json(
+						{
+							error: "Invalid request body",
+							issues: parsedBody.error.flatten(),
+						},
+						400,
+					);
 				}
 
 				const user = await requireCurrentUser(request);
 				const id = parsedParams.data.id;
 				const updates: Partial<typeof investments.$inferInsert> = {
-					...(parsedBody.data.name !== undefined && { name: parsedBody.data.name }),
-					...(parsedBody.data.investmentType !== undefined && { investmentType: parsedBody.data.investmentType }),
-					...(parsedBody.data.symbol !== undefined && { symbol: parsedBody.data.symbol ?? null }),
-					...(parsedBody.data.status !== undefined && { status: parsedBody.data.status }),
+					...(parsedBody.data.name !== undefined && {
+						name: parsedBody.data.name,
+					}),
+					...(parsedBody.data.investmentType !== undefined && {
+						investmentType: parsedBody.data.investmentType,
+					}),
+					...(parsedBody.data.symbol !== undefined && {
+						symbol: parsedBody.data.symbol ?? null,
+					}),
+					...(parsedBody.data.status !== undefined && {
+						status: parsedBody.data.status,
+					}),
 				};
 
 				const [updated] = await db
@@ -66,7 +81,8 @@ export const Route = createFileRoute("/api/investments/$id")({
 			},
 			DELETE: async ({ request, params }) => {
 				const parsedParams = investmentIdSchema.safeParse(params);
-				if (!parsedParams.success) return json({ error: "Invalid investment id" }, 400);
+				if (!parsedParams.success)
+					return json({ error: "Invalid investment id" }, 400);
 
 				const user = await requireCurrentUser(request);
 				const id = parsedParams.data.id;

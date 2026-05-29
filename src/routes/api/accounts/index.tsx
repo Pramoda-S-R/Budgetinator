@@ -10,6 +10,7 @@ const createAccountSchema = z.object({
 	name: z.string().trim().min(1),
 	accountType: z.string().trim().min(1),
 	currentBalance: z.coerce.number(),
+	recordedAt: z.coerce.date().optional(),
 	includeInNetWorth: z.boolean().optional(),
 	isActive: z.boolean().optional(),
 });
@@ -80,6 +81,7 @@ export const Route = createFileRoute("/api/accounts/")({
 					await db.insert(accountBalanceHistory).values({
 						accountId: created.id,
 						balance: created.currentBalance,
+						...(values.recordedAt ? { recordedAt: values.recordedAt } : {}),
 					});
 				}
 

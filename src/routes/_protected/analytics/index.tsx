@@ -60,6 +60,12 @@ const MONTH_NAMES = [
 
 const BAR_CURSOR_STYLE = { fill: "hsl(var(--muted))", opacity: 0.5 };
 
+type ChartTooltipPayloadEntry = {
+	name?: string | number;
+	value?: string | number;
+	color?: string;
+};
+
 function ChartTooltip({
 	active,
 	payload,
@@ -67,8 +73,8 @@ function ChartTooltip({
 	formatter,
 }: {
 	active?: boolean;
-	payload?: Array<{ name: string; value: number; color: string }>;
-	label?: string;
+	payload?: ChartTooltipPayloadEntry[];
+	label?: string | number;
 	formatter?: (value: number) => string;
 }) {
 	if (!active || !payload?.length) return null;
@@ -82,7 +88,7 @@ function ChartTooltip({
 				fontSize: "13px",
 			}}
 		>
-			{label && (
+			{label != null && (
 				<p
 					style={{
 						color: "hsl(var(--popover-foreground))",
@@ -90,21 +96,25 @@ function ChartTooltip({
 						fontWeight: 500,
 					}}
 				>
-					{label}
+					{String(label)}
 				</p>
 			)}
 			<div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-				{payload.map((entry) => (
-					<span
-						key={`${entry.name}-${String(entry.value)}`}
-						style={{
-							display: "block",
-							color: "hsl(var(--popover-foreground))",
-						}}
-					>
-						{entry.name}: {formatter ? formatter(entry.value) : entry.value}
-					</span>
-				))}
+				{payload.map((entry) => {
+					const name = String(entry.name ?? "Value");
+					const value = Number(entry.value ?? 0);
+					return (
+						<span
+							key={`${name}-${String(value)}`}
+							style={{
+								display: "block",
+								color: "hsl(var(--popover-foreground))",
+							}}
+						>
+							{name}: {formatter ? formatter(value) : value}
+						</span>
+					);
+				})}
 			</div>
 		</div>
 	);
@@ -156,9 +166,11 @@ function AnalyticsPage() {
 		const monthMap = new Map<string, Record<string, string | number>>();
 		for (const r of rows) {
 			const key = `${r.year}-${String(r.month).padStart(2, "0")}`;
-			if (!monthMap.has(key))
-				monthMap.set(key, { label: `${MONTH_NAMES[r.month]} ${r.year}` });
-			const entry = monthMap.get(key)!;
+			let entry = monthMap.get(key);
+			if (!entry) {
+				entry = { label: `${MONTH_NAMES[r.month]} ${r.year}` };
+				monthMap.set(key, entry);
+			}
 			entry[r.categoryName ?? "Uncategorized"] = Number(r.total);
 		}
 		return Array.from(monthMap.values());
@@ -167,13 +179,13 @@ function AnalyticsPage() {
 	const categoryNames = [
 		...new Set(
 			(trendsQ.data?.trends ?? []).map(
-				(r: any) => r.categoryName ?? "Uncategorized",
+				(r) => r.categoryName ?? "Uncategorized",
 			),
 		),
 	];
 
 	const cashflow = cashflowQ.data?.cashflow ?? [];
-	const cashflowChart = cashflow.map((r: any) => ({
+	const cashflowChart = cashflow.map((r) => ({
 		label: `${MONTH_NAMES[r.month]} ${r.year}`,
 		income: Number(r.income),
 		expense: Number(r.expense),
@@ -181,7 +193,7 @@ function AnalyticsPage() {
 		savingsRate: r.savingsRate,
 	}));
 
-	const networthHistory = (networthQ.data?.history ?? []).map((r: any) => ({
+	const networthHistory = (networthQ.data?.history ?? []).map((r) => ({
 		date: r.date,
 		netWorth: Number(r.netWorth),
 	}));
@@ -255,7 +267,7 @@ function AnalyticsPage() {
 										nameKey="categoryName"
 										outerRadius={90}
 									>
-										{breakdown.map((row: any, idx: number) => (
+										{breakdown.map((row, idx) => (
 											<Cell
 												key={`${row.categoryId ?? row.categoryName ?? "uncategorized"}-${String(row.total)}`}
 												fill={CHART_COLORS[idx % CHART_COLORS.length]}
@@ -264,17 +276,14 @@ function AnalyticsPage() {
 									</Pie>
 									<Tooltip
 										content={(p) => (
-											<ChartTooltip
-												{...(p as any)}
-												formatter={(v) => `${Number(v)}%`}
-											/>
+											<ChartTooltip {...p} formatter={(v) => `${Number(v)}%`} />
 										)}
 									/>
 									<Legend />
 								</PieChart>
 							</ResponsiveContainer>
 							<div className="flex-1 space-y-2">
-								{breakdown.map((r: any, idx: number) => (
+								{breakdown.map((r, idx) => (
 									<div
 										key={`${r.categoryId ?? r.categoryName ?? "uncategorized"}-${String(r.total)}`}
 										className="flex items-center justify-between text-sm"
@@ -352,7 +361,7 @@ function AnalyticsPage() {
 								<XAxis dataKey="label" />
 								<YAxis />
 								<Tooltip
-									content={(p) => <ChartTooltip {...(p as any)} />}
+									content={(p) => <ChartTooltip {...p} />}
 									cursor={BAR_CURSOR_STYLE}
 								/>
 								<Legend />
@@ -402,7 +411,7 @@ function AnalyticsPage() {
 								<XAxis dataKey="label" />
 								<YAxis />
 								<Tooltip
-									content={(p) => <ChartTooltip {...(p as any)} />}
+									content={(p) => <ChartTooltip {...p} />}
 									cursor={BAR_CURSOR_STYLE}
 								/>
 								<Legend />
@@ -452,7 +461,7 @@ function AnalyticsPage() {
 								<Tooltip
 									content={(p) => (
 										<ChartTooltip
-											{...(p as any)}
+											{...p}
 											formatter={(v) =>
 												Number(v).toLocaleString(undefined, {
 													minimumFractionDigits: 2,

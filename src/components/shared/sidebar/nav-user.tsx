@@ -131,7 +131,7 @@ export function NavUser() {
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
 						<DropdownMenuSeparator />
-							<DropdownMenuItem
+						<DropdownMenuItem
 							nativeButton={false}
 							render={(params) => (
 								<Button

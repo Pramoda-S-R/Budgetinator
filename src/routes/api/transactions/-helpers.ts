@@ -165,7 +165,10 @@ export async function fetchTransactionById(
 	}
 
 	const tags = await loadTags(client, [transactionId]);
-	return serializeTransaction(row as TransactionRow, tags.get(transactionId) ?? []);
+	return serializeTransaction(
+		row as TransactionRow,
+		tags.get(transactionId) ?? [],
+	);
 }
 
 export async function syncTransactionTags(

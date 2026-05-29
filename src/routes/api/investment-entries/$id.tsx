@@ -40,12 +40,19 @@ export const Route = createFileRoute("/api/investment-entries/$id")({
 				// re-create the entry to change the cash movement.  Only the
 				// investment-specific metadata (units, notes) can be patched.
 				const parsedParams = entryIdSchema.safeParse(params);
-				if (!parsedParams.success) return json({ error: "Invalid entry id" }, 400);
+				if (!parsedParams.success)
+					return json({ error: "Invalid entry id" }, 400);
 
 				const payload = await request.json();
 				const parsedBody = updateEntrySchema.safeParse(payload);
 				if (!parsedBody.success) {
-					return json({ error: "Invalid request body", issues: parsedBody.error.flatten() }, 400);
+					return json(
+						{
+							error: "Invalid request body",
+							issues: parsedBody.error.flatten(),
+						},
+						400,
+					);
 				}
 
 				const user = await requireCurrentUser(request);
@@ -54,15 +61,23 @@ export const Route = createFileRoute("/api/investment-entries/$id")({
 				const existing = await db
 					.select()
 					.from(investmentEntries)
-					.innerJoin(investments, eq(investmentEntries.investmentId, investments.id))
-					.where(and(eq(investmentEntries.id, id), eq(investments.userId, user.id)))
+					.innerJoin(
+						investments,
+						eq(investmentEntries.investmentId, investments.id),
+					)
+					.where(
+						and(eq(investmentEntries.id, id), eq(investments.userId, user.id)),
+					)
 					.limit(1);
 
 				if (!existing.length) return json({ error: "Entry not found" }, 404);
 
 				const updates: Partial<typeof investmentEntries.$inferInsert> = {};
 				if ("units" in parsedBody.data) {
-					updates.units = parsedBody.data.units !== undefined ? parsedBody.data.units.toFixed(4) : null;
+					updates.units =
+						parsedBody.data.units !== undefined
+							? parsedBody.data.units.toFixed(4)
+							: null;
 				}
 				if ("notes" in parsedBody.data) {
 					updates.notes = parsedBody.data.notes ?? "";
@@ -78,7 +93,8 @@ export const Route = createFileRoute("/api/investment-entries/$id")({
 			},
 			DELETE: async ({ request, params }) => {
 				const parsedParams = entryIdSchema.safeParse(params);
-				if (!parsedParams.success) return json({ error: "Invalid entry id" }, 400);
+				if (!parsedParams.success)
+					return json({ error: "Invalid entry id" }, 400);
 
 				const user = await requireCurrentUser(request);
 				const id = parsedParams.data.id;
@@ -86,8 +102,13 @@ export const Route = createFileRoute("/api/investment-entries/$id")({
 				const existing = await db
 					.select({ entry: investmentEntries, investment: investments })
 					.from(investmentEntries)
-					.innerJoin(investments, eq(investmentEntries.investmentId, investments.id))
-					.where(and(eq(investmentEntries.id, id), eq(investments.userId, user.id)))
+					.innerJoin(
+						investments,
+						eq(investmentEntries.investmentId, investments.id),
+					)
+					.where(
+						and(eq(investmentEntries.id, id), eq(investments.userId, user.id)),
+					)
 					.limit(1);
 
 				if (!existing.length) return json({ error: "Entry not found" }, 404);
@@ -116,7 +137,9 @@ export const Route = createFileRoute("/api/investment-entries/$id")({
 						await tx.delete(transactions).where(eq(transactions.id, t.id));
 					}
 
-					await tx.delete(investmentEntries).where(eq(investmentEntries.id, id));
+					await tx
+						.delete(investmentEntries)
+						.where(eq(investmentEntries.id, id));
 				});
 
 				return json({ success: true });

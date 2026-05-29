@@ -22,7 +22,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { createAccountsDataAccess } from "#/features/accounts/data-access";
 import { createCategoriesDataAccess } from "#/features/categories/data-access";
-import { createLoansDataAccess } from "#/features/loans/data-access";
+import {
+	createLoansDataAccess,
+	type EmiPayment,
+	type LoanPayment,
+} from "#/features/loans/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
 import { toLocalDateInputValue } from "#/lib/date.ts";
 
@@ -128,26 +132,25 @@ function LoansPage() {
 	const loans = loansQ.data?.loans ?? [];
 	const emisList = emisQ.data?.emis ?? [];
 	const contactsList = contactsQ.data?.contacts ?? [];
-	const accountsList = (accountsQ.data as any)?.accounts ?? [];
-	const categoriesList = ((categoriesQ.data as any)?.categories ?? []) as any[];
+	const accountsList = accountsQ.data?.accounts ?? [];
+	const categoriesList = categoriesQ.data?.categories ?? [];
 	const categoryNameMap = useMemo(
-		() =>
-			new Map<string, string>(categoriesList.map((c: any) => [c.id, c.name])),
+		() => new Map<string, string>(categoriesList.map((c) => [c.id, c.name])),
 		[categoriesList],
 	);
 	const allLoanPayments = loanPaymentsQ.data?.payments ?? [];
 	const allEmiPayments = emiPaymentsQ.data?.payments ?? [];
 
 	const contactNameMap = useMemo(
-		() => new Map(contactsList.map((c: any) => [c.id, c.name])),
+		() => new Map<string, string>(contactsList.map((c) => [c.id, c.name])),
 		[contactsList],
 	);
 	const accountNameMap = useMemo(
-		() => new Map<string, string>(accountsList.map((a: any) => [a.id, a.name])),
+		() => new Map<string, string>(accountsList.map((a) => [a.id, a.name])),
 		[accountsList],
 	);
 	const paymentsByLoan = useMemo(() => {
-		const m = new Map<string, any[]>();
+		const m = new Map<string, LoanPayment[]>();
 		for (const p of allLoanPayments) {
 			const arr = m.get(p.loanId) ?? [];
 			arr.push(p);
@@ -156,7 +159,7 @@ function LoansPage() {
 		return m;
 	}, [allLoanPayments]);
 	const paymentsByEmi = useMemo(() => {
-		const m = new Map<string, any[]>();
+		const m = new Map<string, EmiPayment[]>();
 		for (const p of allEmiPayments) {
 			const arr = m.get(p.emiId) ?? [];
 			arr.push(p);
@@ -327,18 +330,14 @@ function LoansPage() {
 	});
 
 	const totalDebt = loans
-		.filter(
-			(l: any) => l.loan.loanType === "taken" && l.loan.status === "active",
-		)
-		.reduce((s: number, l: any) => s + Number(l.loan.remainingAmount), 0);
+		.filter((l) => l.loan.loanType === "taken" && l.loan.status === "active")
+		.reduce((s: number, l) => s + Number(l.loan.remainingAmount), 0);
 	const totalOwed = loans
-		.filter(
-			(l: any) => l.loan.loanType === "given" && l.loan.status === "active",
-		)
-		.reduce((s: number, l: any) => s + Number(l.loan.remainingAmount), 0);
+		.filter((l) => l.loan.loanType === "given" && l.loan.status === "active")
+		.reduce((s: number, l) => s + Number(l.loan.remainingAmount), 0);
 	const totalEmiMonthly = emisList
-		.filter((e: any) => e.status === "active")
-		.reduce((s: number, e: any) => s + Number(e.monthlyAmount), 0);
+		.filter((e) => e.status === "active")
+		.reduce((s: number, e) => s + Number(e.monthlyAmount), 0);
 
 	return (
 		<div className="p-6 space-y-6">
@@ -426,7 +425,7 @@ function LoansPage() {
 						) : contactsList.length === 0 ? (
 							<p className="text-muted-foreground">No contacts yet.</p>
 						) : (
-							contactsList.map((c: any) => (
+							contactsList.map((c) => (
 								<Card key={c.id}>
 									<CardContent className="pt-4 flex items-center justify-between">
 										<div>
@@ -508,7 +507,7 @@ function LoansPage() {
 											)}
 										</SelectTrigger>
 										<SelectContent>
-											{contactsList.map((c: any) => (
+											{contactsList.map((c) => (
 												<SelectItem key={c.id} value={c.id}>
 													{c.name}
 												</SelectItem>
@@ -537,12 +536,12 @@ function LoansPage() {
 									</SelectTrigger>
 									<SelectContent>
 										{accountsList
-											.filter((a: any) =>
+											.filter((a) =>
 												["bank", "cash", "wallet", "salary"].includes(
 													a.accountType,
 												),
 											)
-											.map((a: any) => (
+											.map((a) => (
 												<SelectItem key={a.id} value={a.id}>
 													{a.name}
 												</SelectItem>
@@ -574,7 +573,7 @@ function LoansPage() {
 										)}
 									</SelectTrigger>
 									<SelectContent>
-										{categoriesList.map((c: any) => (
+										{categoriesList.map((c) => (
 											<SelectItem key={c.id} value={c.id}>
 												{c.name}
 												{c.groupName ? ` — ${c.groupName}` : ""}
@@ -637,7 +636,7 @@ function LoansPage() {
 						) : loans.length === 0 ? (
 							<p className="text-muted-foreground">No loans yet.</p>
 						) : (
-							loans.map((row: any) => {
+							loans.map((row) => {
 								const l = row.loan;
 								const paid =
 									Number(l.principalAmount) - Number(l.remainingAmount);
@@ -715,7 +714,7 @@ function LoansPage() {
 														Payments ({loanPayments.length})
 													</p>
 													<div className="space-y-1">
-														{loanPayments.map((p: any) => (
+														{loanPayments.map((p) => (
 															<div
 																key={p.id}
 																className="flex items-center justify-between text-sm bg-muted/40 rounded px-3 py-1.5"
@@ -833,12 +832,12 @@ function LoansPage() {
 										</SelectTrigger>
 										<SelectContent>
 											{accountsList
-												.filter((a: any) =>
+												.filter((a) =>
 													["bank", "cash", "wallet", "salary"].includes(
 														a.accountType,
 													),
 												)
-												.map((a: any) => (
+												.map((a) => (
 													<SelectItem key={a.id} value={a.id}>
 														{a.name}
 													</SelectItem>
@@ -869,7 +868,7 @@ function LoansPage() {
 											)}
 										</SelectTrigger>
 										<SelectContent>
-											{categoriesList.map((c: any) => (
+											{categoriesList.map((c) => (
 												<SelectItem key={c.id} value={c.id}>
 													{c.name}
 													{c.groupName ? ` — ${c.groupName}` : ""}
@@ -901,7 +900,7 @@ function LoansPage() {
 						) : emisList.length === 0 ? (
 							<p className="text-muted-foreground">No EMIs yet.</p>
 						) : (
-							emisList.map((e: any) => {
+							emisList.map((e) => {
 								const due = new Date(e.nextDueDate);
 								const isOverdue = due < new Date() && e.status === "active";
 								const emiPayments = paymentsByEmi.get(e.id) ?? [];
@@ -969,7 +968,7 @@ function LoansPage() {
 														Payments ({emiPayments.length})
 													</p>
 													<div className="space-y-1">
-														{emiPayments.map((p: any) => (
+														{emiPayments.map((p) => (
 															<div
 																key={p.id}
 																className="flex items-center justify-between text-sm bg-muted/40 rounded px-3 py-1.5"
@@ -1022,7 +1021,7 @@ function LoansPage() {
 											>
 												{(() => {
 													const l = loans.find(
-														(r: any) => r.loan.id === payLoanId,
+														(r) => r.loan.id === payLoanId,
 													)?.loan;
 													if (!l) return payLoanId;
 													const contact = l.contactId
@@ -1037,8 +1036,8 @@ function LoansPage() {
 									</SelectTrigger>
 									<SelectContent>
 										{loans
-											.filter((l: any) => l.loan.status === "active")
-											.map((l: any) => {
+											.filter((l) => l.loan.status === "active")
+											.map((l) => {
 												const contact = l.loan.contactId
 													? contactNameMap.get(l.loan.contactId)
 													: null;
@@ -1071,12 +1070,12 @@ function LoansPage() {
 									</SelectTrigger>
 									<SelectContent>
 										{accountsList
-											.filter((a: any) =>
+											.filter((a) =>
 												["bank", "cash", "wallet", "salary"].includes(
 													a.accountType,
 												),
 											)
-											.map((a: any) => (
+											.map((a) => (
 												<SelectItem key={a.id} value={a.id}>
 													{a.name}
 												</SelectItem>
@@ -1102,7 +1101,7 @@ function LoansPage() {
 										)}
 									</SelectTrigger>
 									<SelectContent>
-										{categoriesList.map((c: any) => (
+										{categoriesList.map((c) => (
 											<SelectItem key={c.id} value={c.id}>
 												{c.name}
 												{c.groupName ? ` — ${c.groupName}` : ""}
@@ -1147,7 +1146,7 @@ function LoansPage() {
 												data-slot="select-value"
 												className="flex flex-1 text-left text-sm"
 											>
-												{emisList.find((e: any) => e.id === payEmiId)?.name ??
+												{emisList.find((e) => e.id === payEmiId)?.name ??
 													payEmiId}
 											</span>
 										) : (
@@ -1156,8 +1155,8 @@ function LoansPage() {
 									</SelectTrigger>
 									<SelectContent>
 										{emisList
-											.filter((e: any) => e.status === "active")
-											.map((e: any) => (
+											.filter((e) => e.status === "active")
+											.map((e) => (
 												<SelectItem key={e.id} value={e.id}>
 													{e.name} — {fmt(e.monthlyAmount)}/mo
 												</SelectItem>
@@ -1183,12 +1182,12 @@ function LoansPage() {
 									</SelectTrigger>
 									<SelectContent>
 										{accountsList
-											.filter((a: any) =>
+											.filter((a) =>
 												["bank", "cash", "wallet", "salary"].includes(
 													a.accountType,
 												),
 											)
-											.map((a: any) => (
+											.map((a) => (
 												<SelectItem key={a.id} value={a.id}>
 													{a.name}
 												</SelectItem>
@@ -1213,7 +1212,7 @@ function LoansPage() {
 										)}
 									</SelectTrigger>
 									<SelectContent>
-										{categoriesList.map((c: any) => (
+										{categoriesList.map((c) => (
 											<SelectItem key={c.id} value={c.id}>
 												{c.name}
 												{c.groupName ? ` — ${c.groupName}` : ""}

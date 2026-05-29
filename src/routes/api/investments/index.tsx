@@ -50,7 +50,10 @@ export const Route = createFileRoute("/api/investments/")({
 				const parsed = createInvestmentSchema.safeParse(payload);
 
 				if (!parsed.success) {
-					return json({ error: "Invalid request body", issues: parsed.error.flatten() }, 400);
+					return json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						400,
+					);
 				}
 
 				const values = parsed.data;
@@ -60,7 +63,10 @@ export const Route = createFileRoute("/api/investments/")({
 						.insert(accounts)
 						.values({
 							userId: user.id,
-							name: pairedAccountName({ kind: "investment", label: values.name }),
+							name: pairedAccountName({
+								kind: "investment",
+								label: values.name,
+							}),
 							accountType: "investment",
 							currentBalance: "0",
 							includeInNetWorth: true,

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "#/db";
@@ -16,6 +16,25 @@ import {
 	authorizeAccounts,
 	authorizeCategory,
 } from "../transactions/-helpers";
+
+type SqlRows<T> = { rows: T[] };
+
+type EmiSqlRow = {
+	id: string;
+	userId: string;
+	accountId: string;
+	name: string;
+	interestRate: string;
+	monthlyAmount: string;
+	startDate: string;
+	endDate: string;
+	nextDueDate: string;
+	lenderName: string;
+	status: string;
+	createdAt: string;
+	outstanding: string;
+	principal: string;
+};
 
 const createEmiSchema = z.object({
 	name: z.string().trim().min(1),
@@ -72,7 +91,7 @@ export const Route = createFileRoute("/api/emis/")({
 					WHERE e.user_id = ${user.id}
 					ORDER BY e.next_due_date DESC
 				`);
-				return json({ emis: (rows as any).rows });
+				return json({ emis: (rows as SqlRows<EmiSqlRow>).rows });
 			},
 			POST: async ({ request }) => {
 				const user = await requireCurrentUser(request);
@@ -80,7 +99,10 @@ export const Route = createFileRoute("/api/emis/")({
 				const parsed = createEmiSchema.safeParse(payload);
 
 				if (!parsed.success) {
-					return json({ error: "Invalid request body", issues: parsed.error.flatten() }, 400);
+					return json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						400,
+					);
 				}
 
 				const d = parsed.data;

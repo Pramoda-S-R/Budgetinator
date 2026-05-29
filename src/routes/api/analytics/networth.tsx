@@ -5,26 +5,36 @@ import { db } from "#/db";
 import { accountBalanceHistory, accounts } from "#/db/schema";
 import { requireCurrentUser } from "#/lib/server-auth";
 
+type SqlRows<T> = { rows: T[] };
+
+type NetworthHistoryRow = {
+	date: string;
+	netWorth: string;
+};
+
 function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json" },
-  });
+	return new Response(JSON.stringify(data), {
+		status,
+		headers: { "content-type": "application/json" },
+	});
 }
 
 export const Route = createFileRoute("/api/analytics/networth")({
-  server: {
-    handlers: {
-      GET: async ({ request }) => {
-        const user = await requireCurrentUser(request);
-        const url = new URL(request.url);
-        const months = Math.min(Number(url.searchParams.get("months") ?? "12"), 36);
+	server: {
+		handlers: {
+			GET: async ({ request }) => {
+				const user = await requireCurrentUser(request);
+				const url = new URL(request.url);
+				const months = Math.min(
+					Number(url.searchParams.get("months") ?? "12"),
+					36,
+				);
 
-        // Collect every date in the window on which any net-worth account had a balance
-        // update, then for EACH of those dates sum the LAST KNOWN balance of EVERY
-        // net-worth account (including ones that weren't updated that day).  This prevents
-        // accounts from disappearing from the total on days they had no activity.
-        const result = await db.execute(sql`
+				// Collect every date in the window on which any net-worth account had a balance
+				// update, then for EACH of those dates sum the LAST KNOWN balance of EVERY
+				// net-worth account (including ones that weren't updated that day).  This prevents
+				// accounts from disappearing from the total on days they had no activity.
+				const result = await db.execute(sql`
           WITH active_dates AS (
             SELECT DISTINCT DATE(abh.recorded_at) AS date
             FROM ${accountBalanceHistory} abh
@@ -62,9 +72,9 @@ export const Route = createFileRoute("/api/analytics/networth")({
           ORDER BY date
         `);
 
-        const rows = (result as any).rows as Array<{ date: string; netWorth: string }>;
-        return json({ history: rows });
-      },
-    },
-  },
+				const rows = (result as SqlRows<NetworthHistoryRow>).rows;
+				return json({ history: rows });
+			},
+		},
+	},
 });

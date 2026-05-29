@@ -24,7 +24,8 @@ export const Route = createFileRoute("/api/investment-valuations/$id")({
 			// update without losing the entry trail.
 			DELETE: async ({ request, params }) => {
 				const parsedParams = valuationIdSchema.safeParse(params);
-				if (!parsedParams.success) return json({ error: "Invalid valuation id" }, 400);
+				if (!parsedParams.success)
+					return json({ error: "Invalid valuation id" }, 400);
 
 				const user = await requireCurrentUser(request);
 				const id = parsedParams.data.id;
@@ -37,13 +38,20 @@ export const Route = createFileRoute("/api/investment-valuations/$id")({
 					.from(accountBalanceHistory)
 					.innerJoin(accounts, eq(accountBalanceHistory.accountId, accounts.id))
 					.innerJoin(investments, eq(investments.accountId, accounts.id))
-					.where(and(eq(accountBalanceHistory.id, id), eq(investments.userId, user.id)))
+					.where(
+						and(
+							eq(accountBalanceHistory.id, id),
+							eq(investments.userId, user.id),
+						),
+					)
 					.limit(1);
 
 				if (!row) return json({ error: "Valuation not found" }, 404);
 
 				await db.transaction(async (tx) => {
-					await tx.delete(accountBalanceHistory).where(eq(accountBalanceHistory.id, id));
+					await tx
+						.delete(accountBalanceHistory)
+						.where(eq(accountBalanceHistory.id, id));
 
 					const [latest] = await tx
 						.select({ balance: accountBalanceHistory.balance })

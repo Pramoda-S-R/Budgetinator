@@ -36,7 +36,10 @@ export const Route = createFileRoute("/api/emi-payments/$id")({
 					.from(emiPayments)
 					.innerJoin(emis, eq(emiPayments.emiId, emis.id))
 					.where(
-						and(eq(emiPayments.id, parsedParams.data.id), eq(emis.userId, user.id)),
+						and(
+							eq(emiPayments.id, parsedParams.data.id),
+							eq(emis.userId, user.id),
+						),
 					)
 					.limit(1);
 
@@ -66,12 +69,15 @@ export const Route = createFileRoute("/api/emi-payments/$id")({
 						await tx.delete(transactions).where(eq(transactions.id, t.id));
 					}
 
-					await tx.delete(emiPayments).where(eq(emiPayments.id, row.payment.id));
+					await tx
+						.delete(emiPayments)
+						.where(eq(emiPayments.id, row.payment.id));
 
 					// Rewind nextDueDate by one month and revive status if needed.
 					const prev = new Date(row.emi.nextDueDate);
 					prev.setMonth(prev.getMonth() - 1);
-					const revertedStatus = row.emi.status === "completed" ? "active" : row.emi.status;
+					const revertedStatus =
+						row.emi.status === "completed" ? "active" : row.emi.status;
 					await tx
 						.update(emis)
 						.set({ nextDueDate: prev, status: revertedStatus })

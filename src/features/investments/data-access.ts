@@ -2,7 +2,41 @@ import { z } from "zod";
 import { createApiClient, unwrapApiResult } from "#/features/shared/api-client";
 import type { User } from "#/hooks/use-current-user";
 
-type InvestmentEntity = Record<string, unknown>;
+const investmentSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	accountId: z.string(),
+	name: z.string(),
+	investmentType: z.string(),
+	symbol: z.string().nullable(),
+	status: z.string(),
+	createdAt: z.string(),
+});
+
+const investmentListItemSchema = investmentSchema.extend({
+	currentValue: z.string(),
+	accountName: z.string(),
+});
+
+const investmentEntrySchema = z.object({
+	id: z.string(),
+	investmentId: z.string(),
+	amountInvested: z.string(),
+	units: z.string().nullable(),
+	investedAt: z.string(),
+	notes: z.string(),
+});
+
+const investmentValuationSchema = z.object({
+	id: z.string(),
+	investmentId: z.string(),
+	valuationAmount: z.string(),
+	valuationDate: z.string(),
+});
+
+export type Investment = z.infer<typeof investmentListItemSchema>;
+export type InvestmentEntry = z.infer<typeof investmentEntrySchema>;
+export type InvestmentValuation = z.infer<typeof investmentValuationSchema>;
 
 export type CreateInvestmentEntryInput = {
 	investmentId: string;
@@ -32,30 +66,28 @@ export type CreateInvestmentInput = {
 	symbol?: string | null;
 };
 
-const investmentEntitySchema = z.record(z.string(), z.unknown());
-
 const investmentsEnvelopeSchema = z.object({
-	investments: z.array(investmentEntitySchema),
+	investments: z.array(investmentListItemSchema),
 });
 
 const investmentEntriesEnvelopeSchema = z.object({
-	entries: z.array(investmentEntitySchema),
+	entries: z.array(investmentEntrySchema),
 });
 
 const investmentValuationsEnvelopeSchema = z.object({
-	valuations: z.array(investmentEntitySchema),
+	valuations: z.array(investmentValuationSchema),
 });
 
 const investmentEnvelopeSchema = z.object({
-	investment: investmentEntitySchema,
+	investment: investmentSchema,
 });
 
 const investmentEntryEnvelopeSchema = z.object({
-	entry: investmentEntitySchema,
+	entry: investmentEntrySchema,
 });
 
 const investmentValuationEnvelopeSchema = z.object({
-	valuation: investmentEntitySchema,
+	valuation: investmentValuationSchema,
 });
 
 const successEnvelopeSchema = z.object({
@@ -105,7 +137,7 @@ export function createInvestmentsDataAccess(user?: User) {
 		},
 		async fetchInvestmentById(
 			id: string,
-		): Promise<{ investment: InvestmentEntity }> {
+		): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 			const result = await client.get(
 				`/api/investments/${id}`,
 				investmentEnvelopeSchema,
@@ -115,7 +147,7 @@ export function createInvestmentsDataAccess(user?: User) {
 		async updateInvestmentById(
 			id: string,
 			input: UpdateInvestmentInput,
-		): Promise<{ investment: InvestmentEntity }> {
+		): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 			const result = await client.patch(
 				`/api/investments/${id}`,
 				input,
@@ -132,7 +164,7 @@ export function createInvestmentsDataAccess(user?: User) {
 		},
 		async createInvestment(
 			input: CreateInvestmentInput,
-		): Promise<{ investment: InvestmentEntity }> {
+		): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 			const result = await client.post(
 				"/api/investments",
 				input,
@@ -142,7 +174,7 @@ export function createInvestmentsDataAccess(user?: User) {
 		},
 		async liquidateInvestment(
 			id: string,
-		): Promise<{ investment: InvestmentEntity }> {
+		): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 			const result = await client.patch(
 				`/api/investments/${id}`,
 				{ status: "liquidated" },
@@ -196,7 +228,7 @@ export async function createInvestmentValuation(
 export async function fetchInvestmentById(
 	id: string,
 	user?: User,
-): Promise<{ investment: InvestmentEntity }> {
+): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 	return createInvestmentsDataAccess(user).fetchInvestmentById(id);
 }
 
@@ -204,7 +236,7 @@ export async function updateInvestmentById(
 	id: string,
 	input: UpdateInvestmentInput,
 	user?: User,
-): Promise<{ investment: InvestmentEntity }> {
+): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 	return createInvestmentsDataAccess(user).updateInvestmentById(id, input);
 }
 
@@ -218,14 +250,14 @@ export async function deleteInvestmentById(
 export async function createInvestment(
 	input: CreateInvestmentInput,
 	user?: User,
-): Promise<{ investment: InvestmentEntity }> {
+): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 	return createInvestmentsDataAccess(user).createInvestment(input);
 }
 
 export async function liquidateInvestment(
 	id: string,
 	user?: User,
-): Promise<{ investment: InvestmentEntity }> {
+): Promise<{ investment: z.infer<typeof investmentSchema> }> {
 	return createInvestmentsDataAccess(user).liquidateInvestment(id);
 }
 

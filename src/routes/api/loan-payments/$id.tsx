@@ -36,7 +36,10 @@ export const Route = createFileRoute("/api/loan-payments/$id")({
 					.from(loanPayments)
 					.innerJoin(loans, eq(loanPayments.loanId, loans.id))
 					.where(
-						and(eq(loanPayments.id, parsedParams.data.id), eq(loans.userId, user.id)),
+						and(
+							eq(loanPayments.id, parsedParams.data.id),
+							eq(loans.userId, user.id),
+						),
 					)
 					.limit(1);
 
@@ -68,7 +71,9 @@ export const Route = createFileRoute("/api/loan-payments/$id")({
 						await tx.delete(transactions).where(eq(transactions.id, t.id));
 					}
 
-					await tx.delete(loanPayments).where(eq(loanPayments.id, row.payment.id));
+					await tx
+						.delete(loanPayments)
+						.where(eq(loanPayments.id, row.payment.id));
 
 					// If the loan was marked paid because of this payment, reopen it.
 					if (row.loan.status === "paid") {

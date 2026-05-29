@@ -3,12 +3,19 @@ import { sql } from "drizzle-orm";
 
 import { db } from "#/db";
 import { accounts, transactions } from "#/db/schema";
-import {
-	ASSET_TYPES,
-	CASH_TYPES,
-	LIABILITY_TYPES,
-} from "#/lib/account-class";
+import { ASSET_TYPES, CASH_TYPES, LIABILITY_TYPES } from "#/lib/account-class";
 import { requireCurrentUser } from "#/lib/server-auth";
+
+type SqlRows<T> = { rows: T[] };
+
+type CashflowSqlRow = {
+	year: number;
+	month: number;
+	income: string;
+	expense: string;
+	capitalInflow: string;
+	capitalOutflow: string;
+};
 
 function json(data: unknown, status = 200) {
 	return new Response(JSON.stringify(data), {
@@ -32,11 +39,12 @@ export const Route = createFileRoute("/api/analytics/cashflow")({
 			GET: async ({ request }) => {
 				const user = await requireCurrentUser(request);
 				const url = new URL(request.url);
-				const months = Math.min(Number(url.searchParams.get("months") ?? "12"), 24);
-
-				const cashList = sql.raw(
-					CASH_TYPES.map((t) => `'${t}'`).join(", "),
+				const months = Math.min(
+					Number(url.searchParams.get("months") ?? "12"),
+					24,
 				);
+
+				const cashList = sql.raw(CASH_TYPES.map((t) => `'${t}'`).join(", "));
 				const nonCashList = sql.raw(
 					[...ASSET_TYPES, ...LIABILITY_TYPES].map((t) => `'${t}'`).join(", "),
 				);
@@ -80,7 +88,8 @@ export const Route = createFileRoute("/api/analytics/cashflow")({
 					ORDER BY 1, 2
 				`);
 
-				const result = ((rows as any).rows as any[]).map((r) => {
+				const sqlRows = (rows as SqlRows<CashflowSqlRow>).rows;
+				const result = sqlRows.map((r) => {
 					const income = Number(r.income);
 					const expense = Number(r.expense);
 					const capitalInflow = Number(r.capitalInflow);
@@ -96,7 +105,8 @@ export const Route = createFileRoute("/api/analytics/cashflow")({
 						capitalOutflow: capitalOutflow.toFixed(2),
 						net: netOperating.toFixed(2),
 						netCash: netCash.toFixed(2),
-						savingsRate: income > 0 ? Math.round((netOperating / income) * 100) : 0,
+						savingsRate:
+							income > 0 ? Math.round((netOperating / income) * 100) : 0,
 					};
 				});
 

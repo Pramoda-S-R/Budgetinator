@@ -17,6 +17,27 @@ import {
 	authorizeCategory,
 } from "../transactions/-helpers";
 
+type SqlRows<T> = { rows: T[] };
+
+type LoanSqlRow = {
+	id: string;
+	userId: string;
+	contactId: string | null;
+	accountId: string;
+	loanType: string;
+	interestRate: string | null;
+	startedAt: string;
+	expectedEndDate: string | null;
+	status: string;
+	notes: string;
+	createdAt: string;
+	contactName: string | null;
+	accountName: string;
+	remainingAmount: string;
+	principalAmount: string;
+	totalPaid: string;
+};
+
 const createLoanSchema = z.object({
 	contactId: z.string().uuid().nullable().optional(),
 	accountId: z.string().uuid(), // source account is now required: it's the bank the money moves through
@@ -77,7 +98,7 @@ export const Route = createFileRoute("/api/loans/")({
 					ORDER BY l.created_at DESC
 				`);
 
-				const list = (rows as any).rows as any[];
+				const list = (rows as SqlRows<LoanSqlRow>).rows;
 				return json({
 					loans: list.map((r) => ({
 						loan: {
@@ -107,7 +128,10 @@ export const Route = createFileRoute("/api/loans/")({
 				const parsed = createLoanSchema.safeParse(payload);
 
 				if (!parsed.success) {
-					return json({ error: "Invalid request body", issues: parsed.error.flatten() }, 400);
+					return json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						400,
+					);
 				}
 
 				const d = parsed.data;
@@ -122,7 +146,9 @@ export const Route = createFileRoute("/api/loans/")({
 					const [contact] = await db
 						.select({ name: contacts.name })
 						.from(contacts)
-						.where(and(eq(contacts.id, d.contactId), eq(contacts.userId, user.id)))
+						.where(
+							and(eq(contacts.id, d.contactId), eq(contacts.userId, user.id)),
+						)
 						.limit(1);
 					if (!contact) return json({ error: "Contact not found" }, 404);
 					contactLabel = contact.name;
@@ -132,12 +158,16 @@ export const Route = createFileRoute("/api/loans/")({
 
 				const created = await db.transaction(async (tx) => {
 					// 1. Auto-create the paired loan account.
-					const accountKind = d.loanType === "given" ? "loan_given" : "loan_taken";
+					const accountKind =
+						d.loanType === "given" ? "loan_given" : "loan_taken";
 					const [pairedAccount] = await tx
 						.insert(accounts)
 						.values({
 							userId: user.id,
-							name: pairedAccountName({ kind: accountKind, label: contactLabel }),
+							name: pairedAccountName({
+								kind: accountKind,
+								label: contactLabel,
+							}),
 							accountType: accountKind,
 							currentBalance: "0",
 							includeInNetWorth: true,
@@ -149,8 +179,10 @@ export const Route = createFileRoute("/api/loans/")({
 					//    leaves the bank and lands in the loan-given asset.  For a loan
 					//    TAKEN, money flows the other way: the liability accrues and the
 					//    bank gains the principal.
-					const sourceAccountId = d.loanType === "given" ? d.accountId : pairedAccount.id;
-					const destAccountId = d.loanType === "given" ? pairedAccount.id : d.accountId;
+					const sourceAccountId =
+						d.loanType === "given" ? d.accountId : pairedAccount.id;
+					const destAccountId =
+						d.loanType === "given" ? pairedAccount.id : d.accountId;
 
 					const [transferTx] = await tx
 						.insert(transactions)
@@ -162,7 +194,10 @@ export const Route = createFileRoute("/api/loans/")({
 							amount: toNumericString(d.principalAmount),
 							transactionType: "transfer",
 							transactionDate: startedAt,
-							merchant: d.loanType === "given" ? `Loan to ${contactLabel}` : `Loan from ${contactLabel}`,
+							merchant:
+								d.loanType === "given"
+									? `Loan to ${contactLabel}`
+									: `Loan from ${contactLabel}`,
 							notes: d.notes ?? "",
 							isRecurring: false,
 						})
@@ -186,9 +221,12 @@ export const Route = createFileRoute("/api/loans/")({
 							contactId: d.contactId ?? null,
 							accountId: pairedAccount.id,
 							loanType: d.loanType,
-							interestRate: d.interestRate != null ? d.interestRate.toFixed(2) : null,
+							interestRate:
+								d.interestRate != null ? d.interestRate.toFixed(2) : null,
 							startedAt,
-							expectedEndDate: d.expectedEndDate ? new Date(d.expectedEndDate) : null,
+							expectedEndDate: d.expectedEndDate
+								? new Date(d.expectedEndDate)
+								: null,
 							notes: d.notes ?? "",
 						})
 						.returning();

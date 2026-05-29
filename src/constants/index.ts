@@ -1,4 +1,14 @@
-import { LayoutDashboard, Tags, Users, Wallet, Calendar, ChartPie, TrendingUp, CreditCard, RefreshCw } from "lucide-react";
+import {
+	LayoutDashboard,
+	Tags,
+	Users,
+	Wallet,
+	Calendar,
+	ChartPie,
+	TrendingUp,
+	CreditCard,
+	RefreshCw,
+} from "lucide-react";
 import type { MenuItem } from "#/types";
 
 export const menuItems: MenuItem[] = [
@@ -17,34 +27,34 @@ export const menuItems: MenuItem[] = [
 		url: "/transactions",
 		icon: Wallet,
 	},
-  {
-    title: "Categories",
-    url: "/categories",
-    icon: Tags,
-  },
-  {
-    title: "Budgets",
-    url: "/budgets",
-    icon: Calendar,
-  },
-  {
-    title: "Investments",
-    url: "/investments",
-    icon: ChartPie,
-  },
-  {
-    title: "Loans & EMIs",
-    url: "/loans",
-    icon: CreditCard,
-  },
-  {
-    title: "Analytics",
-    url: "/analytics",
-    icon: TrendingUp,
-  },
-  {
-    title: "Recurring",
-    url: "/recurring",
-    icon: RefreshCw,
-  },
+	{
+		title: "Categories",
+		url: "/categories",
+		icon: Tags,
+	},
+	{
+		title: "Budgets",
+		url: "/budgets",
+		icon: Calendar,
+	},
+	{
+		title: "Investments",
+		url: "/investments",
+		icon: ChartPie,
+	},
+	{
+		title: "Loans & EMIs",
+		url: "/loans",
+		icon: CreditCard,
+	},
+	{
+		title: "Analytics",
+		url: "/analytics",
+		icon: TrendingUp,
+	},
+	{
+		title: "Recurring",
+		url: "/recurring",
+		icon: RefreshCw,
+	},
 ];

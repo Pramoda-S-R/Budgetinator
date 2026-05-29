@@ -50,7 +50,9 @@ export const Route = createFileRoute("/api/emi-payments/")({
 							.select({ payment: emiPayments })
 							.from(emiPayments)
 							.innerJoin(emis, eq(emiPayments.emiId, emis.id))
-							.where(and(eq(emis.userId, user.id), eq(emiPayments.emiId, emiId)))
+							.where(
+								and(eq(emis.userId, user.id), eq(emiPayments.emiId, emiId)),
+							)
 							.orderBy(desc(emiPayments.paidAt))
 					: await db
 							.select({ payment: emiPayments })
@@ -67,7 +69,10 @@ export const Route = createFileRoute("/api/emi-payments/")({
 				const parsed = createPaymentSchema.safeParse(payload);
 
 				if (!parsed.success) {
-					return json({ error: "Invalid request body", issues: parsed.error.flatten() }, 400);
+					return json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						400,
+					);
 				}
 
 				const [emi] = await db
@@ -81,7 +86,9 @@ export const Route = createFileRoute("/api/emi-payments/")({
 				await authorizeAccounts(db, user.id, [parsed.data.accountId]);
 				await authorizeCategory(db, user.id, parsed.data.categoryId ?? null);
 
-				const paidAt = parsed.data.paidAt ? new Date(parsed.data.paidAt) : new Date();
+				const paidAt = parsed.data.paidAt
+					? new Date(parsed.data.paidAt)
+					: new Date();
 				const newNextDue = advanceNextDueDate(emi.nextDueDate);
 				const isPastEnd = newNextDue > new Date(emi.endDate);
 

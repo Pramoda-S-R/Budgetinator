@@ -70,22 +70,22 @@ export const Route = createFileRoute("/api/category-groups/")({
 					.orderBy(desc(categoryGroups.sortOrder))
 					.limit(1);
 
-                const nextSortOrder = resolveSortOrder(
-                    lastGroup?.sortOrder ?? null,
-                    parsed.data.sortOrder,
-                );
+				const nextSortOrder = resolveSortOrder(
+					lastGroup?.sortOrder ?? null,
+					parsed.data.sortOrder,
+				);
 
-                const [created] = await db
-                    .insert(categoryGroups)
-                    .values({
-                        userId: user.id,
-                        name: parsed.data.name,
-                        type: parsed.data.type,
-                        icon: parsed.data.icon ?? "folder",
-                        color: parsed.data.color ?? "#475569",
-                        sortOrder: nextSortOrder,
-                    })
-                    .returning();
+				const [created] = await db
+					.insert(categoryGroups)
+					.values({
+						userId: user.id,
+						name: parsed.data.name,
+						type: parsed.data.type,
+						icon: parsed.data.icon ?? "folder",
+						color: parsed.data.color ?? "#475569",
+						sortOrder: nextSortOrder,
+					})
+					.returning();
 
 				return json({ categoryGroup: created }, 201);
 			},

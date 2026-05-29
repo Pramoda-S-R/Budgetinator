@@ -40,7 +40,13 @@ export const Route = createFileRoute("/api/emis/$id")({
 				const payload = await request.json();
 				const parsedBody = updateSchema.safeParse(payload);
 				if (!parsedBody.success) {
-					return json({ error: "Invalid request body", issues: parsedBody.error.flatten() }, 400);
+					return json(
+						{
+							error: "Invalid request body",
+							issues: parsedBody.error.flatten(),
+						},
+						400,
+					);
 				}
 
 				const user = await requireCurrentUser(request);
@@ -48,7 +54,9 @@ export const Route = createFileRoute("/api/emis/$id")({
 
 				const updates: Partial<typeof emis.$inferInsert> = {
 					...(d.name ? { name: d.name } : {}),
-					...(d.monthlyAmount !== undefined ? { monthlyAmount: d.monthlyAmount.toFixed(2) } : {}),
+					...(d.monthlyAmount !== undefined
+						? { monthlyAmount: d.monthlyAmount.toFixed(2) }
+						: {}),
 					...(d.nextDueDate ? { nextDueDate: new Date(d.nextDueDate) } : {}),
 					...(d.lenderName !== undefined ? { lenderName: d.lenderName } : {}),
 					...(d.status ? { status: d.status } : {}),
@@ -57,7 +65,9 @@ export const Route = createFileRoute("/api/emis/$id")({
 				const [updated] = await db
 					.update(emis)
 					.set(updates)
-					.where(and(eq(emis.id, parsedParams.data.id), eq(emis.userId, user.id)))
+					.where(
+						and(eq(emis.id, parsedParams.data.id), eq(emis.userId, user.id)),
+					)
 					.returning();
 
 				if (!updated) return json({ error: "EMI not found" }, 404);
@@ -72,7 +82,9 @@ export const Route = createFileRoute("/api/emis/$id")({
 				const [emi] = await db
 					.select()
 					.from(emis)
-					.where(and(eq(emis.id, parsedParams.data.id), eq(emis.userId, user.id)))
+					.where(
+						and(eq(emis.id, parsedParams.data.id), eq(emis.userId, user.id)),
+					)
 					.limit(1);
 
 				if (!emi) return json({ error: "EMI not found" }, 404);

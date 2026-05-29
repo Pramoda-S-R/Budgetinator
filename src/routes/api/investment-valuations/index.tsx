@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "#/db";
@@ -49,14 +49,22 @@ export const Route = createFileRoute("/api/investment-valuations/")({
 				const payload = await request.json();
 				const parsed = createValuationSchema.safeParse(payload);
 				if (!parsed.success) {
-					return json({ error: "Invalid request body", issues: parsed.error.flatten() }, 400);
+					return json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						400,
+					);
 				}
 
 				const { investmentId, valuationAmount, valuationDate } = parsed.data;
 				const [inv] = await db
 					.select({ accountId: investments.accountId })
 					.from(investments)
-					.where(and(eq(investments.id, investmentId), eq(investments.userId, user.id)))
+					.where(
+						and(
+							eq(investments.id, investmentId),
+							eq(investments.userId, user.id),
+						),
+					)
 					.limit(1);
 
 				if (!inv) return json({ error: "Investment not found" }, 404);
@@ -79,14 +87,17 @@ export const Route = createFileRoute("/api/investment-valuations/")({
 					return history;
 				});
 
-				return json({
-					valuation: {
-						id: created.id,
-						investmentId,
-						valuationAmount: created.balance,
-						valuationDate: created.recordedAt,
+				return json(
+					{
+						valuation: {
+							id: created.id,
+							investmentId,
+							valuationAmount: created.balance,
+							valuationDate: created.recordedAt,
+						},
 					},
-				}, 201);
+					201,
+				);
 			},
 		},
 	},

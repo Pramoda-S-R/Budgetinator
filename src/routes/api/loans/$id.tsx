@@ -41,7 +41,13 @@ export const Route = createFileRoute("/api/loans/$id")({
 				const payload = await request.json();
 				const parsedBody = updateSchema.safeParse(payload);
 				if (!parsedBody.success) {
-					return json({ error: "Invalid request body", issues: parsedBody.error.flatten() }, 400);
+					return json(
+						{
+							error: "Invalid request body",
+							issues: parsedBody.error.flatten(),
+						},
+						400,
+					);
 				}
 
 				const user = await requireCurrentUser(request);
@@ -51,10 +57,17 @@ export const Route = createFileRoute("/api/loans/$id")({
 					...(d.contactId !== undefined ? { contactId: d.contactId } : {}),
 					...(d.loanType ? { loanType: d.loanType } : {}),
 					...(d.interestRate !== undefined
-						? { interestRate: d.interestRate != null ? d.interestRate.toFixed(2) : null }
+						? {
+								interestRate:
+									d.interestRate != null ? d.interestRate.toFixed(2) : null,
+							}
 						: {}),
 					...(d.expectedEndDate !== undefined
-						? { expectedEndDate: d.expectedEndDate ? new Date(d.expectedEndDate) : null }
+						? {
+								expectedEndDate: d.expectedEndDate
+									? new Date(d.expectedEndDate)
+									: null,
+							}
 						: {}),
 					...(d.status ? { status: d.status } : {}),
 					...(d.notes !== undefined ? { notes: d.notes } : {}),
@@ -63,7 +76,9 @@ export const Route = createFileRoute("/api/loans/$id")({
 				const [updated] = await db
 					.update(loans)
 					.set(updates)
-					.where(and(eq(loans.id, parsedParams.data.id), eq(loans.userId, user.id)))
+					.where(
+						and(eq(loans.id, parsedParams.data.id), eq(loans.userId, user.id)),
+					)
 					.returning();
 
 				if (!updated) return json({ error: "Loan not found" }, 404);
@@ -78,7 +93,9 @@ export const Route = createFileRoute("/api/loans/$id")({
 				const [loan] = await db
 					.select()
 					.from(loans)
-					.where(and(eq(loans.id, parsedParams.data.id), eq(loans.userId, user.id)))
+					.where(
+						and(eq(loans.id, parsedParams.data.id), eq(loans.userId, user.id)),
+					)
 					.limit(1);
 
 				if (!loan) return json({ error: "Loan not found" }, 404);

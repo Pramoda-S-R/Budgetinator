@@ -101,23 +101,23 @@ export const Route = createFileRoute("/api/categories/")({
 					.orderBy(desc(categories.sortOrder))
 					.limit(1);
 
-                const nextSortOrder = resolveSortOrder(
-                    lastCategory?.sortOrder ?? null,
-                    parsed.data.sortOrder,
-                );
+				const nextSortOrder = resolveSortOrder(
+					lastCategory?.sortOrder ?? null,
+					parsed.data.sortOrder,
+				);
 
-                const [created] = await db
-                    .insert(categories)
-                    .values({
-                        userId: user.id,
-                        groupId: parsed.data.groupId,
-                        name: parsed.data.name,
-                        icon: parsed.data.icon ?? "tag",
-                        color: parsed.data.color ?? "#64748b",
-                        transactionType: parsed.data.transactionType,
-                        sortOrder: nextSortOrder,
-                    })
-                    .returning();
+				const [created] = await db
+					.insert(categories)
+					.values({
+						userId: user.id,
+						groupId: parsed.data.groupId,
+						name: parsed.data.name,
+						icon: parsed.data.icon ?? "tag",
+						color: parsed.data.color ?? "#64748b",
+						transactionType: parsed.data.transactionType,
+						sortOrder: nextSortOrder,
+					})
+					.returning();
 
 				return json({ category: created }, 201);
 			},

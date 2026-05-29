@@ -44,6 +44,7 @@ type CreateAccountInput = {
 	name: string;
 	accountType: string;
 	currentBalance: number;
+	recordedAt?: string;
 	includeInNetWorth?: boolean;
 	isActive?: boolean;
 };

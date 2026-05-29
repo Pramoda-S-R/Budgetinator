@@ -200,7 +200,11 @@ function ChartTooltipContent({
 					.filter((item) => item.type !== "none")
 					.map((item, index) => {
 						const key = `${nameKey ?? item.name ?? item.dataKey ?? "value"}-${index}`;
-						const itemConfig = getPayloadConfigFromPayload(config, item, String(nameKey ?? item.name ?? item.dataKey ?? "value"));
+						const itemConfig = getPayloadConfigFromPayload(
+							config,
+							item,
+							String(nameKey ?? item.name ?? item.dataKey ?? "value"),
+						);
 						const indicatorColor = color ?? item.payload?.fill ?? item.color;
 
 						return (
@@ -299,7 +303,11 @@ function ChartLegendContent({
 				.filter((item) => item.type !== "none")
 				.map((item, index) => {
 					const key = `${nameKey ?? item.dataKey ?? "value"}-${index}`;
-					const itemConfig = getPayloadConfigFromPayload(config, item, String(nameKey ?? item.dataKey ?? "value"));
+					const itemConfig = getPayloadConfigFromPayload(
+						config,
+						item,
+						String(nameKey ?? item.dataKey ?? "value"),
+					);
 
 					return (
 						<div

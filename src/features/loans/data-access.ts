@@ -49,46 +49,128 @@ export type CreateEmiPaymentInput = {
 	paidAt?: string;
 };
 
-const loansEntitySchema = z.record(z.string(), z.unknown());
+const contactSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	name: z.string(),
+	phone: z.string(),
+	notes: z.string(),
+});
+
+const loanSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	contactId: z.string().nullable(),
+	accountId: z.string(),
+	loanType: z.string(),
+	interestRate: z.string().nullable(),
+	startedAt: z.string(),
+	expectedEndDate: z.string().nullable(),
+	status: z.string(),
+	notes: z.string(),
+	createdAt: z.string(),
+});
+
+const loanListItemSchema = z.object({
+	loan: loanSchema.extend({
+		principalAmount: z.string(),
+		remainingAmount: z.string(),
+	}),
+	contactName: z.string().nullable(),
+	accountName: z.string(),
+	totalPaid: z.string(),
+});
+
+const loanPaymentSchema = z.object({
+	id: z.string(),
+	loanId: z.string(),
+	amount: z.string(),
+	paidAt: z.string(),
+});
+
+const emiSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	accountId: z.string(),
+	name: z.string(),
+	interestRate: z.string(),
+	monthlyAmount: z.string(),
+	startDate: z.string(),
+	endDate: z.string(),
+	nextDueDate: z.string(),
+	lenderName: z.string(),
+	status: z.string(),
+	createdAt: z.string(),
+	principal: z.string(),
+	outstanding: z.string(),
+});
+
+const emiBaseSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	accountId: z.string(),
+	name: z.string(),
+	interestRate: z.string(),
+	monthlyAmount: z.string(),
+	startDate: z.string(),
+	endDate: z.string(),
+	nextDueDate: z.string(),
+	lenderName: z.string(),
+	status: z.string(),
+	createdAt: z.string(),
+});
+
+const emiPaymentSchema = z.object({
+	id: z.string(),
+	emiId: z.string(),
+	amount: z.string(),
+	paidAt: z.string(),
+});
+
+export type Contact = z.infer<typeof contactSchema>;
+export type LoanListItem = z.infer<typeof loanListItemSchema>;
+export type LoanPayment = z.infer<typeof loanPaymentSchema>;
+export type Emi = z.infer<typeof emiSchema>;
+export type EmiPayment = z.infer<typeof emiPaymentSchema>;
 
 const contactsEnvelopeSchema = z.object({
-	contacts: z.array(loansEntitySchema),
+	contacts: z.array(contactSchema),
 });
 
 const contactEnvelopeSchema = z.object({
-	contact: loansEntitySchema,
+	contact: contactSchema,
 });
 
 const loansEnvelopeSchema = z.object({
-	loans: z.array(loansEntitySchema),
+	loans: z.array(loanListItemSchema),
 });
 
 const loanEnvelopeSchema = z.object({
-	loan: loansEntitySchema,
+	loan: loanSchema,
 });
 
 const loanPaymentsEnvelopeSchema = z.object({
-	payments: z.array(loansEntitySchema),
+	payments: z.array(loanPaymentSchema),
 });
 
 const loanPaymentEnvelopeSchema = z.object({
-	payment: loansEntitySchema,
+	payment: loanPaymentSchema,
 });
 
 const emisEnvelopeSchema = z.object({
-	emis: z.array(loansEntitySchema),
+	emis: z.array(emiSchema),
 });
 
 const emiEnvelopeSchema = z.object({
-	emi: loansEntitySchema,
+	emi: emiBaseSchema,
 });
 
 const emiPaymentsEnvelopeSchema = z.object({
-	payments: z.array(loansEntitySchema),
+	payments: z.array(emiPaymentSchema),
 });
 
 const emiPaymentEnvelopeSchema = z.object({
-	payment: loansEntitySchema,
+	payment: emiPaymentSchema,
 });
 
 const successEnvelopeSchema = z.object({

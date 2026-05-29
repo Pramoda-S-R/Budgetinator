@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "format": "biome format",
+    "format": "biome format . --write --max-diagnostics=500",
     "lint": "biome lint",
     "check": "biome check",
     "db:generate": "drizzle-kit generate",

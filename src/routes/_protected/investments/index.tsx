@@ -30,7 +30,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { createAccountsDataAccess } from "#/features/accounts/data-access";
 import { createCategoriesDataAccess } from "#/features/categories/data-access";
-import { createInvestmentsDataAccess } from "#/features/investments/data-access";
+import {
+	createInvestmentsDataAccess,
+	type InvestmentEntry,
+	type InvestmentValuation,
+} from "#/features/investments/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
 import { toLocalDateInputValue } from "#/lib/date.ts";
 import {
@@ -160,18 +164,17 @@ function InvestmentsPage() {
 		queryFn: () => categoriesApi.fetchCategories(),
 		enabled: Boolean(user?.id),
 	});
-	const accountsList = (accountsQ.data as any)?.accounts ?? [];
-	const cashAccountsList = accountsList.filter((a: any) =>
+	const accountsList = accountsQ.data?.accounts ?? [];
+	const cashAccountsList = accountsList.filter((a) =>
 		["bank", "cash", "wallet", "salary"].includes(a.accountType),
 	);
-	const categoriesList = ((categoriesQ.data as any)?.categories ?? []) as any[];
+	const categoriesList = categoriesQ.data?.categories ?? [];
 	const accountNameMap = useMemo(
-		() => new Map<string, string>(accountsList.map((a: any) => [a.id, a.name])),
+		() => new Map<string, string>(accountsList.map((a) => [a.id, a.name])),
 		[accountsList],
 	);
 	const categoryNameMap = useMemo(
-		() =>
-			new Map<string, string>(categoriesList.map((c: any) => [c.id, c.name])),
+		() => new Map<string, string>(categoriesList.map((c) => [c.id, c.name])),
 		[categoriesList],
 	);
 
@@ -258,7 +261,7 @@ function InvestmentsPage() {
 	});
 
 	const investmentNameMap = useMemo(
-		() => new Map(investments.map((inv: any) => [inv.id, inv.name])),
+		() => new Map<string, string>(investments.map((inv) => [inv.id, inv.name])),
 		[investments],
 	);
 
@@ -272,7 +275,7 @@ function InvestmentsPage() {
 
 	// Group entries and valuations by investmentId
 	const entriesByInv = useMemo(() => {
-		const m = new Map<string, any[]>();
+		const m = new Map<string, InvestmentEntry[]>();
 		for (const e of entries) {
 			const arr = m.get(e.investmentId) ?? [];
 			arr.push(e);
@@ -282,7 +285,7 @@ function InvestmentsPage() {
 	}, [entries]);
 
 	const valuationsByInv = useMemo(() => {
-		const m = new Map<string, any[]>();
+		const m = new Map<string, InvestmentValuation[]>();
 		for (const v of valuations) {
 			const arr = m.get(v.investmentId) ?? [];
 			arr.push(v);
@@ -292,11 +295,11 @@ function InvestmentsPage() {
 	}, [valuations]);
 
 	const totalInvested = entries.reduce(
-		(s: number, e: any) => s + Number(e.amountInvested),
+		(s: number, e) => s + Number(e.amountInvested),
 		0,
 	);
 	const currentValue = valuations.reduce(
-		(s: number, v: any) => s + Number(v.valuationAmount),
+		(s: number, v) => s + Number(v.valuationAmount),
 		0,
 	);
 	const totalGain = currentValue - totalInvested;
@@ -425,11 +428,11 @@ function InvestmentsPage() {
 							No investments yet. Add one in the "Add New" tab.
 						</p>
 					) : (
-						investments.map((inv: any) => {
+						investments.map((inv) => {
 							const invEntries = entriesByInv.get(inv.id) ?? [];
 							const invVals = valuationsByInv.get(inv.id) ?? [];
 							const invested = invEntries.reduce(
-								(s: number, e: any) => s + Number(e.amountInvested),
+								(s: number, e) => s + Number(e.amountInvested),
 								0,
 							);
 							const latestVal = invVals[0]
@@ -521,7 +524,7 @@ function InvestmentsPage() {
 													SIP Entries ({invEntries.length})
 												</p>
 												<div className="space-y-1">
-													{invEntries.map((e: any) => (
+													{invEntries.map((e) => (
 														<div
 															key={e.id}
 															className="flex items-center justify-between text-sm bg-muted/40 rounded px-3 py-1.5"
@@ -563,7 +566,7 @@ function InvestmentsPage() {
 													Valuations ({invVals.length})
 												</p>
 												<div className="space-y-1">
-													{invVals.map((v: any) => (
+													{invVals.map((v) => (
 														<div
 															key={v.id}
 															className="flex items-center justify-between text-sm bg-muted/40 rounded px-3 py-1.5"
@@ -687,7 +690,7 @@ function InvestmentsPage() {
 										)}
 									</SelectTrigger>
 									<SelectContent>
-										{investments.map((inv: any) => (
+										{investments.map((inv) => (
 											<SelectItem key={inv.id} value={inv.id}>
 												{inv.name}
 											</SelectItem>
@@ -715,7 +718,7 @@ function InvestmentsPage() {
 											)}
 										</SelectTrigger>
 										<SelectContent>
-											{cashAccountsList.map((a: any) => (
+											{cashAccountsList.map((a) => (
 												<SelectItem key={a.id} value={a.id}>
 													{a.name}
 												</SelectItem>
@@ -746,7 +749,7 @@ function InvestmentsPage() {
 											)}
 										</SelectTrigger>
 										<SelectContent>
-											{categoriesList.map((c: any) => (
+											{categoriesList.map((c) => (
 												<SelectItem key={c.id} value={c.id}>
 													{c.name}
 													{c.groupName ? ` — ${c.groupName}` : ""}
@@ -836,7 +839,7 @@ function InvestmentsPage() {
 										)}
 									</SelectTrigger>
 									<SelectContent>
-										{investments.map((inv: any) => (
+										{investments.map((inv) => (
 											<SelectItem key={inv.id} value={inv.id}>
 												{inv.name}
 											</SelectItem>

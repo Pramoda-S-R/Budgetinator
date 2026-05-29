@@ -119,15 +119,15 @@ function RecurringPage() {
 	const categories = categoriesQ.data?.categories ?? [];
 	const accounts = accountsQ.data?.accounts ?? [];
 
-	const activeCount = rules.filter((r: any) => r.isActive).length;
+	const activeCount = rules.filter((r) => r.isActive).length;
 	const monthlyEstimate = rules
 		.filter(
-			(r: any) =>
+			(r) =>
 				r.isActive &&
 				r.transactionType === "expense" &&
 				r.frequency === "monthly",
 		)
-		.reduce((s: number, r: any) => s + Number(r.amount), 0);
+		.reduce((s: number, r) => s + Number(r.amount), 0);
 
 	return (
 		<div className="p-6 space-y-6">
@@ -265,7 +265,7 @@ function RecurringPage() {
 											data-slot="select-value"
 											className="flex flex-1 text-left text-sm"
 										>
-											{categories.find((c: any) => c.id === categoryId)?.name ??
+											{categories.find((c) => c.id === categoryId)?.name ??
 												categoryId}
 										</span>
 									) : (
@@ -273,7 +273,7 @@ function RecurringPage() {
 									)}
 								</SelectTrigger>
 								<SelectContent>
-									{categories.map((c: any) => (
+									{categories.map((c) => (
 										<SelectItem key={c.id} value={c.id}>
 											{c.name}
 										</SelectItem>
@@ -293,7 +293,7 @@ function RecurringPage() {
 											data-slot="select-value"
 											className="flex flex-1 text-left text-sm"
 										>
-											{accounts.find((a: any) => a.id === accountId)?.name ??
+											{accounts.find((a) => a.id === accountId)?.name ??
 												accountId}
 										</span>
 									) : (
@@ -301,7 +301,7 @@ function RecurringPage() {
 									)}
 								</SelectTrigger>
 								<SelectContent>
-									{accounts.map((a: any) => (
+									{accounts.map((a) => (
 										<SelectItem key={a.id} value={a.id}>
 											{a.name}
 										</SelectItem>
@@ -325,7 +325,7 @@ function RecurringPage() {
 				) : rules.length === 0 ? (
 					<p className="text-muted-foreground">No recurring rules yet.</p>
 				) : (
-					rules.map((rule: any) => {
+					rules.map((rule) => {
 						const nextDate = new Date(rule.nextRunDate);
 						const isDue = nextDate <= new Date();
 						return (

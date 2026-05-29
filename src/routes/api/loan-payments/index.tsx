@@ -44,7 +44,9 @@ export const Route = createFileRoute("/api/loan-payments/")({
 							.select({ payment: loanPayments })
 							.from(loanPayments)
 							.innerJoin(loans, eq(loanPayments.loanId, loans.id))
-							.where(and(eq(loans.userId, user.id), eq(loanPayments.loanId, loanId)))
+							.where(
+								and(eq(loans.userId, user.id), eq(loanPayments.loanId, loanId)),
+							)
 							.orderBy(desc(loanPayments.paidAt))
 					: await db
 							.select({ payment: loanPayments })
@@ -61,7 +63,10 @@ export const Route = createFileRoute("/api/loan-payments/")({
 				const parsed = createPaymentSchema.safeParse(payload);
 
 				if (!parsed.success) {
-					return json({ error: "Invalid request body", issues: parsed.error.flatten() }, 400);
+					return json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						400,
+					);
 				}
 
 				const d = parsed.data;
@@ -81,8 +86,10 @@ export const Route = createFileRoute("/api/loan-payments/")({
 				//   transfer FROM loan_account (asset shrinks) TO bank (cash grows).
 				// For a loan TAKEN, a payment is YOU repaying the lender:
 				//   transfer FROM bank (cash shrinks) TO loan_account (liability shrinks toward 0).
-				const sourceAccountId = loan.loanType === "given" ? loan.accountId : d.accountId;
-				const destAccountId = loan.loanType === "given" ? d.accountId : loan.accountId;
+				const sourceAccountId =
+					loan.loanType === "given" ? loan.accountId : d.accountId;
+				const destAccountId =
+					loan.loanType === "given" ? d.accountId : loan.accountId;
 				const paidAt = d.paidAt ? new Date(d.paidAt) : new Date();
 
 				const created = await db.transaction(async (tx) => {
@@ -103,7 +110,10 @@ export const Route = createFileRoute("/api/loan-payments/")({
 						amount: toNumericString(d.amount),
 						transactionType: "transfer",
 						transactionDate: paidAt,
-						merchant: loan.loanType === "given" ? "Loan repayment received" : "Loan repayment",
+						merchant:
+							loan.loanType === "given"
+								? "Loan repayment received"
+								: "Loan repayment",
 						notes: `loan_payment:${payment.id}`,
 						isRecurring: false,
 					});

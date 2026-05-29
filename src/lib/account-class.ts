@@ -16,7 +16,8 @@ export const LIABILITY_TYPES = ["loan_taken", "emi", "credit_card"] as const;
 export type AccountClass = "cash" | "asset" | "liability";
 
 export function classifyAccount(accountType: string): AccountClass {
-	if ((LIABILITY_TYPES as readonly string[]).includes(accountType)) return "liability";
+	if ((LIABILITY_TYPES as readonly string[]).includes(accountType))
+		return "liability";
 	if ((ASSET_TYPES as readonly string[]).includes(accountType)) return "asset";
 	return "cash";
 }
