@@ -1,13 +1,13 @@
 import {
-	LayoutDashboard,
-	Tags,
-	Users,
-	Wallet,
 	Calendar,
 	ChartPie,
-	TrendingUp,
 	CreditCard,
+	LayoutDashboard,
 	RefreshCw,
+	Tags,
+	TrendingUp,
+	Users,
+	Wallet,
 } from "lucide-react";
 import type { MenuItem } from "#/types";
 

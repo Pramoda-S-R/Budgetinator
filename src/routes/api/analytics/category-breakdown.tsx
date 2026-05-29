@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { and, eq, sql } from "drizzle-orm";
 
 import { db } from "#/db";
-import { transactions, categories, categoryGroups } from "#/db/schema";
+import { categories, categoryGroups, transactions } from "#/db/schema";
 import { requireCurrentUser } from "#/lib/server-auth";
 
 function json(data: unknown, status = 200) {
