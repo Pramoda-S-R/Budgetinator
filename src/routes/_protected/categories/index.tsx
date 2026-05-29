@@ -36,6 +36,13 @@ import {
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#/components/ui/select";
+import {
 	type Category,
 	type CategoryGroup,
 	createCategory,
@@ -49,8 +56,6 @@ import {
 } from "#/features/categories/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
 
-const SELECT_CLASS_NAME =
-	"border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-none border px-3 py-1 text-sm shadow-xs focus-visible:ring-1 focus-visible:outline-hidden";
 
 const TRANSACTION_TYPE_OPTIONS = [
 	{ value: "expense", label: "Expense" },
@@ -553,19 +558,20 @@ function CategoriesPage() {
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="group-type">Type</Label>
-							<select
-								id="group-type"
-								className={SELECT_CLASS_NAME}
-								value={groupType}
-								onChange={(event) => setGroupType(event.target.value)}
-								required
-							>
-								{TRANSACTION_TYPE_OPTIONS.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
+							<Select value={groupType} onValueChange={(v) => setGroupType(v ?? "")}>
+								<SelectTrigger id="group-type">
+									<span data-slot="select-value" className="flex flex-1 text-left text-sm">
+										{TRANSACTION_TYPE_OPTIONS.find((o) => o.value === groupType)?.label ?? groupType}
+									</span>
+								</SelectTrigger>
+								<SelectContent>
+									{TRANSACTION_TYPE_OPTIONS.map((option) => (
+										<SelectItem key={option.value} value={option.value}>
+											{option.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="group-icon">Icon</Label>
@@ -608,19 +614,24 @@ function CategoriesPage() {
 					>
 						<div className="space-y-2 md:col-span-2">
 							<Label htmlFor="category-group">Group</Label>
-							<select
-								id="category-group"
-								className={SELECT_CLASS_NAME}
-								value={selectedGroupId}
-								onChange={(event) => setSelectedGroupId(event.target.value)}
-								required
-							>
-								{groups.map((group) => (
-									<option key={group.id} value={group.id}>
-										{group.name}
-									</option>
-								))}
-							</select>
+							<Select value={selectedGroupId} onValueChange={(v) => setSelectedGroupId(v ?? "")}>
+								<SelectTrigger id="category-group">
+									{selectedGroupId ? (
+										<span data-slot="select-value" className="flex flex-1 text-left text-sm">
+											{groups.find((g) => g.id === selectedGroupId)?.name ?? selectedGroupId}
+										</span>
+									) : (
+										<SelectValue placeholder="Select group" />
+									)}
+								</SelectTrigger>
+								<SelectContent>
+									{groups.map((group) => (
+										<SelectItem key={group.id} value={group.id}>
+											{group.name}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="category-name">Name</Label>
@@ -635,21 +646,20 @@ function CategoriesPage() {
 							<Label htmlFor="category-transaction-type">
 								Transaction Type
 							</Label>
-							<select
-								id="category-transaction-type"
-								className={SELECT_CLASS_NAME}
-								value={categoryTransactionType}
-								onChange={(event) =>
-									setCategoryTransactionType(event.target.value)
-								}
-								required
-							>
-								{TRANSACTION_TYPE_OPTIONS.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
+							<Select value={categoryTransactionType} onValueChange={(v) => setCategoryTransactionType(v ?? "")}>
+								<SelectTrigger id="category-transaction-type">
+									<span data-slot="select-value" className="flex flex-1 text-left text-sm">
+										{TRANSACTION_TYPE_OPTIONS.find((o) => o.value === categoryTransactionType)?.label ?? categoryTransactionType}
+									</span>
+								</SelectTrigger>
+								<SelectContent>
+									{TRANSACTION_TYPE_OPTIONS.map((option) => (
+										<SelectItem key={option.value} value={option.value}>
+											{option.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="category-icon">Icon</Label>

@@ -1,4 +1,4 @@
-import { LayoutDashboard, Tags, Users, Wallet, Calendar, ChartPie } from "lucide-react";
+import { LayoutDashboard, Tags, Users, Wallet, Calendar, ChartPie, TrendingUp, CreditCard, RefreshCw } from "lucide-react";
 import type { MenuItem } from "#/types";
 
 export const menuItems: MenuItem[] = [
@@ -31,5 +31,20 @@ export const menuItems: MenuItem[] = [
     title: "Investments",
     url: "/investments",
     icon: ChartPie,
+  },
+  {
+    title: "Loans & EMIs",
+    url: "/loans",
+    icon: CreditCard,
+  },
+  {
+    title: "Analytics",
+    url: "/analytics",
+    icon: TrendingUp,
+  },
+  {
+    title: "Recurring",
+    url: "/recurring",
+    icon: RefreshCw,
   },
 ];

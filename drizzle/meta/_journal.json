@@ -43,6 +43,27 @@
       "when": 1779527009526,
       "tag": "0005_investment_sip_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1779957222652,
+      "tag": "0006_lame_warstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779958972891,
+      "tag": "0007_married_sir_ram",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1780000000000,
+      "tag": "0008_unified_ledger",
+      "breakpoints": true
     }
   ]
 }

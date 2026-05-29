@@ -15,32 +15,53 @@ import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignOutRouteImport } from './routes/auth/sign-out'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as ApiTransactionsIndexRouteImport } from './routes/api/transactions/index'
+import { Route as ApiRecurringRulesIndexRouteImport } from './routes/api/recurring-rules/index'
 import { Route as ApiProfileIndexRouteImport } from './routes/api/profile/index'
+import { Route as ApiLoansIndexRouteImport } from './routes/api/loans/index'
+import { Route as ApiLoanPaymentsIndexRouteImport } from './routes/api/loan-payments/index'
 import { Route as ApiInvestmentsIndexRouteImport } from './routes/api/investments/index'
 import { Route as ApiInvestmentValuationsIndexRouteImport } from './routes/api/investment-valuations/index'
 import { Route as ApiInvestmentEntriesIndexRouteImport } from './routes/api/investment-entries/index'
+import { Route as ApiEmisIndexRouteImport } from './routes/api/emis/index'
+import { Route as ApiEmiPaymentsIndexRouteImport } from './routes/api/emi-payments/index'
+import { Route as ApiContactsIndexRouteImport } from './routes/api/contacts/index'
 import { Route as ApiCategoryGroupsIndexRouteImport } from './routes/api/category-groups/index'
 import { Route as ApiCategoriesIndexRouteImport } from './routes/api/categories/index'
 import { Route as ApiBudgetPresetsIndexRouteImport } from './routes/api/budget-presets/index'
 import { Route as ApiAccountsIndexRouteImport } from './routes/api/accounts/index'
 import { Route as ProtectedTransactionsIndexRouteImport } from './routes/_protected/transactions/index'
+import { Route as ProtectedRecurringIndexRouteImport } from './routes/_protected/recurring/index'
+import { Route as ProtectedLoansIndexRouteImport } from './routes/_protected/loans/index'
 import { Route as ProtectedInvestmentsIndexRouteImport } from './routes/_protected/investments/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
 import { Route as ProtectedCategoriesIndexRouteImport } from './routes/_protected/categories/index'
 import { Route as ProtectedBudgetsIndexRouteImport } from './routes/_protected/budgets/index'
+import { Route as ProtectedAnalyticsIndexRouteImport } from './routes/_protected/analytics/index'
 import { Route as ProtectedAccountsIndexRouteImport } from './routes/_protected/accounts/index'
 import { Route as ApiTransactionsIdRouteImport } from './routes/api/transactions/$id'
+import { Route as ApiRecurringRulesIdRouteImport } from './routes/api/recurring-rules/$id'
 import { Route as ApiMonthlyBudgetsApplyPresetRouteImport } from './routes/api/monthly-budgets/apply-preset'
 import { Route as ApiMonthlyBudgetsMonthRouteImport } from './routes/api/monthly-budgets/$month'
+import { Route as ApiMonthlyBudgetAllocationsIdRouteImport } from './routes/api/monthly-budget-allocations/$id'
+import { Route as ApiLoansIdRouteImport } from './routes/api/loans/$id'
+import { Route as ApiLoanPaymentsIdRouteImport } from './routes/api/loan-payments/$id'
 import { Route as ApiInvestmentsIdRouteImport } from './routes/api/investments/$id'
 import { Route as ApiInvestmentValuationsIdRouteImport } from './routes/api/investment-valuations/$id'
 import { Route as ApiInvestmentEntriesIdRouteImport } from './routes/api/investment-entries/$id'
+import { Route as ApiEmisIdRouteImport } from './routes/api/emis/$id'
+import { Route as ApiEmiPaymentsIdRouteImport } from './routes/api/emi-payments/$id'
 import { Route as ApiDashboardSummaryRouteImport } from './routes/api/dashboard/summary'
 import { Route as ApiDashboardCashflowRouteImport } from './routes/api/dashboard/cashflow'
 import { Route as ApiDashboardBudgetStatusRouteImport } from './routes/api/dashboard/budget-status'
+import { Route as ApiContactsIdRouteImport } from './routes/api/contacts/$id'
 import { Route as ApiCategoryGroupsIdRouteImport } from './routes/api/category-groups/$id'
 import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
+import { Route as ApiBudgetPresetsIdRouteImport } from './routes/api/budget-presets/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiAnalyticsSpendingTrendsRouteImport } from './routes/api/analytics/spending-trends'
+import { Route as ApiAnalyticsNetworthRouteImport } from './routes/api/analytics/networth'
+import { Route as ApiAnalyticsCategoryBreakdownRouteImport } from './routes/api/analytics/category-breakdown'
+import { Route as ApiAnalyticsCashflowRouteImport } from './routes/api/analytics/cashflow'
 import { Route as ApiAccountsIdRouteImport } from './routes/api/accounts/$id'
 
 const ProtectedRoute = ProtectedRouteImport.update({
@@ -72,9 +93,24 @@ const ApiTransactionsIndexRoute = ApiTransactionsIndexRouteImport.update({
   path: '/api/transactions/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRecurringRulesIndexRoute = ApiRecurringRulesIndexRouteImport.update({
+  id: '/api/recurring-rules/',
+  path: '/api/recurring-rules/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProfileIndexRoute = ApiProfileIndexRouteImport.update({
   id: '/api/profile/',
   path: '/api/profile/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLoansIndexRoute = ApiLoansIndexRouteImport.update({
+  id: '/api/loans/',
+  path: '/api/loans/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLoanPaymentsIndexRoute = ApiLoanPaymentsIndexRouteImport.update({
+  id: '/api/loan-payments/',
+  path: '/api/loan-payments/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiInvestmentsIndexRoute = ApiInvestmentsIndexRouteImport.update({
@@ -94,6 +130,21 @@ const ApiInvestmentEntriesIndexRoute =
     path: '/api/investment-entries/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiEmisIndexRoute = ApiEmisIndexRouteImport.update({
+  id: '/api/emis/',
+  path: '/api/emis/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEmiPaymentsIndexRoute = ApiEmiPaymentsIndexRouteImport.update({
+  id: '/api/emi-payments/',
+  path: '/api/emi-payments/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiContactsIndexRoute = ApiContactsIndexRouteImport.update({
+  id: '/api/contacts/',
+  path: '/api/contacts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCategoryGroupsIndexRoute = ApiCategoryGroupsIndexRouteImport.update({
   id: '/api/category-groups/',
   path: '/api/category-groups/',
@@ -120,6 +171,16 @@ const ProtectedTransactionsIndexRoute =
     path: '/transactions/',
     getParentRoute: () => ProtectedRoute,
   } as any)
+const ProtectedRecurringIndexRoute = ProtectedRecurringIndexRouteImport.update({
+  id: '/recurring/',
+  path: '/recurring/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
+const ProtectedLoansIndexRoute = ProtectedLoansIndexRouteImport.update({
+  id: '/loans/',
+  path: '/loans/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedInvestmentsIndexRoute =
   ProtectedInvestmentsIndexRouteImport.update({
     id: '/investments/',
@@ -142,6 +203,11 @@ const ProtectedBudgetsIndexRoute = ProtectedBudgetsIndexRouteImport.update({
   path: '/budgets/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedAnalyticsIndexRoute = ProtectedAnalyticsIndexRouteImport.update({
+  id: '/analytics/',
+  path: '/analytics/',
+  getParentRoute: () => ProtectedRoute,
+} as any)
 const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
   id: '/accounts/',
   path: '/accounts/',
@@ -150,6 +216,11 @@ const ProtectedAccountsIndexRoute = ProtectedAccountsIndexRouteImport.update({
 const ApiTransactionsIdRoute = ApiTransactionsIdRouteImport.update({
   id: '/api/transactions/$id',
   path: '/api/transactions/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiRecurringRulesIdRoute = ApiRecurringRulesIdRouteImport.update({
+  id: '/api/recurring-rules/$id',
+  path: '/api/recurring-rules/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMonthlyBudgetsApplyPresetRoute =
@@ -161,6 +232,22 @@ const ApiMonthlyBudgetsApplyPresetRoute =
 const ApiMonthlyBudgetsMonthRoute = ApiMonthlyBudgetsMonthRouteImport.update({
   id: '/api/monthly-budgets/$month',
   path: '/api/monthly-budgets/$month',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMonthlyBudgetAllocationsIdRoute =
+  ApiMonthlyBudgetAllocationsIdRouteImport.update({
+    id: '/api/monthly-budget-allocations/$id',
+    path: '/api/monthly-budget-allocations/$id',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiLoansIdRoute = ApiLoansIdRouteImport.update({
+  id: '/api/loans/$id',
+  path: '/api/loans/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLoanPaymentsIdRoute = ApiLoanPaymentsIdRouteImport.update({
+  id: '/api/loan-payments/$id',
+  path: '/api/loan-payments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiInvestmentsIdRoute = ApiInvestmentsIdRouteImport.update({
@@ -179,6 +266,16 @@ const ApiInvestmentEntriesIdRoute = ApiInvestmentEntriesIdRouteImport.update({
   path: '/api/investment-entries/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiEmisIdRoute = ApiEmisIdRouteImport.update({
+  id: '/api/emis/$id',
+  path: '/api/emis/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEmiPaymentsIdRoute = ApiEmiPaymentsIdRouteImport.update({
+  id: '/api/emi-payments/$id',
+  path: '/api/emi-payments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDashboardSummaryRoute = ApiDashboardSummaryRouteImport.update({
   id: '/api/dashboard/summary',
   path: '/api/dashboard/summary',
@@ -195,6 +292,11 @@ const ApiDashboardBudgetStatusRoute =
     path: '/api/dashboard/budget-status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiContactsIdRoute = ApiContactsIdRouteImport.update({
+  id: '/api/contacts/$id',
+  path: '/api/contacts/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCategoryGroupsIdRoute = ApiCategoryGroupsIdRouteImport.update({
   id: '/api/category-groups/$id',
   path: '/api/category-groups/$id',
@@ -205,9 +307,36 @@ const ApiCategoriesIdRoute = ApiCategoriesIdRouteImport.update({
   path: '/api/categories/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBudgetPresetsIdRoute = ApiBudgetPresetsIdRouteImport.update({
+  id: '/api/budget-presets/$id',
+  path: '/api/budget-presets/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsSpendingTrendsRoute =
+  ApiAnalyticsSpendingTrendsRouteImport.update({
+    id: '/api/analytics/spending-trends',
+    path: '/api/analytics/spending-trends',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAnalyticsNetworthRoute = ApiAnalyticsNetworthRouteImport.update({
+  id: '/api/analytics/networth',
+  path: '/api/analytics/networth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyticsCategoryBreakdownRoute =
+  ApiAnalyticsCategoryBreakdownRouteImport.update({
+    id: '/api/analytics/category-breakdown',
+    path: '/api/analytics/category-breakdown',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiAnalyticsCashflowRoute = ApiAnalyticsCashflowRouteImport.update({
+  id: '/api/analytics/cashflow',
+  path: '/api/analytics/cashflow',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccountsIdRoute = ApiAccountsIdRouteImport.update({
@@ -222,32 +351,53 @@ export interface FileRoutesByFullPath {
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/analytics/cashflow': typeof ApiAnalyticsCashflowRoute
+  '/api/analytics/category-breakdown': typeof ApiAnalyticsCategoryBreakdownRoute
+  '/api/analytics/networth': typeof ApiAnalyticsNetworthRoute
+  '/api/analytics/spending-trends': typeof ApiAnalyticsSpendingTrendsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/budget-presets/$id': typeof ApiBudgetPresetsIdRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/contacts/$id': typeof ApiContactsIdRoute
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
+  '/api/emi-payments/$id': typeof ApiEmiPaymentsIdRoute
+  '/api/emis/$id': typeof ApiEmisIdRoute
   '/api/investment-entries/$id': typeof ApiInvestmentEntriesIdRoute
   '/api/investment-valuations/$id': typeof ApiInvestmentValuationsIdRoute
   '/api/investments/$id': typeof ApiInvestmentsIdRoute
+  '/api/loan-payments/$id': typeof ApiLoanPaymentsIdRoute
+  '/api/loans/$id': typeof ApiLoansIdRoute
+  '/api/monthly-budget-allocations/$id': typeof ApiMonthlyBudgetAllocationsIdRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
+  '/api/recurring-rules/$id': typeof ApiRecurringRulesIdRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/accounts/': typeof ProtectedAccountsIndexRoute
+  '/analytics/': typeof ProtectedAnalyticsIndexRoute
   '/budgets/': typeof ProtectedBudgetsIndexRoute
   '/categories/': typeof ProtectedCategoriesIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
   '/investments/': typeof ProtectedInvestmentsIndexRoute
+  '/loans/': typeof ProtectedLoansIndexRoute
+  '/recurring/': typeof ProtectedRecurringIndexRoute
   '/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
   '/api/budget-presets/': typeof ApiBudgetPresetsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
+  '/api/contacts/': typeof ApiContactsIndexRoute
+  '/api/emi-payments/': typeof ApiEmiPaymentsIndexRoute
+  '/api/emis/': typeof ApiEmisIndexRoute
   '/api/investment-entries/': typeof ApiInvestmentEntriesIndexRoute
   '/api/investment-valuations/': typeof ApiInvestmentValuationsIndexRoute
   '/api/investments/': typeof ApiInvestmentsIndexRoute
+  '/api/loan-payments/': typeof ApiLoanPaymentsIndexRoute
+  '/api/loans/': typeof ApiLoansIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
+  '/api/recurring-rules/': typeof ApiRecurringRulesIndexRoute
   '/api/transactions/': typeof ApiTransactionsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -256,32 +406,53 @@ export interface FileRoutesByTo {
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/analytics/cashflow': typeof ApiAnalyticsCashflowRoute
+  '/api/analytics/category-breakdown': typeof ApiAnalyticsCategoryBreakdownRoute
+  '/api/analytics/networth': typeof ApiAnalyticsNetworthRoute
+  '/api/analytics/spending-trends': typeof ApiAnalyticsSpendingTrendsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/budget-presets/$id': typeof ApiBudgetPresetsIdRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/contacts/$id': typeof ApiContactsIdRoute
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
+  '/api/emi-payments/$id': typeof ApiEmiPaymentsIdRoute
+  '/api/emis/$id': typeof ApiEmisIdRoute
   '/api/investment-entries/$id': typeof ApiInvestmentEntriesIdRoute
   '/api/investment-valuations/$id': typeof ApiInvestmentValuationsIdRoute
   '/api/investments/$id': typeof ApiInvestmentsIdRoute
+  '/api/loan-payments/$id': typeof ApiLoanPaymentsIdRoute
+  '/api/loans/$id': typeof ApiLoansIdRoute
+  '/api/monthly-budget-allocations/$id': typeof ApiMonthlyBudgetAllocationsIdRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
+  '/api/recurring-rules/$id': typeof ApiRecurringRulesIdRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/accounts': typeof ProtectedAccountsIndexRoute
+  '/analytics': typeof ProtectedAnalyticsIndexRoute
   '/budgets': typeof ProtectedBudgetsIndexRoute
   '/categories': typeof ProtectedCategoriesIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
   '/investments': typeof ProtectedInvestmentsIndexRoute
+  '/loans': typeof ProtectedLoansIndexRoute
+  '/recurring': typeof ProtectedRecurringIndexRoute
   '/transactions': typeof ProtectedTransactionsIndexRoute
   '/api/accounts': typeof ApiAccountsIndexRoute
   '/api/budget-presets': typeof ApiBudgetPresetsIndexRoute
   '/api/categories': typeof ApiCategoriesIndexRoute
   '/api/category-groups': typeof ApiCategoryGroupsIndexRoute
+  '/api/contacts': typeof ApiContactsIndexRoute
+  '/api/emi-payments': typeof ApiEmiPaymentsIndexRoute
+  '/api/emis': typeof ApiEmisIndexRoute
   '/api/investment-entries': typeof ApiInvestmentEntriesIndexRoute
   '/api/investment-valuations': typeof ApiInvestmentValuationsIndexRoute
   '/api/investments': typeof ApiInvestmentsIndexRoute
+  '/api/loan-payments': typeof ApiLoanPaymentsIndexRoute
+  '/api/loans': typeof ApiLoansIndexRoute
   '/api/profile': typeof ApiProfileIndexRoute
+  '/api/recurring-rules': typeof ApiRecurringRulesIndexRoute
   '/api/transactions': typeof ApiTransactionsIndexRoute
 }
 export interface FileRoutesById {
@@ -292,32 +463,53 @@ export interface FileRoutesById {
   '/auth/sign-out': typeof AuthSignOutRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/api/accounts/$id': typeof ApiAccountsIdRoute
+  '/api/analytics/cashflow': typeof ApiAnalyticsCashflowRoute
+  '/api/analytics/category-breakdown': typeof ApiAnalyticsCategoryBreakdownRoute
+  '/api/analytics/networth': typeof ApiAnalyticsNetworthRoute
+  '/api/analytics/spending-trends': typeof ApiAnalyticsSpendingTrendsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/budget-presets/$id': typeof ApiBudgetPresetsIdRoute
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
+  '/api/contacts/$id': typeof ApiContactsIdRoute
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
+  '/api/emi-payments/$id': typeof ApiEmiPaymentsIdRoute
+  '/api/emis/$id': typeof ApiEmisIdRoute
   '/api/investment-entries/$id': typeof ApiInvestmentEntriesIdRoute
   '/api/investment-valuations/$id': typeof ApiInvestmentValuationsIdRoute
   '/api/investments/$id': typeof ApiInvestmentsIdRoute
+  '/api/loan-payments/$id': typeof ApiLoanPaymentsIdRoute
+  '/api/loans/$id': typeof ApiLoansIdRoute
+  '/api/monthly-budget-allocations/$id': typeof ApiMonthlyBudgetAllocationsIdRoute
   '/api/monthly-budgets/$month': typeof ApiMonthlyBudgetsMonthRoute
   '/api/monthly-budgets/apply-preset': typeof ApiMonthlyBudgetsApplyPresetRoute
+  '/api/recurring-rules/$id': typeof ApiRecurringRulesIdRoute
   '/api/transactions/$id': typeof ApiTransactionsIdRoute
   '/_protected/accounts/': typeof ProtectedAccountsIndexRoute
+  '/_protected/analytics/': typeof ProtectedAnalyticsIndexRoute
   '/_protected/budgets/': typeof ProtectedBudgetsIndexRoute
   '/_protected/categories/': typeof ProtectedCategoriesIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
   '/_protected/investments/': typeof ProtectedInvestmentsIndexRoute
+  '/_protected/loans/': typeof ProtectedLoansIndexRoute
+  '/_protected/recurring/': typeof ProtectedRecurringIndexRoute
   '/_protected/transactions/': typeof ProtectedTransactionsIndexRoute
   '/api/accounts/': typeof ApiAccountsIndexRoute
   '/api/budget-presets/': typeof ApiBudgetPresetsIndexRoute
   '/api/categories/': typeof ApiCategoriesIndexRoute
   '/api/category-groups/': typeof ApiCategoryGroupsIndexRoute
+  '/api/contacts/': typeof ApiContactsIndexRoute
+  '/api/emi-payments/': typeof ApiEmiPaymentsIndexRoute
+  '/api/emis/': typeof ApiEmisIndexRoute
   '/api/investment-entries/': typeof ApiInvestmentEntriesIndexRoute
   '/api/investment-valuations/': typeof ApiInvestmentValuationsIndexRoute
   '/api/investments/': typeof ApiInvestmentsIndexRoute
+  '/api/loan-payments/': typeof ApiLoanPaymentsIndexRoute
+  '/api/loans/': typeof ApiLoansIndexRoute
   '/api/profile/': typeof ApiProfileIndexRoute
+  '/api/recurring-rules/': typeof ApiRecurringRulesIndexRoute
   '/api/transactions/': typeof ApiTransactionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -328,32 +520,53 @@ export interface FileRouteTypes {
     | '/auth/sign-out'
     | '/auth/sign-up'
     | '/api/accounts/$id'
+    | '/api/analytics/cashflow'
+    | '/api/analytics/category-breakdown'
+    | '/api/analytics/networth'
+    | '/api/analytics/spending-trends'
     | '/api/auth/$'
+    | '/api/budget-presets/$id'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/contacts/$id'
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
+    | '/api/emi-payments/$id'
+    | '/api/emis/$id'
     | '/api/investment-entries/$id'
     | '/api/investment-valuations/$id'
     | '/api/investments/$id'
+    | '/api/loan-payments/$id'
+    | '/api/loans/$id'
+    | '/api/monthly-budget-allocations/$id'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
+    | '/api/recurring-rules/$id'
     | '/api/transactions/$id'
     | '/accounts/'
+    | '/analytics/'
     | '/budgets/'
     | '/categories/'
     | '/dashboard/'
     | '/investments/'
+    | '/loans/'
+    | '/recurring/'
     | '/transactions/'
     | '/api/accounts/'
     | '/api/budget-presets/'
     | '/api/categories/'
     | '/api/category-groups/'
+    | '/api/contacts/'
+    | '/api/emi-payments/'
+    | '/api/emis/'
     | '/api/investment-entries/'
     | '/api/investment-valuations/'
     | '/api/investments/'
+    | '/api/loan-payments/'
+    | '/api/loans/'
     | '/api/profile/'
+    | '/api/recurring-rules/'
     | '/api/transactions/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -362,32 +575,53 @@ export interface FileRouteTypes {
     | '/auth/sign-out'
     | '/auth/sign-up'
     | '/api/accounts/$id'
+    | '/api/analytics/cashflow'
+    | '/api/analytics/category-breakdown'
+    | '/api/analytics/networth'
+    | '/api/analytics/spending-trends'
     | '/api/auth/$'
+    | '/api/budget-presets/$id'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/contacts/$id'
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
+    | '/api/emi-payments/$id'
+    | '/api/emis/$id'
     | '/api/investment-entries/$id'
     | '/api/investment-valuations/$id'
     | '/api/investments/$id'
+    | '/api/loan-payments/$id'
+    | '/api/loans/$id'
+    | '/api/monthly-budget-allocations/$id'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
+    | '/api/recurring-rules/$id'
     | '/api/transactions/$id'
     | '/accounts'
+    | '/analytics'
     | '/budgets'
     | '/categories'
     | '/dashboard'
     | '/investments'
+    | '/loans'
+    | '/recurring'
     | '/transactions'
     | '/api/accounts'
     | '/api/budget-presets'
     | '/api/categories'
     | '/api/category-groups'
+    | '/api/contacts'
+    | '/api/emi-payments'
+    | '/api/emis'
     | '/api/investment-entries'
     | '/api/investment-valuations'
     | '/api/investments'
+    | '/api/loan-payments'
+    | '/api/loans'
     | '/api/profile'
+    | '/api/recurring-rules'
     | '/api/transactions'
   id:
     | '__root__'
@@ -397,32 +631,53 @@ export interface FileRouteTypes {
     | '/auth/sign-out'
     | '/auth/sign-up'
     | '/api/accounts/$id'
+    | '/api/analytics/cashflow'
+    | '/api/analytics/category-breakdown'
+    | '/api/analytics/networth'
+    | '/api/analytics/spending-trends'
     | '/api/auth/$'
+    | '/api/budget-presets/$id'
     | '/api/categories/$id'
     | '/api/category-groups/$id'
+    | '/api/contacts/$id'
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
+    | '/api/emi-payments/$id'
+    | '/api/emis/$id'
     | '/api/investment-entries/$id'
     | '/api/investment-valuations/$id'
     | '/api/investments/$id'
+    | '/api/loan-payments/$id'
+    | '/api/loans/$id'
+    | '/api/monthly-budget-allocations/$id'
     | '/api/monthly-budgets/$month'
     | '/api/monthly-budgets/apply-preset'
+    | '/api/recurring-rules/$id'
     | '/api/transactions/$id'
     | '/_protected/accounts/'
+    | '/_protected/analytics/'
     | '/_protected/budgets/'
     | '/_protected/categories/'
     | '/_protected/dashboard/'
     | '/_protected/investments/'
+    | '/_protected/loans/'
+    | '/_protected/recurring/'
     | '/_protected/transactions/'
     | '/api/accounts/'
     | '/api/budget-presets/'
     | '/api/categories/'
     | '/api/category-groups/'
+    | '/api/contacts/'
+    | '/api/emi-payments/'
+    | '/api/emis/'
     | '/api/investment-entries/'
     | '/api/investment-valuations/'
     | '/api/investments/'
+    | '/api/loan-payments/'
+    | '/api/loans/'
     | '/api/profile/'
+    | '/api/recurring-rules/'
     | '/api/transactions/'
   fileRoutesById: FileRoutesById
 }
@@ -433,26 +688,44 @@ export interface RootRouteChildren {
   AuthSignOutRoute: typeof AuthSignOutRoute
   AuthSignUpRoute: typeof AuthSignUpRoute
   ApiAccountsIdRoute: typeof ApiAccountsIdRoute
+  ApiAnalyticsCashflowRoute: typeof ApiAnalyticsCashflowRoute
+  ApiAnalyticsCategoryBreakdownRoute: typeof ApiAnalyticsCategoryBreakdownRoute
+  ApiAnalyticsNetworthRoute: typeof ApiAnalyticsNetworthRoute
+  ApiAnalyticsSpendingTrendsRoute: typeof ApiAnalyticsSpendingTrendsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBudgetPresetsIdRoute: typeof ApiBudgetPresetsIdRoute
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiCategoryGroupsIdRoute: typeof ApiCategoryGroupsIdRoute
+  ApiContactsIdRoute: typeof ApiContactsIdRoute
   ApiDashboardBudgetStatusRoute: typeof ApiDashboardBudgetStatusRoute
   ApiDashboardCashflowRoute: typeof ApiDashboardCashflowRoute
   ApiDashboardSummaryRoute: typeof ApiDashboardSummaryRoute
+  ApiEmiPaymentsIdRoute: typeof ApiEmiPaymentsIdRoute
+  ApiEmisIdRoute: typeof ApiEmisIdRoute
   ApiInvestmentEntriesIdRoute: typeof ApiInvestmentEntriesIdRoute
   ApiInvestmentValuationsIdRoute: typeof ApiInvestmentValuationsIdRoute
   ApiInvestmentsIdRoute: typeof ApiInvestmentsIdRoute
+  ApiLoanPaymentsIdRoute: typeof ApiLoanPaymentsIdRoute
+  ApiLoansIdRoute: typeof ApiLoansIdRoute
+  ApiMonthlyBudgetAllocationsIdRoute: typeof ApiMonthlyBudgetAllocationsIdRoute
   ApiMonthlyBudgetsMonthRoute: typeof ApiMonthlyBudgetsMonthRoute
   ApiMonthlyBudgetsApplyPresetRoute: typeof ApiMonthlyBudgetsApplyPresetRoute
+  ApiRecurringRulesIdRoute: typeof ApiRecurringRulesIdRoute
   ApiTransactionsIdRoute: typeof ApiTransactionsIdRoute
   ApiAccountsIndexRoute: typeof ApiAccountsIndexRoute
   ApiBudgetPresetsIndexRoute: typeof ApiBudgetPresetsIndexRoute
   ApiCategoriesIndexRoute: typeof ApiCategoriesIndexRoute
   ApiCategoryGroupsIndexRoute: typeof ApiCategoryGroupsIndexRoute
+  ApiContactsIndexRoute: typeof ApiContactsIndexRoute
+  ApiEmiPaymentsIndexRoute: typeof ApiEmiPaymentsIndexRoute
+  ApiEmisIndexRoute: typeof ApiEmisIndexRoute
   ApiInvestmentEntriesIndexRoute: typeof ApiInvestmentEntriesIndexRoute
   ApiInvestmentValuationsIndexRoute: typeof ApiInvestmentValuationsIndexRoute
   ApiInvestmentsIndexRoute: typeof ApiInvestmentsIndexRoute
+  ApiLoanPaymentsIndexRoute: typeof ApiLoanPaymentsIndexRoute
+  ApiLoansIndexRoute: typeof ApiLoansIndexRoute
   ApiProfileIndexRoute: typeof ApiProfileIndexRoute
+  ApiRecurringRulesIndexRoute: typeof ApiRecurringRulesIndexRoute
   ApiTransactionsIndexRoute: typeof ApiTransactionsIndexRoute
 }
 
@@ -500,11 +773,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTransactionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/recurring-rules/': {
+      id: '/api/recurring-rules/'
+      path: '/api/recurring-rules'
+      fullPath: '/api/recurring-rules/'
+      preLoaderRoute: typeof ApiRecurringRulesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/profile/': {
       id: '/api/profile/'
       path: '/api/profile'
       fullPath: '/api/profile/'
       preLoaderRoute: typeof ApiProfileIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/loans/': {
+      id: '/api/loans/'
+      path: '/api/loans'
+      fullPath: '/api/loans/'
+      preLoaderRoute: typeof ApiLoansIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/loan-payments/': {
+      id: '/api/loan-payments/'
+      path: '/api/loan-payments'
+      fullPath: '/api/loan-payments/'
+      preLoaderRoute: typeof ApiLoanPaymentsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/investments/': {
@@ -526,6 +820,27 @@ declare module '@tanstack/react-router' {
       path: '/api/investment-entries'
       fullPath: '/api/investment-entries/'
       preLoaderRoute: typeof ApiInvestmentEntriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/emis/': {
+      id: '/api/emis/'
+      path: '/api/emis'
+      fullPath: '/api/emis/'
+      preLoaderRoute: typeof ApiEmisIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/emi-payments/': {
+      id: '/api/emi-payments/'
+      path: '/api/emi-payments'
+      fullPath: '/api/emi-payments/'
+      preLoaderRoute: typeof ApiEmiPaymentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/contacts/': {
+      id: '/api/contacts/'
+      path: '/api/contacts'
+      fullPath: '/api/contacts/'
+      preLoaderRoute: typeof ApiContactsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/category-groups/': {
@@ -563,6 +878,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedTransactionsIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/recurring/': {
+      id: '/_protected/recurring/'
+      path: '/recurring'
+      fullPath: '/recurring/'
+      preLoaderRoute: typeof ProtectedRecurringIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/loans/': {
+      id: '/_protected/loans/'
+      path: '/loans'
+      fullPath: '/loans/'
+      preLoaderRoute: typeof ProtectedLoansIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/investments/': {
       id: '/_protected/investments/'
       path: '/investments'
@@ -591,6 +920,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedBudgetsIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/analytics/': {
+      id: '/_protected/analytics/'
+      path: '/analytics'
+      fullPath: '/analytics/'
+      preLoaderRoute: typeof ProtectedAnalyticsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/accounts/': {
       id: '/_protected/accounts/'
       path: '/accounts'
@@ -605,6 +941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTransactionsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/recurring-rules/$id': {
+      id: '/api/recurring-rules/$id'
+      path: '/api/recurring-rules/$id'
+      fullPath: '/api/recurring-rules/$id'
+      preLoaderRoute: typeof ApiRecurringRulesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/monthly-budgets/apply-preset': {
       id: '/api/monthly-budgets/apply-preset'
       path: '/api/monthly-budgets/apply-preset'
@@ -617,6 +960,27 @@ declare module '@tanstack/react-router' {
       path: '/api/monthly-budgets/$month'
       fullPath: '/api/monthly-budgets/$month'
       preLoaderRoute: typeof ApiMonthlyBudgetsMonthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/monthly-budget-allocations/$id': {
+      id: '/api/monthly-budget-allocations/$id'
+      path: '/api/monthly-budget-allocations/$id'
+      fullPath: '/api/monthly-budget-allocations/$id'
+      preLoaderRoute: typeof ApiMonthlyBudgetAllocationsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/loans/$id': {
+      id: '/api/loans/$id'
+      path: '/api/loans/$id'
+      fullPath: '/api/loans/$id'
+      preLoaderRoute: typeof ApiLoansIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/loan-payments/$id': {
+      id: '/api/loan-payments/$id'
+      path: '/api/loan-payments/$id'
+      fullPath: '/api/loan-payments/$id'
+      preLoaderRoute: typeof ApiLoanPaymentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/investments/$id': {
@@ -640,6 +1004,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiInvestmentEntriesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/emis/$id': {
+      id: '/api/emis/$id'
+      path: '/api/emis/$id'
+      fullPath: '/api/emis/$id'
+      preLoaderRoute: typeof ApiEmisIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/emi-payments/$id': {
+      id: '/api/emi-payments/$id'
+      path: '/api/emi-payments/$id'
+      fullPath: '/api/emi-payments/$id'
+      preLoaderRoute: typeof ApiEmiPaymentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/dashboard/summary': {
       id: '/api/dashboard/summary'
       path: '/api/dashboard/summary'
@@ -661,6 +1039,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDashboardBudgetStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/contacts/$id': {
+      id: '/api/contacts/$id'
+      path: '/api/contacts/$id'
+      fullPath: '/api/contacts/$id'
+      preLoaderRoute: typeof ApiContactsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/category-groups/$id': {
       id: '/api/category-groups/$id'
       path: '/api/category-groups/$id'
@@ -675,11 +1060,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCategoriesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/budget-presets/$id': {
+      id: '/api/budget-presets/$id'
+      path: '/api/budget-presets/$id'
+      fullPath: '/api/budget-presets/$id'
+      preLoaderRoute: typeof ApiBudgetPresetsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/spending-trends': {
+      id: '/api/analytics/spending-trends'
+      path: '/api/analytics/spending-trends'
+      fullPath: '/api/analytics/spending-trends'
+      preLoaderRoute: typeof ApiAnalyticsSpendingTrendsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/networth': {
+      id: '/api/analytics/networth'
+      path: '/api/analytics/networth'
+      fullPath: '/api/analytics/networth'
+      preLoaderRoute: typeof ApiAnalyticsNetworthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/category-breakdown': {
+      id: '/api/analytics/category-breakdown'
+      path: '/api/analytics/category-breakdown'
+      fullPath: '/api/analytics/category-breakdown'
+      preLoaderRoute: typeof ApiAnalyticsCategoryBreakdownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analytics/cashflow': {
+      id: '/api/analytics/cashflow'
+      path: '/api/analytics/cashflow'
+      fullPath: '/api/analytics/cashflow'
+      preLoaderRoute: typeof ApiAnalyticsCashflowRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/accounts/$id': {
@@ -694,19 +1114,25 @@ declare module '@tanstack/react-router' {
 
 interface ProtectedRouteChildren {
   ProtectedAccountsIndexRoute: typeof ProtectedAccountsIndexRoute
+  ProtectedAnalyticsIndexRoute: typeof ProtectedAnalyticsIndexRoute
   ProtectedBudgetsIndexRoute: typeof ProtectedBudgetsIndexRoute
   ProtectedCategoriesIndexRoute: typeof ProtectedCategoriesIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
   ProtectedInvestmentsIndexRoute: typeof ProtectedInvestmentsIndexRoute
+  ProtectedLoansIndexRoute: typeof ProtectedLoansIndexRoute
+  ProtectedRecurringIndexRoute: typeof ProtectedRecurringIndexRoute
   ProtectedTransactionsIndexRoute: typeof ProtectedTransactionsIndexRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAccountsIndexRoute: ProtectedAccountsIndexRoute,
+  ProtectedAnalyticsIndexRoute: ProtectedAnalyticsIndexRoute,
   ProtectedBudgetsIndexRoute: ProtectedBudgetsIndexRoute,
   ProtectedCategoriesIndexRoute: ProtectedCategoriesIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
   ProtectedInvestmentsIndexRoute: ProtectedInvestmentsIndexRoute,
+  ProtectedLoansIndexRoute: ProtectedLoansIndexRoute,
+  ProtectedRecurringIndexRoute: ProtectedRecurringIndexRoute,
   ProtectedTransactionsIndexRoute: ProtectedTransactionsIndexRoute,
 }
 
@@ -721,26 +1147,44 @@ const rootRouteChildren: RootRouteChildren = {
   AuthSignOutRoute: AuthSignOutRoute,
   AuthSignUpRoute: AuthSignUpRoute,
   ApiAccountsIdRoute: ApiAccountsIdRoute,
+  ApiAnalyticsCashflowRoute: ApiAnalyticsCashflowRoute,
+  ApiAnalyticsCategoryBreakdownRoute: ApiAnalyticsCategoryBreakdownRoute,
+  ApiAnalyticsNetworthRoute: ApiAnalyticsNetworthRoute,
+  ApiAnalyticsSpendingTrendsRoute: ApiAnalyticsSpendingTrendsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBudgetPresetsIdRoute: ApiBudgetPresetsIdRoute,
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiCategoryGroupsIdRoute: ApiCategoryGroupsIdRoute,
+  ApiContactsIdRoute: ApiContactsIdRoute,
   ApiDashboardBudgetStatusRoute: ApiDashboardBudgetStatusRoute,
   ApiDashboardCashflowRoute: ApiDashboardCashflowRoute,
   ApiDashboardSummaryRoute: ApiDashboardSummaryRoute,
+  ApiEmiPaymentsIdRoute: ApiEmiPaymentsIdRoute,
+  ApiEmisIdRoute: ApiEmisIdRoute,
   ApiInvestmentEntriesIdRoute: ApiInvestmentEntriesIdRoute,
   ApiInvestmentValuationsIdRoute: ApiInvestmentValuationsIdRoute,
   ApiInvestmentsIdRoute: ApiInvestmentsIdRoute,
+  ApiLoanPaymentsIdRoute: ApiLoanPaymentsIdRoute,
+  ApiLoansIdRoute: ApiLoansIdRoute,
+  ApiMonthlyBudgetAllocationsIdRoute: ApiMonthlyBudgetAllocationsIdRoute,
   ApiMonthlyBudgetsMonthRoute: ApiMonthlyBudgetsMonthRoute,
   ApiMonthlyBudgetsApplyPresetRoute: ApiMonthlyBudgetsApplyPresetRoute,
+  ApiRecurringRulesIdRoute: ApiRecurringRulesIdRoute,
   ApiTransactionsIdRoute: ApiTransactionsIdRoute,
   ApiAccountsIndexRoute: ApiAccountsIndexRoute,
   ApiBudgetPresetsIndexRoute: ApiBudgetPresetsIndexRoute,
   ApiCategoriesIndexRoute: ApiCategoriesIndexRoute,
   ApiCategoryGroupsIndexRoute: ApiCategoryGroupsIndexRoute,
+  ApiContactsIndexRoute: ApiContactsIndexRoute,
+  ApiEmiPaymentsIndexRoute: ApiEmiPaymentsIndexRoute,
+  ApiEmisIndexRoute: ApiEmisIndexRoute,
   ApiInvestmentEntriesIndexRoute: ApiInvestmentEntriesIndexRoute,
   ApiInvestmentValuationsIndexRoute: ApiInvestmentValuationsIndexRoute,
   ApiInvestmentsIndexRoute: ApiInvestmentsIndexRoute,
+  ApiLoanPaymentsIndexRoute: ApiLoanPaymentsIndexRoute,
+  ApiLoansIndexRoute: ApiLoansIndexRoute,
   ApiProfileIndexRoute: ApiProfileIndexRoute,
+  ApiRecurringRulesIndexRoute: ApiRecurringRulesIndexRoute,
   ApiTransactionsIndexRoute: ApiTransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport

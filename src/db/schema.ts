@@ -183,16 +183,26 @@ export type NewMonthlyBudget = typeof monthlyBudgets.$inferInsert;
 export type MonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferSelect;
 export type NewMonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferInsert;
 
-// Phase 7: Investments & SIP Tracking
+// Phase 7: Investments & SIP Tracking — each investment owns a paired
+// `accounts` row (account_type='investment') whose current_balance IS the
+// investment's market value.  Valuations are now plain account-balance
+// updates captured in `account_balance_history`.
 export const investments = pgTable("investments", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  accountId: uuid("account_id")
+    .notNull()
+    .references(() => accounts.id, { onDelete: "restrict" }),
   name: text("name").notNull(),
   investmentType: text("investment_type").notNull(),
   symbol: text("symbol"),
+  status: text("status").notNull().default("active"), // 'active' | 'liquidated'
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// investment_entries keeps the unit-count metadata for each buy; the cash
+// movement itself lives in `transactions` (transfer from bank → investment
+// account).
 export const investmentEntries = pgTable("investment_entries", {
   id: uuid("id").defaultRandom().primaryKey(),
   investmentId: uuid("investment_id").notNull().references(() => investments.id, { onDelete: "cascade" }),
@@ -202,16 +212,119 @@ export const investmentEntries = pgTable("investment_entries", {
   notes: text("notes").notNull().default(""),
 });
 
-export const investmentValuations = pgTable("investment_valuations", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  investmentId: uuid("investment_id").notNull().references(() => investments.id, { onDelete: "cascade" }),
-  valuationAmount: numeric("valuation_amount", { precision: 14, scale: 2 }).notNull(),
-  valuationDate: timestamp("valuation_date", { withTimezone: true }).defaultNow().notNull(),
-});
-
 export type Investment = typeof investments.$inferSelect;
 export type NewInvestment = typeof investments.$inferInsert;
 export type InvestmentEntry = typeof investmentEntries.$inferSelect;
 export type NewInvestmentEntry = typeof investmentEntries.$inferInsert;
-export type InvestmentValuation = typeof investmentValuations.$inferSelect;
-export type NewInvestmentValuation = typeof investmentValuations.$inferInsert;
+
+// Phase 8: Loans, EMI & Lending — every loan/EMI also owns a paired
+// `accounts` row (loan_given asset, loan_taken/emi liability with negative
+// balance) so net worth and cash flow flow through the same ledger as cash.
+export const contacts = pgTable("contacts", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	name: text("name").notNull(),
+	phone: text("phone").notNull().default(""),
+	notes: text("notes").notNull().default(""),
+});
+
+export const loans = pgTable("loans", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "set null" }),
+	accountId: uuid("account_id")
+		.notNull()
+		.references(() => accounts.id, { onDelete: "restrict" }),
+	loanType: text("loan_type").notNull(), // 'given' | 'taken'
+	interestRate: numeric("interest_rate", { precision: 5, scale: 2 }),
+	startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
+	expectedEndDate: timestamp("expected_end_date", { withTimezone: true }),
+	status: text("status").notNull().default("active"), // 'active' | 'paid' | 'overdue'
+	notes: text("notes").notNull().default(""),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const loanPayments = pgTable("loan_payments", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	loanId: uuid("loan_id")
+		.notNull()
+		.references(() => loans.id, { onDelete: "cascade" }),
+	amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
+	paidAt: timestamp("paid_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const emis = pgTable("emis", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	accountId: uuid("account_id")
+		.notNull()
+		.references(() => accounts.id, { onDelete: "restrict" }),
+	name: text("name").notNull(),
+	interestRate: numeric("interest_rate", { precision: 5, scale: 2 }).notNull(),
+	monthlyAmount: numeric("monthly_amount", { precision: 14, scale: 2 }).notNull(),
+	startDate: timestamp("start_date", { withTimezone: true }).notNull(),
+	endDate: timestamp("end_date", { withTimezone: true }).notNull(),
+	nextDueDate: timestamp("next_due_date", { withTimezone: true }).notNull(),
+	lenderName: text("lender_name").notNull().default(""),
+	status: text("status").notNull().default("active"), // 'active' | 'completed' | 'cancelled'
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const emiPayments = pgTable("emi_payments", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	emiId: uuid("emi_id")
+		.notNull()
+		.references(() => emis.id, { onDelete: "cascade" }),
+	amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
+	paidAt: timestamp("paid_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type Contact = typeof contacts.$inferSelect;
+export type NewContact = typeof contacts.$inferInsert;
+export type Loan = typeof loans.$inferSelect;
+export type NewLoan = typeof loans.$inferInsert;
+export type LoanPayment = typeof loanPayments.$inferSelect;
+export type NewLoanPayment = typeof loanPayments.$inferInsert;
+export type Emi = typeof emis.$inferSelect;
+export type NewEmi = typeof emis.$inferInsert;
+export type EmiPayment = typeof emiPayments.$inferSelect;
+export type NewEmiPayment = typeof emiPayments.$inferInsert;
+
+// Phase 10: Recurring Rules & Forecasting
+export const recurringRules = pgTable("recurring_rules", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	categoryId: uuid("category_id").references(() => categories.id, { onDelete: "set null" }),
+	accountId: uuid("account_id").references(() => accounts.id, { onDelete: "set null" }),
+	description: text("description").notNull(),
+	amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
+	transactionType: text("transaction_type").notNull(), // 'income' | 'expense'
+	frequency: text("frequency").notNull(), // 'daily' | 'weekly' | 'monthly' | 'yearly'
+	nextRunDate: timestamp("next_run_date", { withTimezone: true }).notNull(),
+	isActive: boolean("is_active").notNull().default(true),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const forecastSnapshots = pgTable("forecast_snapshots", {
+	id: uuid("id").defaultRandom().primaryKey(),
+	userId: uuid("user_id")
+		.notNull()
+		.references(() => users.id, { onDelete: "cascade" }),
+	forecastMonth: timestamp("forecast_month", { withTimezone: true }).notNull(),
+	predictedSpend: numeric("predicted_spend", { precision: 14, scale: 2 }).notNull(),
+	predictedSavings: numeric("predicted_savings", { precision: 14, scale: 2 }).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export type RecurringRule = typeof recurringRules.$inferSelect;
+export type NewRecurringRule = typeof recurringRules.$inferInsert;
+export type ForecastSnapshot = typeof forecastSnapshots.$inferSelect;
+export type NewForecastSnapshot = typeof forecastSnapshots.$inferInsert;

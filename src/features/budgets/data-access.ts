@@ -117,3 +117,40 @@ export async function fetchMonthlyBudget(
     headers: createAuthHeaders(user),
   });
 }
+
+export async function deleteBudgetPreset(id: string, user?: User) {
+  return request<{ success: boolean }>(`/api/budget-presets/${id}`, {
+    method: "DELETE",
+    headers: createAuthHeaders(user),
+  });
+}
+
+export async function updateMonthlyBudget(monthKey: string, input: { expectedIncome: number }, user?: User) {
+  return request<{ monthlyBudget: MonthlyBudget }>(`/api/monthly-budgets/${monthKey}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteMonthlyBudget(monthKey: string, user?: User) {
+  return request<{ success: boolean }>(`/api/monthly-budgets/${monthKey}`, {
+    method: "DELETE",
+    headers: createAuthHeaders(user),
+  });
+}
+
+export async function updateMonthlyAllocation(id: string, input: { allocatedAmount: number }, user?: User) {
+  return request<{ allocation: MonthlyBudgetAllocation }>(`/api/monthly-budget-allocations/${id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deleteMonthlyAllocation(id: string, user?: User) {
+  return request<{ success: boolean }>(`/api/monthly-budget-allocations/${id}`, {
+    method: "DELETE",
+    headers: createAuthHeaders(user),
+  });
+}

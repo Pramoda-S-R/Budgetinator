@@ -16,14 +16,19 @@ export const Route = createFileRoute("/api/dashboard/cashflow")({
     handlers: {
       GET: async ({ request }) => {
         const user = await requireCurrentUser(request);
-        // aggregate daily net cashflow for current month
+        // Daily net cashflow: income +amount, expense -amount, transfers excluded
+        // (transfers move money between user-owned accounts and don't represent
+        // a net flow into/out of the user's overall position).
         const rows = await db
           .select({
             day: sql`date_trunc('day', ${transactions.transactionDate})`,
             net: sql`
               coalesce(sum(
-                case when ${transactions.transactionType}='income' then ${transactions.amount}
-                else -${transactions.amount} end
+                case
+                  when ${transactions.transactionType}='income'  then ${transactions.amount}
+                  when ${transactions.transactionType}='expense' then -${transactions.amount}
+                  else 0
+                end
               ), 0)
             `,
           })

@@ -36,6 +36,8 @@ export async function fetchInvestmentValuations(user?: User) {
 
 export type CreateInvestmentEntryInput = {
   investmentId: string;
+  accountId: string; // source bank funding the buy
+  categoryId?: string | null;
   amountInvested: number;
   units?: number;
   investedAt?: Date;
@@ -123,5 +125,27 @@ export async function createInvestment(
     method: "POST",
     headers: { "content-type": "application/json", ...createAuthHeaders(user) },
     body: JSON.stringify(input),
+  });
+}
+
+export async function liquidateInvestment(id: string, user?: User): Promise<{ investment: any }> {
+  return request<{ investment: any }>(`/api/investments/${id}`, {
+    method: "PATCH",
+    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
+    body: JSON.stringify({ status: "liquidated" }),
+  });
+}
+
+export async function deleteInvestmentEntry(id: string, user?: User): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`/api/investment-entries/${id}`, {
+    method: "DELETE",
+    headers: createAuthHeaders(user),
+  });
+}
+
+export async function deleteInvestmentValuation(id: string, user?: User): Promise<{ success: boolean }> {
+  return request<{ success: boolean }>(`/api/investment-valuations/${id}`, {
+    method: "DELETE",
+    headers: createAuthHeaders(user),
   });
 }

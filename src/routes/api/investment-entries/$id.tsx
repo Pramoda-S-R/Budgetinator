@@ -1,139 +1,126 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { and, eq } from "drizzle-orm";
+import { and, eq, like } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "#/db";
-import { investments, investmentEntries } from "#/db/schema";
+import { investmentEntries, investments, transactions } from "#/db/schema";
 import { requireCurrentUser } from "#/lib/server-auth";
+import {
+	buildTransactionDeltas,
+	combineAccountDeltas,
+	invertDeltas,
+	type TransactionType,
+} from "#/lib/transaction-ledger";
+import { applyBalanceAdjustments } from "../transactions/-helpers";
 
 const entryIdSchema = z.object({ id: z.string().uuid() });
 
 const updateEntrySchema = z
-  .object({
-    amountInvested: z.coerce.number().optional(),
-    units: z.coerce.number().optional(),
-    investedAt: z.coerce.date().optional(),
-    notes: z.string().trim().optional(),
-  })
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field must be provided",
-  });
+	.object({
+		units: z.coerce.number().optional(),
+		notes: z.string().trim().optional(),
+	})
+	.refine((data) => Object.keys(data).length > 0, {
+		message: "At least one field must be provided",
+	});
 
 function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json" },
-  });
-}
-
-function toNumericString(value: number) {
-  return value.toFixed(2);
+	return new Response(JSON.stringify(data), {
+		status,
+		headers: { "content-type": "application/json" },
+	});
 }
 
 export const Route = createFileRoute("/api/investment-entries/$id")({
-  server: {
-    handlers: {
-      PATCH: async ({ request, params }) => {
-        const parsedParams = entryIdSchema.safeParse(params);
+	server: {
+		handlers: {
+			PATCH: async ({ request, params }) => {
+				// Money-side fields (amountInvested, investedAt) are derived from the
+				// linked transaction and are no longer editable here — delete and
+				// re-create the entry to change the cash movement.  Only the
+				// investment-specific metadata (units, notes) can be patched.
+				const parsedParams = entryIdSchema.safeParse(params);
+				if (!parsedParams.success) return json({ error: "Invalid entry id" }, 400);
 
-        if (!parsedParams.success) {
-          return json({ error: "Invalid entry id" }, 400);
-        }
+				const payload = await request.json();
+				const parsedBody = updateEntrySchema.safeParse(payload);
+				if (!parsedBody.success) {
+					return json({ error: "Invalid request body", issues: parsedBody.error.flatten() }, 400);
+				}
 
-        const payload = await request.json();
-        const parsedBody = updateEntrySchema.safeParse(payload);
+				const user = await requireCurrentUser(request);
+				const id = parsedParams.data.id;
 
-        if (!parsedBody.success) {
-          return json(
-            { error: "Invalid request body", issues: parsedBody.error.flatten() },
-            400,
-          );
-        }
+				const existing = await db
+					.select()
+					.from(investmentEntries)
+					.innerJoin(investments, eq(investmentEntries.investmentId, investments.id))
+					.where(and(eq(investmentEntries.id, id), eq(investments.userId, user.id)))
+					.limit(1);
 
-        const user = await requireCurrentUser(request);
-        const id = parsedParams.data.id;
+				if (!existing.length) return json({ error: "Entry not found" }, 404);
 
-        const existing = await db
-          .select()
-          .from(investmentEntries)
-          .innerJoin(
-            investments,
-            eq(investmentEntries.investmentId, investments.id),
-          )
-          .where(
-            and(
-              eq(investmentEntries.id, id),
-              eq(investments.userId, user.id),
-            ),
-          )
-          .limit(1);
+				const updates: Partial<typeof investmentEntries.$inferInsert> = {};
+				if ("units" in parsedBody.data) {
+					updates.units = parsedBody.data.units !== undefined ? parsedBody.data.units.toFixed(4) : null;
+				}
+				if ("notes" in parsedBody.data) {
+					updates.notes = parsedBody.data.notes ?? "";
+				}
 
-        if (!existing.length) {
-          return json({ error: "Entry not found" }, 404);
-        }
+				const [updated] = await db
+					.update(investmentEntries)
+					.set(updates)
+					.where(eq(investmentEntries.id, id))
+					.returning();
 
-        const updates: Partial<typeof investmentEntries.$inferInsert> = {};
-        if (
-          "amountInvested" in parsedBody.data &&
-          parsedBody.data.amountInvested !== undefined
-        ) {
-          updates.amountInvested = toNumericString(parsedBody.data.amountInvested);
-        }
-        if ("units" in parsedBody.data) {
-          updates.units =
-            parsedBody.data.units !== undefined ? toNumericString(parsedBody.data.units) : null;
-        }
-        if (
-          "investedAt" in parsedBody.data &&
-          parsedBody.data.investedAt !== undefined
-        ) {
-          updates.investedAt = parsedBody.data.investedAt;
-        }
-        if ("notes" in parsedBody.data) {
-          updates.notes = parsedBody.data.notes ?? "";
-        }
+				return json({ entry: updated });
+			},
+			DELETE: async ({ request, params }) => {
+				const parsedParams = entryIdSchema.safeParse(params);
+				if (!parsedParams.success) return json({ error: "Invalid entry id" }, 400);
 
-        const [updated] = await db
-          .update(investmentEntries)
-          .set(updates)
-          .where(eq(investmentEntries.id, id))
-          .returning();
+				const user = await requireCurrentUser(request);
+				const id = parsedParams.data.id;
 
-        return json({ entry: updated });
-      },
-      DELETE: async ({ request, params }) => {
-        const parsedParams = entryIdSchema.safeParse(params);
+				const existing = await db
+					.select({ entry: investmentEntries, investment: investments })
+					.from(investmentEntries)
+					.innerJoin(investments, eq(investmentEntries.investmentId, investments.id))
+					.where(and(eq(investmentEntries.id, id), eq(investments.userId, user.id)))
+					.limit(1);
 
-        if (!parsedParams.success) {
-          return json({ error: "Invalid entry id" }, 400);
-        }
+				if (!existing.length) return json({ error: "Entry not found" }, 404);
 
-        const user = await requireCurrentUser(request);
-        const id = parsedParams.data.id;
+				await db.transaction(async (tx) => {
+					const linkedTxs = await tx
+						.select()
+						.from(transactions)
+						.where(
+							and(
+								eq(transactions.userId, user.id),
+								like(transactions.notes, `investment_entry:${id}`),
+							),
+						);
 
-        const existing = await db
-          .select()
-          .from(investmentEntries)
-          .innerJoin(
-            investments,
-            eq(investmentEntries.investmentId, investments.id),
-          )
-          .where(
-            and(
-              eq(investmentEntries.id, id),
-              eq(investments.userId, user.id),
-            ),
-          )
-          .limit(1);
+					for (const t of linkedTxs) {
+						const deltas = combineAccountDeltas(
+							buildTransactionDeltas({
+								accountId: t.accountId,
+								transferAccountId: t.transferAccountId,
+								amount: Number(t.amount),
+								transactionType: t.transactionType as TransactionType,
+							}),
+						);
+						await applyBalanceAdjustments(tx, user.id, invertDeltas(deltas));
+						await tx.delete(transactions).where(eq(transactions.id, t.id));
+					}
 
-        if (!existing.length) {
-          return json({ error: "Entry not found" }, 404);
-        }
+					await tx.delete(investmentEntries).where(eq(investmentEntries.id, id));
+				});
 
-        await db.delete(investmentEntries).where(eq(investmentEntries.id, id));
-
-        return json({ success: true });
-      },
-    },
-  },
+				return json({ success: true });
+			},
+		},
+	},
 });

@@ -26,10 +26,12 @@ import { Input } from "#/components/ui/input";
 import { Kbd } from "#/components/ui/kbd";
 import { Label } from "#/components/ui/label";
 import {
-	NativeSelect,
-	NativeSelectOptGroup,
-	NativeSelectOption,
-} from "#/components/ui/native-select";
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "#/components/ui/select";
 import { Separator } from "#/components/ui/separator";
 import { Spinner } from "#/components/ui/spinner";
 import { Switch } from "#/components/ui/switch";
@@ -123,17 +125,23 @@ function TransactionsPage() {
 		}
 	}, [accountOptions, accountId]);
 
+	// Pre-fill a sensible default whenever the type changes (or categories first
+	// load).  We deliberately omit `categoryId` from the deps — including it
+	// would re-fire on every manual pick and snap the value back to the first
+	// type-matching category.
 	useEffect(() => {
 		const matching = categories.find(
 			(category) => category.transactionType === transactionType,
 		);
-
 		if (matching) {
 			setCategoryId(matching.id);
-		} else if (categories.length && !categoryId) {
+		} else if (categories.length) {
 			setCategoryId(categories[0].id);
+		} else {
+			setCategoryId("");
 		}
-	}, [categories, transactionType, categoryId]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [categories, transactionType]);
 
 	useEffect(() => {
 		if (transactionType !== "transfer") {
@@ -387,68 +395,73 @@ function TransactionsPage() {
 										<div className="grid gap-3 md:grid-cols-2">
 											<div className="space-y-2">
 												<Label htmlFor="transaction-account">Account</Label>
-												<NativeSelect
-													id="transaction-account"
-													value={accountId}
-													onChange={(event) => setAccountId(event.target.value)}
-												>
-													{accountOptions.map((account) => (
-														<NativeSelectOption
-															key={account.id}
-															value={account.id}
-														>
-															{account.name}
-														</NativeSelectOption>
-													))}
-												</NativeSelect>
+												<Select value={accountId} onValueChange={(v) => setAccountId(v ?? "")}>
+													<SelectTrigger id="transaction-account">
+														{accountId ? (
+															<span data-slot="select-value" className="flex flex-1 text-left text-sm">
+																{accountOptions.find((a) => a.id === accountId)?.name ?? accountId}
+															</span>
+														) : (
+															<SelectValue placeholder="Select account" />
+														)}
+													</SelectTrigger>
+													<SelectContent>
+														{accountOptions.map((account) => (
+															<SelectItem key={account.id} value={account.id}>
+																{account.name}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
 											</div>
 											{transactionType === "transfer" ? (
 												<div className="space-y-2">
 													<Label htmlFor="transaction-destination">
 														Destination
 													</Label>
-													<NativeSelect
-														id="transaction-destination"
-														value={transferAccountId}
-														onChange={(event) =>
-															setTransferAccountId(event.target.value)
-														}
-													>
-														<NativeSelectOption value="">
-															Select account
-														</NativeSelectOption>
-														{accountOptions
-															.filter((account) => account.id !== accountId)
-															.map((account) => (
-																<NativeSelectOption
-																	key={account.id}
-																	value={account.id}
-																>
-																	{account.name}
-																</NativeSelectOption>
-															))}
-													</NativeSelect>
+													<Select value={transferAccountId} onValueChange={(v) => setTransferAccountId(v ?? "")}>
+														<SelectTrigger id="transaction-destination">
+															{transferAccountId ? (
+																<span data-slot="select-value" className="flex flex-1 text-left text-sm">
+																	{accountOptions.find((a) => a.id === transferAccountId)?.name ?? transferAccountId}
+																</span>
+															) : (
+																<SelectValue placeholder="Select account" />
+															)}
+														</SelectTrigger>
+														<SelectContent>
+															{accountOptions
+																.filter((account) => account.id !== accountId)
+																.map((account) => (
+																	<SelectItem key={account.id} value={account.id}>
+																		{account.name}
+																	</SelectItem>
+																))}
+														</SelectContent>
+													</Select>
 												</div>
 											) : null}
 										</div>
 										<div className="space-y-2">
 											<Label htmlFor="transaction-category">Category</Label>
-											<NativeSelect
-												id="transaction-category"
-												value={categoryId}
-												onChange={(event) => setCategoryId(event.target.value)}
-											>
-												<NativeSelectOptGroup label="Categories">
+											<Select value={categoryId} onValueChange={(v) => setCategoryId(v ?? "")}>
+												<SelectTrigger id="transaction-category">
+													{categoryId ? (
+														<span data-slot="select-value" className="flex flex-1 text-left text-sm">
+															{categories.find((c) => c.id === categoryId)?.name ?? categoryId}
+														</span>
+													) : (
+														<SelectValue placeholder="Select category" />
+													)}
+												</SelectTrigger>
+												<SelectContent>
 													{categories.map((category) => (
-														<NativeSelectOption
-															key={category.id}
-															value={category.id}
-														>
+														<SelectItem key={category.id} value={category.id}>
 															{category.name}
-														</NativeSelectOption>
+														</SelectItem>
 													))}
-												</NativeSelectOptGroup>
-											</NativeSelect>
+												</SelectContent>
+											</Select>
 										</div>
 										<div className="grid gap-3 md:grid-cols-2">
 											<div className="space-y-2">

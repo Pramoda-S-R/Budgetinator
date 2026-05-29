@@ -1,4 +1,12 @@
-import type { InvestmentEntry, InvestmentValuation } from "#/db/schema";
+import type { InvestmentEntry } from "#/db/schema";
+
+// `InvestmentValuation` no longer maps to a table — it's now the shape served
+// by `/api/investment-valuations`, which projects `account_balance_history`
+// rows for an investment's paired account.
+type InvestmentValuation = {
+  investmentId: string;
+  valuationAmount: string | number;
+};
 
 /**
  * Calculate gain/loss per investment based on entries and latest valuation.
@@ -20,7 +28,7 @@ export function calculateGainLoss(
   }
   return valuations.map((v) => {
     const totalInvested = investedMap.get(v.investmentId) ?? 0;
-    const currentValue = parseFloat(v.valuationAmount);
+    const currentValue = Number(v.valuationAmount);
     return {
       investmentId: v.investmentId,
       totalInvested,
@@ -37,10 +45,10 @@ export function calculateGainLoss(
 export function calculatePortfolioAllocation(
   valuations: InvestmentValuation[],
 ): Array<{ investmentId: string; allocationPercent: number }> {
-  const values = valuations.map((v) => parseFloat(v.valuationAmount));
+  const values = valuations.map((v) => Number(v.valuationAmount));
   const total = values.reduce((sum, v) => sum + v, 0);
   return valuations.map((v) => {
-    const value = parseFloat(v.valuationAmount);
+    const value = Number(v.valuationAmount);
     return {
       investmentId: v.investmentId,
       allocationPercent: total > 0 ? (value / total) * 100 : 0,
