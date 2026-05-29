@@ -91,7 +91,7 @@ export const Route = createFileRoute("/api/emis/")({
 					WHERE e.user_id = ${user.id}
 					ORDER BY e.next_due_date DESC
 				`);
-				return json({ emis: (rows as SqlRows<EmiSqlRow>).rows });
+				return json({ emis: (rows as unknown as SqlRows<EmiSqlRow>).rows });
 			},
 			POST: async ({ request }) => {
 				const user = await requireCurrentUser(request);

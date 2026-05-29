@@ -98,7 +98,7 @@ export const Route = createFileRoute("/api/loans/")({
 					ORDER BY l.created_at DESC
 				`);
 
-				const list = (rows as SqlRows<LoanSqlRow>).rows;
+				const list = (rows as unknown as SqlRows<LoanSqlRow>).rows;
 				return json({
 					loans: list.map((r) => ({
 						loan: {

@@ -72,7 +72,7 @@ export const Route = createFileRoute("/api/analytics/networth")({
           ORDER BY date
         `);
 
-				const rows = (result as SqlRows<NetworthHistoryRow>).rows;
+				const rows = (result as unknown as SqlRows<NetworthHistoryRow>).rows;
 				return json({ history: rows });
 			},
 		},

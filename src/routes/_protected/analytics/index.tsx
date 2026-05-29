@@ -61,8 +61,8 @@ const MONTH_NAMES = [
 const BAR_CURSOR_STYLE = { fill: "hsl(var(--muted))", opacity: 0.5 };
 
 type ChartTooltipPayloadEntry = {
-	name?: string | number;
-	value?: string | number;
+	name?: unknown;
+	value?: unknown;
 	color?: string;
 };
 
@@ -73,9 +73,9 @@ function ChartTooltip({
 	formatter,
 }: {
 	active?: boolean;
-	payload?: ChartTooltipPayloadEntry[];
-	label?: string | number;
-	formatter?: (value: number) => string;
+	payload?: readonly ChartTooltipPayloadEntry[];
+	label?: unknown;
+	formatter?: (value: unknown) => string;
 }) {
 	if (!active || !payload?.length) return null;
 	return (
@@ -103,6 +103,9 @@ function ChartTooltip({
 				{payload.map((entry) => {
 					const name = String(entry.name ?? "Value");
 					const value = Number(entry.value ?? 0);
+					const renderedValue = formatter
+						? formatter(entry.value)
+						: value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 					return (
 						<span
 							key={`${name}-${String(value)}`}
@@ -111,7 +114,7 @@ function ChartTooltip({
 								color: "hsl(var(--popover-foreground))",
 							}}
 						>
-							{name}: {formatter ? formatter(value) : value}
+							{name}: {renderedValue}
 						</span>
 					);
 				})}
@@ -275,8 +278,13 @@ function AnalyticsPage() {
 										))}
 									</Pie>
 									<Tooltip
-										content={(p) => (
-											<ChartTooltip {...p} formatter={(v) => `${Number(v)}%`} />
+										content={({ active, payload, label }) => (
+											<ChartTooltip
+												active={active}
+												payload={payload}
+												label={label}
+												formatter={(v) => `${Number(v)}%`}
+											/>
 										)}
 									/>
 									<Legend />
@@ -361,7 +369,13 @@ function AnalyticsPage() {
 								<XAxis dataKey="label" />
 								<YAxis />
 								<Tooltip
-									content={(p) => <ChartTooltip {...p} />}
+									content={({ active, payload, label }) => (
+										<ChartTooltip
+											active={active}
+											payload={payload}
+											label={label}
+										/>
+									)}
 									cursor={BAR_CURSOR_STYLE}
 								/>
 								<Legend />
@@ -411,7 +425,13 @@ function AnalyticsPage() {
 								<XAxis dataKey="label" />
 								<YAxis />
 								<Tooltip
-									content={(p) => <ChartTooltip {...p} />}
+									content={({ active, payload, label }) => (
+										<ChartTooltip
+											active={active}
+											payload={payload}
+											label={label}
+										/>
+									)}
 									cursor={BAR_CURSOR_STYLE}
 								/>
 								<Legend />
@@ -459,9 +479,11 @@ function AnalyticsPage() {
 								/>
 								<YAxis />
 								<Tooltip
-									content={(p) => (
+									content={({ active, payload, label }) => (
 										<ChartTooltip
-											{...p}
+											active={active}
+											payload={payload}
+											label={label}
 											formatter={(v) =>
 												Number(v).toLocaleString(undefined, {
 													minimumFractionDigits: 2,

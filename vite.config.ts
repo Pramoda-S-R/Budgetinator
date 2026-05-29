@@ -13,16 +13,7 @@ const config = defineConfig({
 		netlify(),
 		neon,
 		tailwindcss(),
-		tanstackStart({
-			server: {
-				// Enable streaming SSR and static prerendering
-				stream: true,
-				prerender: {
-					routes: ['/', '/auth/sign-in'],
-					crawlLinks: true,
-				},
-			},
-		}),
+		tanstackStart(),
 		viteReact(),
 	],
 });

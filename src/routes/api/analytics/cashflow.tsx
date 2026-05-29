@@ -88,7 +88,7 @@ export const Route = createFileRoute("/api/analytics/cashflow")({
 					ORDER BY 1, 2
 				`);
 
-				const sqlRows = (rows as SqlRows<CashflowSqlRow>).rows;
+				const sqlRows = (rows as unknown as SqlRows<CashflowSqlRow>).rows;
 				const result = sqlRows.map((r) => {
 					const income = Number(r.income);
 					const expense = Number(r.expense);

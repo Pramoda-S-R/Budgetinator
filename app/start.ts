@@ -1,7 +1,7 @@
-import { createStart } from '@tanstack/react-start/server';
-import { csrfMiddleware } from '#/lib/middleware/csrf';
+import { createStart } from "@tanstack/react-start";
 
-export default createStart({
-  requestMiddleware: [csrfMiddleware],
-  functionMiddleware: [csrfMiddleware],
-});
+import { csrfMiddleware } from "#/lib/middleware/csrf";
+
+export const startInstance = createStart(() => ({
+	requestMiddleware: [csrfMiddleware],
+}));
