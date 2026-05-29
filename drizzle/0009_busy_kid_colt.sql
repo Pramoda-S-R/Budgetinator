@@ -1,0 +1,4 @@
+-- 0009 was auto-generated from the 0007 snapshot after 0008 was authored by hand.
+-- 0008_unified_ledger already applies all structural changes below, so rerunning
+-- them here fails on existing databases. Keep this file as a no-op so migration
+-- numbering remains stable across environments.
