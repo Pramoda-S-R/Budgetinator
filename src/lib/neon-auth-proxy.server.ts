@@ -1,15 +1,29 @@
-const AUTH_HEADER_ALLOWLIST = ["content-type", "cookie", "origin", "referer"];
+const FORWARDED_AUTH_HEADERS = [
+	"accept",
+	"content-type",
+	"cookie",
+	"origin",
+	"referer",
+];
 
-import { env } from "#/lib/env.functions";
+function getRequiredAuthUrl() {
+	const authUrl = import.meta.env.VITE_NEON_AUTH_URL;
+
+	if (!authUrl) {
+		throw new Error("Missing VITE_NEON_AUTH_URL for Neon Auth proxy");
+	}
+
+	return authUrl;
+}
 
 export function getNeonAuthBaseUrl() {
-  return env.VITE_NEON_AUTH_URL.replace(/\/$/, "");
+	return getRequiredAuthUrl().replace(/\/$/, "");
 }
 
 function buildHeaders(requestHeaders: Headers) {
 	const headers = new Headers();
 
-	for (const headerName of AUTH_HEADER_ALLOWLIST) {
+	for (const headerName of FORWARDED_AUTH_HEADERS) {
 		const value = requestHeaders.get(headerName);
 		if (value) {
 			headers.set(headerName, value);
@@ -37,10 +51,20 @@ export async function proxyNeonAuth(request: Request, path: string) {
 
 	const headers = new Headers();
 	const contentType = upstreamResponse.headers.get("content-type");
-	const setCookie = upstreamResponse.headers.get("set-cookie");
+	const setCookieValues = (
+		upstreamResponse.headers as Headers & { getSetCookie?: () => string[] }
+	).getSetCookie?.();
+	const setCookieFallback = upstreamResponse.headers.get("set-cookie");
 
 	if (contentType) headers.set("content-type", contentType);
-	if (setCookie) headers.set("set-cookie", setCookie);
+
+	if (setCookieValues && setCookieValues.length > 0) {
+		for (const cookie of setCookieValues) {
+			headers.append("set-cookie", cookie);
+		}
+	} else if (setCookieFallback) {
+		headers.append("set-cookie", setCookieFallback);
+	}
 
 	return new Response(upstreamResponse.body, {
 		status: upstreamResponse.status,

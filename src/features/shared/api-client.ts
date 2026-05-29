@@ -42,26 +42,11 @@ export class ApiRequestError extends Error {
 	}
 }
 
-function createAuthHeaders(user?: User): Record<string, string> {
-	if (!user?.id) {
-		return {};
-	}
+function mergeHeaders(headersInit?: HeadersInit): Record<string, string> {
+	const headers = new Headers();
 
-	return {
-		"x-budgetinator-user-id": user.id,
-		"x-budgetinator-user-email": user.email,
-		"x-budgetinator-user-name": user.name,
-	};
-}
-
-function mergeHeaders(
-	a: Record<string, string>,
-	b?: HeadersInit,
-): Record<string, string> {
-	const headers = new Headers(a);
-
-	if (b) {
-		for (const [key, value] of new Headers(b).entries()) {
+	if (headersInit) {
+		for (const [key, value] of new Headers(headersInit).entries()) {
 			headers.set(key, value);
 		}
 	}
@@ -128,11 +113,10 @@ type RequestOptions<TResponse> = {
 };
 
 async function requestJson<TResponse>(
-	user: User | undefined,
+	_user: User | undefined,
 	options: RequestOptions<TResponse>,
 ): Promise<ApiResult<TResponse>> {
-	const authHeaders = createAuthHeaders(user);
-	const headers = mergeHeaders(authHeaders, options.headers);
+	const headers = mergeHeaders(options.headers);
 
 	let body: BodyInit | undefined;
 	if (options.body !== undefined) {
@@ -150,6 +134,7 @@ async function requestJson<TResponse>(
 	try {
 		response = await fetch(options.endpoint, {
 			method: options.method,
+			credentials: "same-origin",
 			headers,
 			body,
 		});

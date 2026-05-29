@@ -28,7 +28,7 @@ afterEach(() => {
 });
 
 describe("createApiClient", () => {
-	test("returns ok result with decoded payload and auth headers", async () => {
+	test("returns ok result with decoded payload", async () => {
 		const fetchMock = vi.fn().mockResolvedValue(
 			new Response(JSON.stringify({ value: 42 }), {
 				status: 200,
@@ -49,10 +49,7 @@ describe("createApiClient", () => {
 		expect(result.data).toEqual({ value: 42 });
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
-		const headers = new Headers(init.headers);
-		expect(headers.get("x-budgetinator-user-id")).toBe(sampleUser.id);
-		expect(headers.get("x-budgetinator-user-email")).toBe(sampleUser.email);
-		expect(headers.get("x-budgetinator-user-name")).toBe(sampleUser.name);
+		expect(init.credentials).toBe("same-origin");
 	});
 
 	test("returns http error result with status and issues", async () => {

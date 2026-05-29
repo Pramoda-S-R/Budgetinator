@@ -11,7 +11,7 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "#/components/ui/sidebar";
-import { getServerSession } from "#/lib/session-fn";
+import { getServerSession } from "#/lib/session.functions";
 
 export const Route = createFileRoute("/_protected")({
 	beforeLoad: async ({ location }) => {

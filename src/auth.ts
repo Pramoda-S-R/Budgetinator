@@ -1,14 +1,25 @@
 import { createAuthClient } from "@neondatabase/neon-js/auth";
 import { BetterAuthReactAdapter } from "@neondatabase/neon-js/auth/react";
 
-// In the browser: route through the app's own /api/auth proxy so that
-// session cookies are set on the app domain and server-side checks work.
-// On the server (SSR): call Neon Auth directly (server-to-server).
-const authBaseUrl =
-	typeof window !== "undefined"
-		? `${window.location.origin}/api/auth`
-		: (import.meta.env.VITE_NEON_AUTH_URL as string);
+const AUTH_PROXY_PATH = "/api/auth";
 
-export const authClient = createAuthClient(authBaseUrl, {
+function trimTrailingSlash(value: string): string {
+	return value.replace(/\/$/, "");
+}
+
+function resolveAuthBaseUrl(): string {
+	if (typeof window !== "undefined") {
+		return `${window.location.origin}${AUTH_PROXY_PATH}`;
+	}
+
+	const serverAuthUrl = import.meta.env.VITE_NEON_AUTH_URL;
+	if (!serverAuthUrl) {
+		throw new Error("Missing VITE_NEON_AUTH_URL for server-side Neon Auth");
+	}
+
+	return trimTrailingSlash(serverAuthUrl);
+}
+
+export const authClient = createAuthClient(resolveAuthBaseUrl(), {
 	adapter: BetterAuthReactAdapter(),
 });

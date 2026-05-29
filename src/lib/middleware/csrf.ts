@@ -1,5 +1,5 @@
 import { createMiddleware } from '@tanstack/react-start';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 const CSRF_TOKEN_NAME = 'csrfToken';
 const CSRF_HEADER_NAME = 'x-csrf-token';

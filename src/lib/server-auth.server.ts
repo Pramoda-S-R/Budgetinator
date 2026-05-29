@@ -2,50 +2,10 @@ import { eq } from "drizzle-orm";
 
 import { db } from "#/db";
 import { users } from "#/db/schema";
-import { getNeonAuthBaseUrl } from "#/lib/neon-auth-proxy";
-
-type SessionUser = {
-	id: string;
-	email?: string | null;
-	name?: string | null;
-};
-
-function getSessionUserFromHeaders(request: Request): SessionUser | null {
-	const id = request.headers.get("x-budgetinator-user-id");
-
-	if (!id) {
-		return null;
-	}
-
-	return {
-		id,
-		email: request.headers.get("x-budgetinator-user-email"),
-		name: request.headers.get("x-budgetinator-user-name"),
-	};
-}
-
-async function getSessionUser(request: Request): Promise<SessionUser | null> {
-	const url = `${getNeonAuthBaseUrl()}/get-session`;
-	const response = await fetch(url, {
-		method: "GET",
-		headers: { cookie: request.headers.get("cookie") ?? "" },
-	});
-
-	if (!response.ok) {
-		return null;
-	}
-
-	const payload = (await response.json()) as {
-		user?: SessionUser;
-		data?: { user?: SessionUser };
-	};
-
-	return payload.user ?? payload.data?.user ?? null;
-}
+import { fetchNeonSessionUser } from "#/lib/neon-auth-session.server";
 
 export async function requireCurrentUser(request: Request) {
-	const sessionUser =
-		(await getSessionUser(request)) ?? getSessionUserFromHeaders(request);
+	const sessionUser = await fetchNeonSessionUser(request);
 
 	if (!sessionUser?.id) {
 		throw new Response(JSON.stringify({ error: "Unauthorized" }), {
