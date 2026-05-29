@@ -45,17 +45,9 @@ import {
 import {
 	type Category,
 	type CategoryGroup,
-	createCategory,
-	createCategoryGroup,
-	deleteCategory,
-	deleteCategoryGroup,
-	fetchCategories,
-	fetchCategoryGroups,
-	updateCategory,
-	updateCategoryGroup,
+	createCategoriesDataAccess,
 } from "#/features/categories/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
-
 
 const TRANSACTION_TYPE_OPTIONS = [
 	{ value: "expense", label: "Expense" },
@@ -174,6 +166,10 @@ export const Route = createFileRoute("/_protected/categories/")({
 function CategoriesPage() {
 	const currentUser = useCurrentUser();
 	const queryClient = useQueryClient();
+	const categoriesApi = useMemo(
+		() => createCategoriesDataAccess(currentUser),
+		[currentUser],
+	);
 	const [showArchived, setShowArchived] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -196,13 +192,13 @@ function CategoriesPage() {
 
 	const categoryGroupsQuery = useQuery({
 		queryKey: ["category-groups", currentUser?.id, showArchived],
-		queryFn: () => fetchCategoryGroups(currentUser, showArchived),
+		queryFn: () => categoriesApi.fetchCategoryGroups(showArchived),
 		enabled: Boolean(currentUser?.id),
 	});
 
 	const categoriesQuery = useQuery({
 		queryKey: ["categories", currentUser?.id, showArchived],
-		queryFn: () => fetchCategories(currentUser, showArchived),
+		queryFn: () => categoriesApi.fetchCategories(showArchived),
 		enabled: Boolean(currentUser?.id),
 	});
 
@@ -244,7 +240,7 @@ function CategoriesPage() {
 			type: string;
 			icon: string;
 			color: string;
-		}) => createCategoryGroup(input, currentUser),
+		}) => categoriesApi.createCategoryGroup(input),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: ["category-groups", currentUser?.id],
@@ -260,7 +256,7 @@ function CategoriesPage() {
 			transactionType: string;
 			icon: string;
 			color: string;
-		}) => createCategory(input, currentUser),
+		}) => categoriesApi.createCategory(input),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: ["categories", currentUser?.id],
@@ -272,23 +268,39 @@ function CategoriesPage() {
 	const updateGroupMutation = useMutation({
 		mutationFn: (payload: {
 			groupId: string;
-			input: Parameters<typeof updateCategoryGroup>[1];
-		}) => updateCategoryGroup(payload.groupId, payload.input, currentUser),
+			input: {
+				name?: string;
+				type?: string;
+				icon?: string;
+				color?: string;
+				sortOrder?: number;
+				isArchived?: boolean;
+			};
+		}) => categoriesApi.updateCategoryGroup(payload.groupId, payload.input),
 	});
 
 	const updateCategoryMutation = useMutation({
 		mutationFn: (payload: {
 			categoryId: string;
-			input: Parameters<typeof updateCategory>[1];
-		}) => updateCategory(payload.categoryId, payload.input, currentUser),
+			input: {
+				groupId?: string;
+				name?: string;
+				icon?: string;
+				color?: string;
+				transactionType?: string;
+				sortOrder?: number;
+				isArchived?: boolean;
+			};
+		}) => categoriesApi.updateCategory(payload.categoryId, payload.input),
 	});
 
 	const deleteGroupMutation = useMutation({
-		mutationFn: (groupId: string) => deleteCategoryGroup(groupId, currentUser),
+		mutationFn: (groupId: string) => categoriesApi.deleteCategoryGroup(groupId),
 	});
 
 	const deleteCategoryMutation = useMutation({
-		mutationFn: (categoryId: string) => deleteCategory(categoryId, currentUser),
+		mutationFn: (categoryId: string) =>
+			categoriesApi.deleteCategory(categoryId),
 	});
 
 	async function refreshCategoriesState() {
@@ -558,10 +570,17 @@ function CategoriesPage() {
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="group-type">Type</Label>
-							<Select value={groupType} onValueChange={(v) => setGroupType(v ?? "")}>
+							<Select
+								value={groupType}
+								onValueChange={(v) => setGroupType(v ?? "")}
+							>
 								<SelectTrigger id="group-type">
-									<span data-slot="select-value" className="flex flex-1 text-left text-sm">
-										{TRANSACTION_TYPE_OPTIONS.find((o) => o.value === groupType)?.label ?? groupType}
+									<span
+										data-slot="select-value"
+										className="flex flex-1 text-left text-sm"
+									>
+										{TRANSACTION_TYPE_OPTIONS.find((o) => o.value === groupType)
+											?.label ?? groupType}
 									</span>
 								</SelectTrigger>
 								<SelectContent>
@@ -614,11 +633,18 @@ function CategoriesPage() {
 					>
 						<div className="space-y-2 md:col-span-2">
 							<Label htmlFor="category-group">Group</Label>
-							<Select value={selectedGroupId} onValueChange={(v) => setSelectedGroupId(v ?? "")}>
+							<Select
+								value={selectedGroupId}
+								onValueChange={(v) => setSelectedGroupId(v ?? "")}
+							>
 								<SelectTrigger id="category-group">
 									{selectedGroupId ? (
-										<span data-slot="select-value" className="flex flex-1 text-left text-sm">
-											{groups.find((g) => g.id === selectedGroupId)?.name ?? selectedGroupId}
+										<span
+											data-slot="select-value"
+											className="flex flex-1 text-left text-sm"
+										>
+											{groups.find((g) => g.id === selectedGroupId)?.name ??
+												selectedGroupId}
 										</span>
 									) : (
 										<SelectValue placeholder="Select group" />
@@ -646,10 +672,18 @@ function CategoriesPage() {
 							<Label htmlFor="category-transaction-type">
 								Transaction Type
 							</Label>
-							<Select value={categoryTransactionType} onValueChange={(v) => setCategoryTransactionType(v ?? "")}>
+							<Select
+								value={categoryTransactionType}
+								onValueChange={(v) => setCategoryTransactionType(v ?? "")}
+							>
 								<SelectTrigger id="category-transaction-type">
-									<span data-slot="select-value" className="flex flex-1 text-left text-sm">
-										{TRANSACTION_TYPE_OPTIONS.find((o) => o.value === categoryTransactionType)?.label ?? categoryTransactionType}
+									<span
+										data-slot="select-value"
+										className="flex flex-1 text-left text-sm"
+									>
+										{TRANSACTION_TYPE_OPTIONS.find(
+											(o) => o.value === categoryTransactionType,
+										)?.label ?? categoryTransactionType}
 									</span>
 								</SelectTrigger>
 								<SelectContent>

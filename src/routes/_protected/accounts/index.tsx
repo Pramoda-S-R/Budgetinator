@@ -27,14 +27,9 @@ import {
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import type { Account } from "#/features/accounts/data-access";
-import {
-	createAccount,
-	deleteAccount,
-	fetchAccounts,
-	updateAccount,
-} from "#/features/accounts/data-access";
+import { createAccountsDataAccess } from "#/features/accounts/data-access";
 import { calculateNetWorth } from "#/features/accounts/net-worth";
-import { fetchProfile } from "#/features/profile/data-access";
+import { createProfileDataAccess } from "#/features/profile/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
 
 const ACCOUNT_TYPE_OPTIONS = [
@@ -127,6 +122,14 @@ export const Route = createFileRoute("/_protected/accounts/")({
 function AccountsPage() {
 	const currentUser = useCurrentUser();
 	const queryClient = useQueryClient();
+	const accountsApi = useMemo(
+		() => createAccountsDataAccess(currentUser),
+		[currentUser],
+	);
+	const profileApi = useMemo(
+		() => createProfileDataAccess(currentUser),
+		[currentUser],
+	);
 	const [name, setName] = useState("");
 	const [accountType, setAccountType] = useState("bank");
 	const [currentBalance, setCurrentBalance] = useState("0");
@@ -134,13 +137,13 @@ function AccountsPage() {
 
 	const accountsQuery = useQuery({
 		queryKey: ["accounts", currentUser?.id],
-		queryFn: () => fetchAccounts(currentUser),
+		queryFn: () => accountsApi.fetchAccounts(),
 		enabled: Boolean(currentUser?.id),
 	});
 
 	const profileQuery = useQuery({
 		queryKey: ["profile", currentUser?.id],
-		queryFn: () => fetchProfile(currentUser),
+		queryFn: () => profileApi.fetchProfile(),
 		enabled: Boolean(currentUser?.id),
 	});
 
@@ -149,7 +152,7 @@ function AccountsPage() {
 			name: string;
 			accountType: string;
 			currentBalance: number;
-		}) => createAccount(input, currentUser),
+		}) => accountsApi.createAccount(input),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: ["accounts", currentUser?.id],
@@ -161,11 +164,9 @@ function AccountsPage() {
 
 	const updateAccountMutation = useMutation({
 		mutationFn: (payload: { accountId: string; currentBalance: number }) =>
-			updateAccount(
-				payload.accountId,
-				{ currentBalance: payload.currentBalance },
-				currentUser,
-			),
+			accountsApi.updateAccount(payload.accountId, {
+				currentBalance: payload.currentBalance,
+			}),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: ["accounts", currentUser?.id],
@@ -174,7 +175,7 @@ function AccountsPage() {
 	});
 
 	const deleteAccountMutation = useMutation({
-		mutationFn: (accountId: string) => deleteAccount(accountId, currentUser),
+		mutationFn: (accountId: string) => accountsApi.deleteAccount(accountId),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: ["accounts", currentUser?.id],

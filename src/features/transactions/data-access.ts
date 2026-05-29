@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { createApiClient, unwrapApiResult } from "#/features/shared/api-client";
 import type { User } from "#/hooks/use-current-user";
 
 export type Transaction = {
@@ -22,6 +24,36 @@ export type TransactionsResponse = {
 	transactions: Transaction[];
 };
 
+const transactionSchema = z.object({
+	id: z.string(),
+	accountId: z.string(),
+	transferAccountId: z.string().nullable(),
+	accountName: z.string().nullable(),
+	transferAccountName: z.string().nullable(),
+	categoryId: z.string().nullable(),
+	categoryName: z.string().nullable(),
+	amount: z.string(),
+	transactionType: z.enum(["expense", "income", "transfer"]),
+	merchant: z.string(),
+	notes: z.string(),
+	tags: z.array(z.string()),
+	isRecurring: z.boolean(),
+	transactionDate: z.string(),
+	createdAt: z.string(),
+});
+
+const transactionsResponseSchema = z.object({
+	transactions: z.array(transactionSchema),
+});
+
+const transactionEnvelopeSchema = z.object({
+	transaction: transactionSchema,
+});
+
+const successEnvelopeSchema = z.object({
+	success: z.boolean(),
+});
+
 type TransactionInput = {
 	accountId: string;
 	amount: number;
@@ -37,48 +69,53 @@ type TransactionInput = {
 
 type TransactionUpdateInput = Partial<TransactionInput>;
 
-function createAuthHeaders(user?: User): Record<string, string> {
-	if (!user?.id) {
-		return {};
-	}
+export function createTransactionsDataAccess(user?: User) {
+	const client = createApiClient(user);
 
 	return {
-		"x-budgetinator-user-id": user.id,
-		"x-budgetinator-user-email": user.email,
-		"x-budgetinator-user-name": user.name,
+		async fetchTransactions(limit = 60) {
+			const params = new URLSearchParams({ limit: String(limit) });
+			const result = await client.get(
+				`/api/transactions?${params.toString()}`,
+				transactionsResponseSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async createTransaction(input: TransactionInput) {
+			const result = await client.post(
+				"/api/transactions",
+				input,
+				transactionEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async updateTransaction(
+			transactionId: string,
+			input: TransactionUpdateInput,
+		) {
+			const result = await client.patch(
+				`/api/transactions/${transactionId}`,
+				input,
+				transactionEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async deleteTransaction(transactionId: string) {
+			const result = await client.delete(
+				`/api/transactions/${transactionId}`,
+				successEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
 	};
 }
 
-async function request<T>(url: string, init: RequestInit = {}) {
-	const response = await fetch(url, init);
-
-	if (!response.ok) {
-		throw new Error(`Request failed: ${response.status}`);
-	}
-
-	return (await response.json()) as T;
-}
-
 export async function fetchTransactions(user?: User, limit = 60) {
-	const params = new URLSearchParams({ limit: String(limit) });
-
-	return request<TransactionsResponse>(
-		`/api/transactions?${params.toString()}`,
-		{
-			headers: createAuthHeaders(user),
-		},
-	);
+	return createTransactionsDataAccess(user).fetchTransactions(limit);
 }
 
 export async function createTransaction(input: TransactionInput, user?: User) {
-	return request<{ transaction: Transaction }>("/api/transactions", {
-		method: "POST",
-		headers: {
-			"content-type": "application/json",
-			...createAuthHeaders(user),
-		},
-		body: JSON.stringify(input),
-	});
+	return createTransactionsDataAccess(user).createTransaction(input);
 }
 
 export async function updateTransaction(
@@ -86,22 +123,12 @@ export async function updateTransaction(
 	input: TransactionUpdateInput,
 	user?: User,
 ) {
-	return request<{ transaction: Transaction }>(
-		`/api/transactions/${transactionId}`,
-		{
-			method: "PATCH",
-			headers: {
-				"content-type": "application/json",
-				...createAuthHeaders(user),
-			},
-			body: JSON.stringify(input),
-		},
+	return createTransactionsDataAccess(user).updateTransaction(
+		transactionId,
+		input,
 	);
 }
 
 export async function deleteTransaction(transactionId: string, user?: User) {
-	return request<{ success: boolean }>(`/api/transactions/${transactionId}`, {
-		method: "DELETE",
-		headers: createAuthHeaders(user),
-	});
+	return createTransactionsDataAccess(user).deleteTransaction(transactionId);
 }

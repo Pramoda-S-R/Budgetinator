@@ -12,6 +12,7 @@ import {
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
+import { Calendar } from "#/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import {
 	Dialog,
@@ -26,6 +27,11 @@ import { Input } from "#/components/ui/input";
 import { Kbd } from "#/components/ui/kbd";
 import { Label } from "#/components/ui/label";
 import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "#/components/ui/popover";
+import {
 	Select,
 	SelectContent,
 	SelectItem,
@@ -38,18 +44,15 @@ import { Switch } from "#/components/ui/switch";
 import { Textarea } from "#/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "#/components/ui/toggle-group";
 
-import { fetchAccounts } from "#/features/accounts/data-access";
+import { createAccountsDataAccess } from "#/features/accounts/data-access";
 import {
 	type Category,
-	fetchCategories,
+	createCategoriesDataAccess,
 } from "#/features/categories/data-access";
-import { fetchProfile } from "#/features/profile/data-access";
-import {
-	createTransaction,
-	deleteTransaction,
-	fetchTransactions,
-} from "#/features/transactions/data-access";
+import { createProfileDataAccess } from "#/features/profile/data-access";
+import { createTransactionsDataAccess } from "#/features/transactions/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
+import { toLocalDateInputValue } from "#/lib/date.ts";
 
 const TRANSACTION_TYPE_ICON: Record<
 	"expense" | "income" | "transfer",
@@ -67,6 +70,22 @@ export const Route = createFileRoute("/_protected/transactions/")({
 function TransactionsPage() {
 	const currentUser = useCurrentUser();
 	const queryClient = useQueryClient();
+	const accountsApi = useMemo(
+		() => createAccountsDataAccess(currentUser),
+		[currentUser],
+	);
+	const categoriesApi = useMemo(
+		() => createCategoriesDataAccess(currentUser),
+		[currentUser],
+	);
+	const profileApi = useMemo(
+		() => createProfileDataAccess(currentUser),
+		[currentUser],
+	);
+	const transactionsApi = useMemo(
+		() => createTransactionsDataAccess(currentUser),
+		[currentUser],
+	);
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [amount, setAmount] = useState("");
 	const [merchant, setMerchant] = useState("");
@@ -79,32 +98,32 @@ function TransactionsPage() {
 	>("expense");
 	const [transferAccountId, setTransferAccountId] = useState("");
 	const [transactionDate, setTransactionDate] = useState(() =>
-		new Date().toISOString().slice(0, 10),
+		toLocalDateInputValue(new Date()),
 	);
 	const [isRecurring, setIsRecurring] = useState(false);
 	const [formError, setFormError] = useState<string | null>(null);
 
 	const accountsQuery = useQuery({
 		queryKey: ["accounts", currentUser?.id],
-		queryFn: () => fetchAccounts(currentUser),
+		queryFn: () => accountsApi.fetchAccounts(),
 		enabled: Boolean(currentUser?.id),
 	});
 
 	const categoriesQuery = useQuery({
 		queryKey: ["categories", currentUser?.id],
-		queryFn: () => fetchCategories(currentUser),
+		queryFn: () => categoriesApi.fetchCategories(),
 		enabled: Boolean(currentUser?.id),
 	});
 
 	const profileQuery = useQuery({
 		queryKey: ["profile", currentUser?.id],
-		queryFn: () => fetchProfile(currentUser),
+		queryFn: () => profileApi.fetchProfile(),
 		enabled: Boolean(currentUser?.id),
 	});
 
 	const transactionsQuery = useQuery({
 		queryKey: ["transactions", currentUser?.id],
-		queryFn: () => fetchTransactions(currentUser),
+		queryFn: () => transactionsApi.fetchTransactions(),
 		enabled: Boolean(currentUser?.id),
 	});
 
@@ -205,8 +224,18 @@ function TransactionsPage() {
 		.slice(0, 6) as Category[];
 
 	const transactionMutation = useMutation({
-		mutationFn: (payload: Parameters<typeof createTransaction>[0]) =>
-			createTransaction(payload, currentUser),
+		mutationFn: (payload: {
+			accountId: string;
+			amount: number;
+			transactionType: "expense" | "income" | "transfer";
+			categoryId?: string | null;
+			merchant?: string;
+			notes?: string;
+			isRecurring?: boolean;
+			transactionDate?: string;
+			transferAccountId?: string | null;
+			tags?: string[];
+		}) => transactionsApi.createTransaction(payload),
 		onSuccess: async () => {
 			await Promise.all([
 				queryClient.invalidateQueries({
@@ -232,7 +261,7 @@ function TransactionsPage() {
 
 	const deleteMutation = useMutation({
 		mutationFn: (transactionId: string) =>
-			deleteTransaction(transactionId, currentUser),
+			transactionsApi.deleteTransaction(transactionId),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({
 				queryKey: ["transactions", currentUser?.id],
@@ -395,11 +424,18 @@ function TransactionsPage() {
 										<div className="grid gap-3 md:grid-cols-2">
 											<div className="space-y-2">
 												<Label htmlFor="transaction-account">Account</Label>
-												<Select value={accountId} onValueChange={(v) => setAccountId(v ?? "")}>
+												<Select
+													value={accountId}
+													onValueChange={(v) => setAccountId(v ?? "")}
+												>
 													<SelectTrigger id="transaction-account">
 														{accountId ? (
-															<span data-slot="select-value" className="flex flex-1 text-left text-sm">
-																{accountOptions.find((a) => a.id === accountId)?.name ?? accountId}
+															<span
+																data-slot="select-value"
+																className="flex flex-1 text-left text-sm"
+															>
+																{accountOptions.find((a) => a.id === accountId)
+																	?.name ?? accountId}
 															</span>
 														) : (
 															<SelectValue placeholder="Select account" />
@@ -419,11 +455,19 @@ function TransactionsPage() {
 													<Label htmlFor="transaction-destination">
 														Destination
 													</Label>
-													<Select value={transferAccountId} onValueChange={(v) => setTransferAccountId(v ?? "")}>
+													<Select
+														value={transferAccountId}
+														onValueChange={(v) => setTransferAccountId(v ?? "")}
+													>
 														<SelectTrigger id="transaction-destination">
 															{transferAccountId ? (
-																<span data-slot="select-value" className="flex flex-1 text-left text-sm">
-																	{accountOptions.find((a) => a.id === transferAccountId)?.name ?? transferAccountId}
+																<span
+																	data-slot="select-value"
+																	className="flex flex-1 text-left text-sm"
+																>
+																	{accountOptions.find(
+																		(a) => a.id === transferAccountId,
+																	)?.name ?? transferAccountId}
 																</span>
 															) : (
 																<SelectValue placeholder="Select account" />
@@ -433,7 +477,10 @@ function TransactionsPage() {
 															{accountOptions
 																.filter((account) => account.id !== accountId)
 																.map((account) => (
-																	<SelectItem key={account.id} value={account.id}>
+																	<SelectItem
+																		key={account.id}
+																		value={account.id}
+																	>
 																		{account.name}
 																	</SelectItem>
 																))}
@@ -444,11 +491,18 @@ function TransactionsPage() {
 										</div>
 										<div className="space-y-2">
 											<Label htmlFor="transaction-category">Category</Label>
-											<Select value={categoryId} onValueChange={(v) => setCategoryId(v ?? "")}>
+											<Select
+												value={categoryId}
+												onValueChange={(v) => setCategoryId(v ?? "")}
+											>
 												<SelectTrigger id="transaction-category">
 													{categoryId ? (
-														<span data-slot="select-value" className="flex flex-1 text-left text-sm">
-															{categories.find((c) => c.id === categoryId)?.name ?? categoryId}
+														<span
+															data-slot="select-value"
+															className="flex flex-1 text-left text-sm"
+														>
+															{categories.find((c) => c.id === categoryId)
+																?.name ?? categoryId}
 														</span>
 													) : (
 														<SelectValue placeholder="Select category" />
@@ -479,35 +533,31 @@ function TransactionsPage() {
 												/>
 											</div>
 											<div className="space-y-2">
-                                        <Label htmlFor="transaction-date">Date</Label>
-                                        <Popover>
-                                           <PopoverTrigger
-                                             nativeButton={false}
-                                             render={
-                                              <Input
-                                                id="transaction-date"
-                                                readOnly
-                                                value={transactionDate}
-                                                required
-                                              />
-                                            }
-                                          />
-                                          <PopoverContent sideOffset={4} align="start">
-                                            <Calendar
-                                              mode="single"
-                                              selected={new Date(
-                                                `${transactionDate}T00:00:00`
-                                              )}
-                                              onSelect={(date) =>
-                                                date &&
-                                                setTransactionDate(
-                                                  date.toISOString().slice(0, 10)
-                                                )
-                                              }
-                                              showOutsideDays={false}
-                                            />
-                                          </PopoverContent>
-                                        </Popover>
+												<Label htmlFor="transaction-date">Date</Label>
+												<Popover>
+													<PopoverTrigger
+														nativeButton={false}
+														render={
+															<Input
+																id="transaction-date"
+																readOnly
+																value={transactionDate}
+																required
+															/>
+														}
+													/>
+													<PopoverContent sideOffset={4} align="start">
+														<Calendar
+															mode="single"
+															selected={new Date(`${transactionDate}T00:00:00`)}
+															onSelect={(date) =>
+																date &&
+																setTransactionDate(toLocalDateInputValue(date))
+															}
+															showOutsideDays={false}
+														/>
+													</PopoverContent>
+												</Popover>
 											</div>
 										</div>
 										<div className="space-y-2">
@@ -614,7 +664,7 @@ function TransactionsPage() {
 											</p>
 										</div>
 										<div className="flex items-center gap-2 text-sm text-muted-foreground">
-							<CalendarIcon className="size-4" />
+											<CalendarIcon className="size-4" />
 											<span>
 												{new Date(
 													transaction.transactionDate,
@@ -663,5 +713,3 @@ function TransactionsPage() {
 		</div>
 	);
 }
-import { Popover, PopoverTrigger, PopoverContent } from "#/components/ui/popover";
-import { Calendar } from "#/components/ui/calendar";

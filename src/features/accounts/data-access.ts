@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { createApiClient, unwrapApiResult } from "#/features/shared/api-client";
 import type { User } from "#/hooks/use-current-user";
 
 export type Account = {
@@ -15,6 +17,29 @@ export type AccountsResponse = {
 	totalNetWorth: string;
 };
 
+const accountSchema = z.object({
+	id: z.string(),
+	name: z.string(),
+	accountType: z.string(),
+	currentBalance: z.string(),
+	includeInNetWorth: z.boolean(),
+	isActive: z.boolean(),
+	createdAt: z.string(),
+});
+
+const accountsResponseSchema = z.object({
+	accounts: z.array(accountSchema),
+	totalNetWorth: z.string(),
+});
+
+const accountEnvelopeSchema = z.object({
+	account: accountSchema,
+});
+
+const successEnvelopeSchema = z.object({
+	success: z.boolean(),
+});
+
 type CreateAccountInput = {
 	name: string;
 	accountType: string;
@@ -31,43 +56,46 @@ type UpdateAccountInput = {
 	isActive?: boolean;
 };
 
-function createAuthHeaders(user?: User): Record<string, string> {
-	if (!user?.id) {
-		return {};
-	}
+export function createAccountsDataAccess(user?: User) {
+	const client = createApiClient(user);
 
 	return {
-		"x-budgetinator-user-id": user.id,
-		"x-budgetinator-user-email": user.email,
-		"x-budgetinator-user-name": user.name,
+		async fetchAccounts() {
+			const result = await client.get("/api/accounts", accountsResponseSchema);
+			return unwrapApiResult(result);
+		},
+		async createAccount(input: CreateAccountInput) {
+			const result = await client.post(
+				"/api/accounts",
+				input,
+				accountEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async updateAccount(accountId: string, input: UpdateAccountInput) {
+			const result = await client.patch(
+				`/api/accounts/${accountId}`,
+				input,
+				accountEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async deleteAccount(accountId: string) {
+			const result = await client.delete(
+				`/api/accounts/${accountId}`,
+				successEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
 	};
 }
 
-async function request<T>(url: string, init: RequestInit = {}) {
-	const response = await fetch(url, init);
-
-	if (!response.ok) {
-		throw new Error(`Request failed: ${response.status}`);
-	}
-
-	return (await response.json()) as T;
-}
-
 export async function fetchAccounts(user?: User) {
-	return request<AccountsResponse>("/api/accounts", {
-		headers: createAuthHeaders(user),
-	});
+	return createAccountsDataAccess(user).fetchAccounts();
 }
 
 export async function createAccount(input: CreateAccountInput, user?: User) {
-	return request<{ account: Account }>("/api/accounts", {
-		method: "POST",
-		headers: {
-			"content-type": "application/json",
-			...createAuthHeaders(user),
-		},
-		body: JSON.stringify(input),
-	});
+	return createAccountsDataAccess(user).createAccount(input);
 }
 
 export async function updateAccount(
@@ -75,19 +103,9 @@ export async function updateAccount(
 	input: UpdateAccountInput,
 	user?: User,
 ) {
-	return request<{ account: Account }>(`/api/accounts/${accountId}`, {
-		method: "PATCH",
-		headers: {
-			"content-type": "application/json",
-			...createAuthHeaders(user),
-		},
-		body: JSON.stringify(input),
-	});
+	return createAccountsDataAccess(user).updateAccount(accountId, input);
 }
 
 export async function deleteAccount(accountId: string, user?: User) {
-	return request<{ success: boolean }>(`/api/accounts/${accountId}`, {
-		method: "DELETE",
-		headers: createAuthHeaders(user),
-	});
+	return createAccountsDataAccess(user).deleteAccount(accountId);
 }

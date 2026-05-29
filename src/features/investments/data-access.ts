@@ -1,151 +1,244 @@
+import { z } from "zod";
+import { createApiClient, unwrapApiResult } from "#/features/shared/api-client";
 import type { User } from "#/hooks/use-current-user";
 
-type AuthHeaders = Record<string, string>;
-function createAuthHeaders(user?: User): AuthHeaders {
-  if (!user?.id) return {};
-  return {
-    "x-budgetinator-user-id": user.id,
-    "x-budgetinator-user-email": user.email,
-    "x-budgetinator-user-name": user.name,
-  };
-}
+type InvestmentEntity = Record<string, unknown>;
 
-async function request<T>(url: string, init: RequestInit = {}): Promise<T> {
-  const response = await fetch(url, init);
-  if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-  return (await response.json()) as T;
+export type CreateInvestmentEntryInput = {
+	investmentId: string;
+	accountId: string;
+	categoryId?: string | null;
+	amountInvested: number;
+	units?: number;
+	investedAt?: Date;
+	notes?: string;
+};
+
+export type CreateInvestmentValuationInput = {
+	investmentId: string;
+	valuationAmount: number;
+	valuationDate?: Date;
+};
+
+export type UpdateInvestmentInput = {
+	name?: string;
+	investmentType?: string;
+	symbol?: string | null;
+};
+
+export type CreateInvestmentInput = {
+	name: string;
+	investmentType: string;
+	symbol?: string | null;
+};
+
+const investmentEntitySchema = z.record(z.string(), z.unknown());
+
+const investmentsEnvelopeSchema = z.object({
+	investments: z.array(investmentEntitySchema),
+});
+
+const investmentEntriesEnvelopeSchema = z.object({
+	entries: z.array(investmentEntitySchema),
+});
+
+const investmentValuationsEnvelopeSchema = z.object({
+	valuations: z.array(investmentEntitySchema),
+});
+
+const investmentEnvelopeSchema = z.object({
+	investment: investmentEntitySchema,
+});
+
+const investmentEntryEnvelopeSchema = z.object({
+	entry: investmentEntitySchema,
+});
+
+const investmentValuationEnvelopeSchema = z.object({
+	valuation: investmentEntitySchema,
+});
+
+const successEnvelopeSchema = z.object({
+	success: z.boolean(),
+});
+
+export function createInvestmentsDataAccess(user?: User) {
+	const client = createApiClient(user);
+
+	return {
+		async fetchInvestments() {
+			const result = await client.get(
+				"/api/investments",
+				investmentsEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async fetchInvestmentEntries() {
+			const result = await client.get(
+				"/api/investment-entries",
+				investmentEntriesEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async fetchInvestmentValuations() {
+			const result = await client.get(
+				"/api/investment-valuations",
+				investmentValuationsEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async createInvestmentEntry(input: CreateInvestmentEntryInput) {
+			const result = await client.post(
+				"/api/investment-entries",
+				input,
+				investmentEntryEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async createInvestmentValuation(input: CreateInvestmentValuationInput) {
+			const result = await client.post(
+				"/api/investment-valuations",
+				input,
+				investmentValuationEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async fetchInvestmentById(
+			id: string,
+		): Promise<{ investment: InvestmentEntity }> {
+			const result = await client.get(
+				`/api/investments/${id}`,
+				investmentEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async updateInvestmentById(
+			id: string,
+			input: UpdateInvestmentInput,
+		): Promise<{ investment: InvestmentEntity }> {
+			const result = await client.patch(
+				`/api/investments/${id}`,
+				input,
+				investmentEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async deleteInvestmentById(id: string): Promise<{ success: boolean }> {
+			const result = await client.delete(
+				`/api/investments/${id}`,
+				successEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async createInvestment(
+			input: CreateInvestmentInput,
+		): Promise<{ investment: InvestmentEntity }> {
+			const result = await client.post(
+				"/api/investments",
+				input,
+				investmentEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async liquidateInvestment(
+			id: string,
+		): Promise<{ investment: InvestmentEntity }> {
+			const result = await client.patch(
+				`/api/investments/${id}`,
+				{ status: "liquidated" },
+				investmentEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async deleteInvestmentEntry(id: string): Promise<{ success: boolean }> {
+			const result = await client.delete(
+				`/api/investment-entries/${id}`,
+				successEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async deleteInvestmentValuation(id: string): Promise<{ success: boolean }> {
+			const result = await client.delete(
+				`/api/investment-valuations/${id}`,
+				successEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+	};
 }
 
 export async function fetchInvestments(user?: User) {
-  return request<{ investments: any[] }>("/api/investments", {
-    headers: createAuthHeaders(user),
-  });
+	return createInvestmentsDataAccess(user).fetchInvestments();
 }
 
 export async function fetchInvestmentEntries(user?: User) {
-  return request<{ entries: any[] }>("/api/investment-entries", {
-    headers: createAuthHeaders(user),
-  });
+	return createInvestmentsDataAccess(user).fetchInvestmentEntries();
 }
 
 export async function fetchInvestmentValuations(user?: User) {
-  return request<{ valuations: any[] }>("/api/investment-valuations", {
-    headers: createAuthHeaders(user),
-  });
+	return createInvestmentsDataAccess(user).fetchInvestmentValuations();
 }
 
-export type CreateInvestmentEntryInput = {
-  investmentId: string;
-  accountId: string; // source bank funding the buy
-  categoryId?: string | null;
-  amountInvested: number;
-  units?: number;
-  investedAt?: Date;
-  notes?: string;
-};
 export async function createInvestmentEntry(
-  input: CreateInvestmentEntryInput,
-  user?: User,
+	input: CreateInvestmentEntryInput,
+	user?: User,
 ) {
-  return request<{ entry: any }>("/api/investment-entries", {
-    method: "POST",
-    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
-    body: JSON.stringify(input),
-  });
+	return createInvestmentsDataAccess(user).createInvestmentEntry(input);
 }
 
-export type CreateInvestmentValuationInput = {
-  investmentId: string;
-  valuationAmount: number;
-  valuationDate?: Date;
-};
 export async function createInvestmentValuation(
-  input: CreateInvestmentValuationInput,
-  user?: User,
+	input: CreateInvestmentValuationInput,
+	user?: User,
 ) {
-  return request<{ valuation: any }>("/api/investment-valuations", {
-    method: "POST",
-    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
-    body: JSON.stringify(input),
-  });
+	return createInvestmentsDataAccess(user).createInvestmentValuation(input);
 }
 
-/** Fetch a single investment by id */
 export async function fetchInvestmentById(
-  id: string,
-  user?: User,
-): Promise<{ investment: any }> {
-  return request(`/api/investments/${id}`, {
-    headers: createAuthHeaders(user),
-  });
+	id: string,
+	user?: User,
+): Promise<{ investment: InvestmentEntity }> {
+	return createInvestmentsDataAccess(user).fetchInvestmentById(id);
 }
 
-export type UpdateInvestmentInput = {
-  name?: string;
-  investmentType?: string;
-  symbol?: string | null;
-};
-/** Update an existing investment */
 export async function updateInvestmentById(
-  id: string,
-  input: UpdateInvestmentInput,
-  user?: User,
-): Promise<{ investment: any }> {
-  return request(`/api/investments/${id}`, {
-    method: "PATCH",
-    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
-    body: JSON.stringify(input),
-  });
+	id: string,
+	input: UpdateInvestmentInput,
+	user?: User,
+): Promise<{ investment: InvestmentEntity }> {
+	return createInvestmentsDataAccess(user).updateInvestmentById(id, input);
 }
 
-/** Delete an investment */
 export async function deleteInvestmentById(
-  id: string,
-  user?: User,
+	id: string,
+	user?: User,
 ): Promise<{ success: boolean }> {
-  return request(`/api/investments/${id}`, {
-    method: "DELETE",
-    headers: createAuthHeaders(user),
-  });
+	return createInvestmentsDataAccess(user).deleteInvestmentById(id);
 }
 
-/**
- * Create a new investment
- */
-export type CreateInvestmentInput = {
-  name: string;
-  investmentType: string;
-  symbol?: string | null;
-};
 export async function createInvestment(
-  input: CreateInvestmentInput,
-  user?: User,
-): Promise<{ investment: any }> {
-  return request<{ investment: any }>("/api/investments", {
-    method: "POST",
-    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
-    body: JSON.stringify(input),
-  });
+	input: CreateInvestmentInput,
+	user?: User,
+): Promise<{ investment: InvestmentEntity }> {
+	return createInvestmentsDataAccess(user).createInvestment(input);
 }
 
-export async function liquidateInvestment(id: string, user?: User): Promise<{ investment: any }> {
-  return request<{ investment: any }>(`/api/investments/${id}`, {
-    method: "PATCH",
-    headers: { "content-type": "application/json", ...createAuthHeaders(user) },
-    body: JSON.stringify({ status: "liquidated" }),
-  });
+export async function liquidateInvestment(
+	id: string,
+	user?: User,
+): Promise<{ investment: InvestmentEntity }> {
+	return createInvestmentsDataAccess(user).liquidateInvestment(id);
 }
 
-export async function deleteInvestmentEntry(id: string, user?: User): Promise<{ success: boolean }> {
-  return request<{ success: boolean }>(`/api/investment-entries/${id}`, {
-    method: "DELETE",
-    headers: createAuthHeaders(user),
-  });
+export async function deleteInvestmentEntry(
+	id: string,
+	user?: User,
+): Promise<{ success: boolean }> {
+	return createInvestmentsDataAccess(user).deleteInvestmentEntry(id);
 }
 
-export async function deleteInvestmentValuation(id: string, user?: User): Promise<{ success: boolean }> {
-  return request<{ success: boolean }>(`/api/investment-valuations/${id}`, {
-    method: "DELETE",
-    headers: createAuthHeaders(user),
-  });
+export async function deleteInvestmentValuation(
+	id: string,
+	user?: User,
+): Promise<{ success: boolean }> {
+	return createInvestmentsDataAccess(user).deleteInvestmentValuation(id);
 }

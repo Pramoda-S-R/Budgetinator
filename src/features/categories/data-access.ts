@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { createApiClient, unwrapApiResult } from "#/features/shared/api-client";
 import type { User } from "#/hooks/use-current-user";
 
 export type CategoryGroup = {
@@ -62,54 +64,136 @@ type UpdateCategoryInput = {
 	isArchived?: boolean;
 };
 
-function createAuthHeaders(user?: User): Record<string, string> {
-	if (!user?.id) {
-		return {};
-	}
+const categoryGroupSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	name: z.string(),
+	type: z.string(),
+	icon: z.string(),
+	color: z.string(),
+	sortOrder: z.number(),
+	isArchived: z.boolean(),
+	createdAt: z.string(),
+});
+
+const categorySchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	groupId: z.string(),
+	name: z.string(),
+	icon: z.string(),
+	color: z.string(),
+	transactionType: z.string(),
+	sortOrder: z.number(),
+	isArchived: z.boolean(),
+	createdAt: z.string(),
+	groupName: z.string().optional(),
+});
+
+const categoryGroupsEnvelopeSchema = z.object({
+	categoryGroups: z.array(categoryGroupSchema),
+});
+
+const categoryGroupEnvelopeSchema = z.object({
+	categoryGroup: categoryGroupSchema,
+});
+
+const categoriesEnvelopeSchema = z.object({
+	categories: z.array(categorySchema),
+});
+
+const categoryEnvelopeSchema = z.object({
+	category: categorySchema,
+});
+
+const successEnvelopeSchema = z.object({
+	success: z.boolean(),
+});
+
+export function createCategoriesDataAccess(user?: User) {
+	const client = createApiClient(user);
 
 	return {
-		"x-budgetinator-user-id": user.id,
-		"x-budgetinator-user-email": user.email,
-		"x-budgetinator-user-name": user.name,
+		async fetchCategoryGroups(includeArchived = false) {
+			const search = includeArchived ? "?includeArchived=true" : "";
+			const result = await client.get(
+				`/api/category-groups${search}`,
+				categoryGroupsEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async createCategoryGroup(input: CreateCategoryGroupInput) {
+			const result = await client.post(
+				"/api/category-groups",
+				input,
+				categoryGroupEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async updateCategoryGroup(
+			groupId: string,
+			input: UpdateCategoryGroupInput,
+		) {
+			const result = await client.patch(
+				`/api/category-groups/${groupId}`,
+				input,
+				categoryGroupEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async deleteCategoryGroup(groupId: string) {
+			const result = await client.delete(
+				`/api/category-groups/${groupId}`,
+				successEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async fetchCategories(includeArchived = false) {
+			const search = includeArchived ? "?includeArchived=true" : "";
+			const result = await client.get(
+				`/api/categories${search}`,
+				categoriesEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async createCategory(input: CreateCategoryInput) {
+			const result = await client.post(
+				"/api/categories",
+				input,
+				categoryEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async updateCategory(categoryId: string, input: UpdateCategoryInput) {
+			const result = await client.patch(
+				`/api/categories/${categoryId}`,
+				input,
+				categoryEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async deleteCategory(categoryId: string) {
+			const result = await client.delete(
+				`/api/categories/${categoryId}`,
+				successEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
 	};
-}
-
-async function request<T>(url: string, init: RequestInit = {}) {
-	const response = await fetch(url, init);
-
-	if (!response.ok) {
-		throw new Error(`Request failed: ${response.status}`);
-	}
-
-	return (await response.json()) as T;
 }
 
 export async function fetchCategoryGroups(
 	user?: User,
 	includeArchived = false,
 ) {
-	const search = includeArchived ? "?includeArchived=true" : "";
-
-	return request<{ categoryGroups: CategoryGroup[] }>(
-		`/api/category-groups${search}`,
-		{
-			headers: createAuthHeaders(user),
-		},
-	);
+	return createCategoriesDataAccess(user).fetchCategoryGroups(includeArchived);
 }
 
 export async function createCategoryGroup(
 	input: CreateCategoryGroupInput,
 	user?: User,
 ) {
-	return request<{ categoryGroup: CategoryGroup }>("/api/category-groups", {
-		method: "POST",
-		headers: {
-			"content-type": "application/json",
-			...createAuthHeaders(user),
-		},
-		body: JSON.stringify(input),
-	});
+	return createCategoriesDataAccess(user).createCategoryGroup(input);
 }
 
 export async function updateCategoryGroup(
@@ -117,43 +201,19 @@ export async function updateCategoryGroup(
 	input: UpdateCategoryGroupInput,
 	user?: User,
 ) {
-	return request<{ categoryGroup: CategoryGroup }>(
-		`/api/category-groups/${groupId}`,
-		{
-			method: "PATCH",
-			headers: {
-				"content-type": "application/json",
-				...createAuthHeaders(user),
-			},
-			body: JSON.stringify(input),
-		},
-	);
+	return createCategoriesDataAccess(user).updateCategoryGroup(groupId, input);
 }
 
 export async function deleteCategoryGroup(groupId: string, user?: User) {
-	return request<{ success: boolean }>(`/api/category-groups/${groupId}`, {
-		method: "DELETE",
-		headers: createAuthHeaders(user),
-	});
+	return createCategoriesDataAccess(user).deleteCategoryGroup(groupId);
 }
 
 export async function fetchCategories(user?: User, includeArchived = false) {
-	const search = includeArchived ? "?includeArchived=true" : "";
-
-	return request<{ categories: Category[] }>(`/api/categories${search}`, {
-		headers: createAuthHeaders(user),
-	});
+	return createCategoriesDataAccess(user).fetchCategories(includeArchived);
 }
 
 export async function createCategory(input: CreateCategoryInput, user?: User) {
-	return request<{ category: Category }>("/api/categories", {
-		method: "POST",
-		headers: {
-			"content-type": "application/json",
-			...createAuthHeaders(user),
-		},
-		body: JSON.stringify(input),
-	});
+	return createCategoriesDataAccess(user).createCategory(input);
 }
 
 export async function updateCategory(
@@ -161,19 +221,9 @@ export async function updateCategory(
 	input: UpdateCategoryInput,
 	user?: User,
 ) {
-	return request<{ category: Category }>(`/api/categories/${categoryId}`, {
-		method: "PATCH",
-		headers: {
-			"content-type": "application/json",
-			...createAuthHeaders(user),
-		},
-		body: JSON.stringify(input),
-	});
+	return createCategoriesDataAccess(user).updateCategory(categoryId, input);
 }
 
 export async function deleteCategory(categoryId: string, user?: User) {
-	return request<{ success: boolean }>(`/api/categories/${categoryId}`, {
-		method: "DELETE",
-		headers: createAuthHeaders(user),
-	});
+	return createCategoriesDataAccess(user).deleteCategory(categoryId);
 }

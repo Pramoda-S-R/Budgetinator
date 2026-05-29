@@ -1,34 +1,55 @@
+import { z } from "zod";
+import { createApiClient, unwrapApiResult } from "#/features/shared/api-client";
 import type { User } from "#/hooks/use-current-user";
 
-function createAuthHeaders(user?: User): Record<string, string> {
-  if (!user?.id) return {};
-  return {
-    "x-budgetinator-user-id": user.id,
-    "x-budgetinator-user-email": user.email,
-    "x-budgetinator-user-name": user.name,
-  };
-}
+const dashboardSummaryEnvelopeSchema = z.object({
+	summary: z.record(z.string(), z.unknown()),
+});
 
-async function request<T>(url: string, init: RequestInit = {}): Promise<T> {
-  const response = await fetch(url, init);
-  if (!response.ok) throw new Error(`Request failed: ${response.status}`);
-  return (await response.json()) as T;
+const budgetStatusEnvelopeSchema = z.object({
+	budgetStatus: z.array(z.record(z.string(), z.unknown())),
+});
+
+const cashflowEnvelopeSchema = z.object({
+	cashflow: z.array(z.record(z.string(), z.unknown())),
+});
+
+export function createDashboardDataAccess(user?: User) {
+	const client = createApiClient(user);
+
+	return {
+		async fetchDashboardSummary() {
+			const result = await client.get(
+				"/api/dashboard/summary",
+				dashboardSummaryEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async fetchBudgetStatus() {
+			const result = await client.get(
+				"/api/dashboard/budget-status",
+				budgetStatusEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+		async fetchCashflow() {
+			const result = await client.get(
+				"/api/dashboard/cashflow",
+				cashflowEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
+	};
 }
 
 export async function fetchDashboardSummary(user?: User) {
-  return request<{ summary: Record<string, unknown> }>("/api/dashboard/summary", {
-    headers: createAuthHeaders(user),
-  });
+	return createDashboardDataAccess(user).fetchDashboardSummary();
 }
 
 export async function fetchBudgetStatus(user?: User) {
-  return request<{ budgetStatus: Array<Record<string, unknown>> }>("/api/dashboard/budget-status", {
-    headers: createAuthHeaders(user),
-  });
+	return createDashboardDataAccess(user).fetchBudgetStatus();
 }
 
 export async function fetchCashflow(user?: User) {
-  return request<{ cashflow: Array<Record<string, unknown>> }>("/api/dashboard/cashflow", {
-    headers: createAuthHeaders(user),
-  });
+	return createDashboardDataAccess(user).fetchCashflow();
 }

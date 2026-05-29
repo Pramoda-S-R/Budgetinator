@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { createApiClient, unwrapApiResult } from "#/features/shared/api-client";
 import type { User } from "#/hooks/use-current-user";
 
 export type UserProfile = {
@@ -14,41 +16,41 @@ type UpdateProfileInput = {
 	timezone?: string;
 };
 
-function createAuthHeaders(user?: User): Record<string, string> {
-	if (!user?.id) {
-		return {};
-	}
+const userProfileSchema = z.object({
+	id: z.string(),
+	email: z.string(),
+	name: z.string(),
+	currencyCode: z.string(),
+	timezone: z.string(),
+});
+
+const profileEnvelopeSchema = z.object({
+	profile: userProfileSchema,
+});
+
+export function createProfileDataAccess(user?: User) {
+	const client = createApiClient(user);
 
 	return {
-		"x-budgetinator-user-id": user.id,
-		"x-budgetinator-user-email": user.email,
-		"x-budgetinator-user-name": user.name,
+		async fetchProfile() {
+			const result = await client.get("/api/profile", profileEnvelopeSchema);
+			return unwrapApiResult(result);
+		},
+		async updateProfile(input: UpdateProfileInput) {
+			const result = await client.patch(
+				"/api/profile",
+				input,
+				profileEnvelopeSchema,
+			);
+			return unwrapApiResult(result);
+		},
 	};
 }
 
-async function request<T>(url: string, init: RequestInit = {}) {
-	const response = await fetch(url, init);
-
-	if (!response.ok) {
-		throw new Error(`Request failed: ${response.status}`);
-	}
-
-	return (await response.json()) as T;
-}
-
 export async function fetchProfile(user?: User) {
-	return request<{ profile: UserProfile }>("/api/profile", {
-		headers: createAuthHeaders(user),
-	});
+	return createProfileDataAccess(user).fetchProfile();
 }
 
 export async function updateProfile(input: UpdateProfileInput, user?: User) {
-	return request<{ profile: UserProfile }>("/api/profile", {
-		method: "PATCH",
-		headers: {
-			"content-type": "application/json",
-			...createAuthHeaders(user),
-		},
-		body: JSON.stringify(input),
-	});
+	return createProfileDataAccess(user).updateProfile(input);
 }
