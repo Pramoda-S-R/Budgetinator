@@ -11,12 +11,15 @@ import {
 	LineChart,
 	Pie,
 	PieChart,
-	ResponsiveContainer,
-	Tooltip,
 	XAxis,
 	YAxis,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
+import {
+	ChartContainer,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "#/components/ui/chart";
 import {
 	Select,
 	SelectContent,
@@ -60,65 +63,25 @@ const MONTH_NAMES = [
 
 const BAR_CURSOR_STYLE = { fill: "hsl(var(--muted))", opacity: 0.5 };
 
-type ChartTooltipPayloadEntry = {
-	name?: unknown;
-	value?: unknown;
-	color?: string;
-};
+function renderTooltipEntry(
+	value: unknown,
+	name: unknown,
+	entryColor: string,
+	formatValue?: (value: unknown) => string,
+) {
+	const numericValue = Number(value ?? 0);
+	const renderedValue = formatValue
+		? formatValue(value)
+		: numericValue.toLocaleString(undefined, { maximumFractionDigits: 2 });
 
-function ChartTooltip({
-	active,
-	payload,
-	label,
-	formatter,
-}: {
-	active?: boolean;
-	payload?: readonly ChartTooltipPayloadEntry[];
-	label?: unknown;
-	formatter?: (value: unknown) => string;
-}) {
-	if (!active || !payload?.length) return null;
 	return (
-		<div
-			style={{
-				background: "hsl(var(--popover))",
-				border: "1px solid hsl(var(--border))",
-				borderRadius: "6px",
-				padding: "8px 12px",
-				fontSize: "13px",
-			}}
-		>
-			{label != null && (
-				<p
-					style={{
-						color: "hsl(var(--popover-foreground))",
-						marginBottom: "6px",
-						fontWeight: 500,
-					}}
-				>
-					{String(label)}
-				</p>
-			)}
-			<div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-				{payload.map((entry) => {
-					const name = String(entry.name ?? "Value");
-					const value = Number(entry.value ?? 0);
-					const renderedValue = formatter
-						? formatter(entry.value)
-						: value.toLocaleString(undefined, { maximumFractionDigits: 2 });
-					return (
-						<span
-							key={`${name}-${String(value)}`}
-							style={{
-								display: "block",
-								color: "hsl(var(--popover-foreground))",
-							}}
-						>
-							{name}: {renderedValue}
-						</span>
-					);
-				})}
-			</div>
+		<div className="flex w-full items-center justify-between gap-3">
+			<span className="font-medium" style={{ color: entryColor }}>
+				{String(name ?? "Value")}
+			</span>
+			<span className="font-mono font-semibold tabular-nums" style={{ color: entryColor }}>
+				{renderedValue}
+			</span>
 		</div>
 	);
 }
@@ -202,6 +165,30 @@ function AnalyticsPage() {
 	}));
 
 	const breakdown = breakdownQ.data?.breakdown ?? [];
+	const breakdownChartConfig = Object.fromEntries(
+		breakdown.map((row, idx) => {
+			const category = row.categoryName ?? "Uncategorized";
+			return [
+				category,
+				{ label: category, color: CHART_COLORS[idx % CHART_COLORS.length] },
+			];
+		}),
+	);
+	const trendsChartConfig = Object.fromEntries(
+		categoryNames.map((cat, idx) => [
+			cat,
+			{ label: cat, color: CHART_COLORS[idx % CHART_COLORS.length] },
+		]),
+	);
+
+	const cashflowChartConfig = {
+		income: { label: "Income", color: "#4ade80" },
+		expense: { label: "Expense", color: "#f87171" },
+		net: { label: "Net", color: "#60a5fa" },
+	};
+	const networthChartConfig = {
+		netWorth: { label: "Net Worth", color: "#60a5fa" },
+	};
 
 	// Year options: current year and last 2
 	const yearOptions = [
@@ -262,7 +249,11 @@ function AnalyticsPage() {
 						</p>
 					) : (
 						<div className="flex flex-col md:flex-row gap-6">
-							<ResponsiveContainer width="100%" height={240}>
+							<ChartContainer
+								id="analytics-category-breakdown"
+								config={breakdownChartConfig}
+								className="h-60 w-full md:max-w-sm aspect-auto"
+							>
 								<PieChart>
 									<Pie
 										data={breakdown}
@@ -277,19 +268,24 @@ function AnalyticsPage() {
 											/>
 										))}
 									</Pie>
-									<Tooltip
-										content={({ active, payload, label }) => (
-											<ChartTooltip
-												active={active}
-												payload={payload}
-												label={label}
-												formatter={(v) => `${Number(v)}%`}
+									<ChartTooltip
+										content={
+											<ChartTooltipContent
+												className="bg-muted text-foreground ring-border/60"
+												formatter={(value, name, item) =>
+													renderTooltipEntry(
+														value,
+														name,
+														item.color ?? "hsl(var(--foreground))",
+														(v) => `${Number(v)}%`,
+													)
+												}
 											/>
-										)}
+										}
 									/>
 									<Legend />
 								</PieChart>
-							</ResponsiveContainer>
+							</ChartContainer>
 							<div className="flex-1 space-y-2">
 								{breakdown.map((r, idx) => (
 									<div
@@ -363,19 +359,28 @@ function AnalyticsPage() {
 					) : trendsData.length === 0 ? (
 						<p className="text-muted-foreground">No data yet.</p>
 					) : (
-						<ResponsiveContainer width="100%" height={280}>
+						<ChartContainer
+							id="analytics-spending-trends"
+							config={trendsChartConfig}
+							className="h-[280px] w-full aspect-auto"
+						>
 							<BarChart data={trendsData}>
 								<CartesianGrid strokeDasharray="3 3" />
 								<XAxis dataKey="label" />
 								<YAxis />
-								<Tooltip
-									content={({ active, payload, label }) => (
-										<ChartTooltip
-											active={active}
-											payload={payload}
-											label={label}
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											className="bg-muted text-foreground ring-border/60"
+											formatter={(value, name, item) =>
+												renderTooltipEntry(
+													value,
+													name,
+													item.color ?? "hsl(var(--foreground))",
+												)
+											}
 										/>
-									)}
+									}
 									cursor={BAR_CURSOR_STYLE}
 								/>
 								<Legend />
@@ -388,7 +393,7 @@ function AnalyticsPage() {
 									/>
 								))}
 							</BarChart>
-						</ResponsiveContainer>
+						</ChartContainer>
 					)}
 				</CardContent>
 			</Card>
@@ -419,19 +424,28 @@ function AnalyticsPage() {
 					) : cashflowChart.length === 0 ? (
 						<p className="text-muted-foreground">No data yet.</p>
 					) : (
-						<ResponsiveContainer width="100%" height={280}>
+						<ChartContainer
+							id="analytics-cashflow"
+							config={cashflowChartConfig}
+							className="h-[280px] w-full aspect-auto"
+						>
 							<BarChart data={cashflowChart}>
 								<CartesianGrid strokeDasharray="3 3" />
 								<XAxis dataKey="label" />
 								<YAxis />
-								<Tooltip
-									content={({ active, payload, label }) => (
-										<ChartTooltip
-											active={active}
-											payload={payload}
-											label={label}
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											className="bg-muted text-foreground ring-border/60"
+											formatter={(value, name, item) =>
+												renderTooltipEntry(
+													value,
+													name,
+													item.color ?? "hsl(var(--foreground))",
+												)
+											}
 										/>
-									)}
+									}
 									cursor={BAR_CURSOR_STYLE}
 								/>
 								<Legend />
@@ -446,7 +460,7 @@ function AnalyticsPage() {
 									dot={false}
 								/>
 							</BarChart>
-						</ResponsiveContainer>
+						</ChartContainer>
 					)}
 				</CardContent>
 			</Card>
@@ -465,7 +479,11 @@ function AnalyticsPage() {
 							over time.
 						</p>
 					) : (
-						<ResponsiveContainer width="100%" height={240}>
+						<ChartContainer
+							id="analytics-net-worth"
+							config={networthChartConfig}
+							className="h-60 w-full aspect-auto"
+						>
 							<LineChart data={networthHistory}>
 								<CartesianGrid strokeDasharray="3 3" />
 								<XAxis
@@ -478,19 +496,23 @@ function AnalyticsPage() {
 									}
 								/>
 								<YAxis />
-								<Tooltip
-									content={({ active, payload, label }) => (
-										<ChartTooltip
-											active={active}
-											payload={payload}
-											label={label}
-											formatter={(v) =>
-												Number(v).toLocaleString(undefined, {
-													minimumFractionDigits: 2,
-												})
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											className="bg-muted text-foreground ring-border/60"
+											formatter={(value, name, item) =>
+												renderTooltipEntry(
+													value,
+													name,
+													item.color ?? "hsl(var(--foreground))",
+													(v) =>
+														Number(v).toLocaleString(undefined, {
+															minimumFractionDigits: 2,
+														}),
+												)
 											}
 										/>
-									)}
+									}
 								/>
 								<Line
 									type="monotone"
@@ -501,7 +523,7 @@ function AnalyticsPage() {
 									name="Net Worth"
 								/>
 							</LineChart>
-						</ResponsiveContainer>
+						</ChartContainer>
 					)}
 				</CardContent>
 			</Card>

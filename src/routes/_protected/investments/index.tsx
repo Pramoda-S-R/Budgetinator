@@ -6,13 +6,16 @@ import {
 	Legend,
 	Pie,
 	PieChart,
-	Tooltip as RechartsTooltip,
-	ResponsiveContainer,
 } from "recharts";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Calendar } from "#/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
+import {
+	ChartContainer,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "#/components/ui/chart";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import {
@@ -273,6 +276,16 @@ function InvestmentsPage() {
 		}));
 	}, [investmentNameMap, valuations]);
 
+	const allocationChartConfig = Object.fromEntries(
+		allocationWithNames.map((allocation, idx) => [
+			allocation.investmentName,
+			{
+				label: allocation.investmentName,
+				color: CHART_COLORS[idx % CHART_COLORS.length],
+			},
+		]),
+	);
+
 	// Group entries and valuations by investmentId
 	const entriesByInv = useMemo(() => {
 		const m = new Map<string, InvestmentEntry[]>();
@@ -357,9 +370,39 @@ function InvestmentsPage() {
 								{allocationWithNames.length === 0 ? (
 									<p className="text-muted-foreground">No valuations yet.</p>
 								) : (
-									<ResponsiveContainer width="100%" height={220}>
+									<ChartContainer
+										id="investments-allocation"
+										config={allocationChartConfig}
+										className="h-55 w-full aspect-auto"
+									>
 										<PieChart>
-											<RechartsTooltip />
+											<ChartTooltip
+												content={
+													<ChartTooltipContent
+														className="bg-muted text-foreground ring-border/60"
+														formatter={(value, name, item) => {
+															const numericValue = Number(value ?? 0);
+															const percentValue =
+																numericValue <= 1 ? numericValue * 100 : numericValue;
+															const color = item.color ?? "hsl(var(--foreground))";
+
+															return (
+																<div className="flex w-full items-center justify-between gap-3">
+																	<span className="font-medium" style={{ color }}>
+																		{String(name ?? "Allocation")}
+																	</span>
+																	<span
+																		className="font-mono font-semibold tabular-nums"
+																		style={{ color }}
+																	>
+																		{percentValue.toFixed(2)}%
+																	</span>
+																</div>
+															);
+														}}
+													/>
+												}
+											/>
 											<Legend />
 											<Pie
 												data={allocationWithNames}
@@ -379,7 +422,7 @@ function InvestmentsPage() {
 												))}
 											</Pie>
 										</PieChart>
-									</ResponsiveContainer>
+									</ChartContainer>
 								)}
 							</CardContent>
 						</Card>

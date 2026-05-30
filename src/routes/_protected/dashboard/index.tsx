@@ -3,7 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
-import { ChartContainer, ChartTooltip } from "#/components/ui/chart";
+import {
+	ChartContainer,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "#/components/ui/chart";
 import { Progress } from "#/components/ui/progress";
 import { createDashboardDataAccess } from "#/features/dashboard/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
@@ -140,7 +144,11 @@ function RouteComponent() {
 										strokeWidth={2}
 										dot={false}
 									/>
-									<ChartTooltip />
+									<ChartTooltip
+										content={
+											<ChartTooltipContent className="bg-muted text-foreground ring-border/60" />
+										}
+									/>
 								</LineChart>
 							</ChartContainer>
 						)}
