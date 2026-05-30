@@ -251,6 +251,7 @@ function TransactionsPage() {
 			accountId: string;
 			amount: number;
 			transactionType: "expense" | "income" | "transfer";
+			postingKey: string;
 			categoryId?: string | null;
 			merchant?: string;
 			notes?: string;
@@ -318,6 +319,7 @@ function TransactionsPage() {
 				accountId,
 				amount: Number(amount),
 				transactionType,
+				postingKey: crypto.randomUUID(),
 				categoryId: categoryId || undefined,
 				merchant: merchant || undefined,
 				notes: notes || undefined,

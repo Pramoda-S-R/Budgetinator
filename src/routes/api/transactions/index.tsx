@@ -2,19 +2,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { db } from "#/db";
-import { transactions } from "#/db/schema";
+import {
+	createPostgresFinancialPostingAdapter,
+} from "#/lib/financial-posting/adapters/postgres";
+import { createFinancialPostingModule } from "#/lib/financial-posting/module";
+import { TRANSACTION_CREATE_OPERATION_KIND } from "#/lib/financial-posting/operation-kind";
 import { requireCurrentUser } from "#/lib/server-auth";
+import { transactionTypes } from "#/lib/transaction-ledger";
 import {
-	buildTransactionDeltas,
-	combineAccountDeltas,
-	toNumericString,
-	transactionTypes,
-} from "#/lib/transaction-ledger";
-import {
-	applyBalanceAdjustments,
-	authorizeAccounts,
-	authorizeCategory,
-	fetchTransactionById,
 	listTransactions,
 	normalizeTags,
 	syncTransactionTags,
@@ -33,6 +28,7 @@ const createTransactionSchema = z
 		notes: z.string().trim().optional().default(""),
 		isRecurring: z.boolean().optional().default(false),
 		transferAccountId: z.string().uuid().optional(),
+		postingKey: z.string().trim().min(1),
 		tags: z.array(z.string().min(1)).optional(),
 	})
 	.superRefine((value, ctx) => {
@@ -63,6 +59,10 @@ function json(data: unknown, status = 200) {
 	});
 }
 
+const financialPosting = createFinancialPostingModule(
+	createPostgresFinancialPostingAdapter(db),
+);
+
 export const Route = createFileRoute("/api/transactions/")({
 	server: {
 		handlers: {
@@ -89,55 +89,54 @@ export const Route = createFileRoute("/api/transactions/")({
 					);
 				}
 
-				const { transferAccountId, tags, ...body } = parsed.data;
+				const { transferAccountId, tags, postingKey, ...body } = parsed.data;
 				const transactionDate = parsed.data.transactionDate ?? new Date();
 				const normalizedTags = normalizeTags(tags);
-				const accountsToAuthorize = [body.accountId, transferAccountId].filter(
-					(value): value is string => Boolean(value),
-				);
 
-				const transaction = await db.transaction(async (tx) => {
-					await authorizeAccounts(tx, user.id, accountsToAuthorize);
-					await authorizeCategory(tx, user.id, parsed.data.categoryId ?? null);
-
-					const [created] = await tx
-						.insert(transactions)
-						.values({
-							userId: user.id,
-							accountId: body.accountId,
-							transferAccountId: transferAccountId ?? null,
-							categoryId: parsed.data.categoryId ?? null,
-							amount: toNumericString(body.amount),
-							transactionType: body.transactionType,
-							transactionDate,
-							merchant: body.merchant,
-							notes: body.notes,
-							isRecurring: body.isRecurring,
-						})
-						.returning();
-
-					const deltas = combineAccountDeltas(
-						buildTransactionDeltas({
-							accountId: body.accountId,
-							amount: body.amount,
-							transactionType: body.transactionType,
-							transferAccountId: transferAccountId ?? null,
-						}),
-					);
-
-					await applyBalanceAdjustments(tx, user.id, deltas);
-					await syncTransactionTags(tx, created.id, normalizedTags);
-
-					const detailed = await fetchTransactionById(tx, user.id, created.id);
-
-					if (!detailed) {
-						throw new Error("Unable to serialize transaction");
-					}
-
-					return detailed;
+				const result = await financialPosting.postTransactionCreate({
+					userId: user.id,
+					operationKind: TRANSACTION_CREATE_OPERATION_KIND,
+					postingKey,
+					payload: {
+						accountId: body.accountId,
+						transferAccountId: transferAccountId ?? null,
+						categoryId: parsed.data.categoryId ?? null,
+						amount: body.amount,
+						transactionType: body.transactionType,
+						transactionDate,
+						merchant: body.merchant,
+						notes: body.notes,
+						isRecurring: body.isRecurring,
+					},
 				});
 
-				return json({ transaction }, 201);
+				if (!result.ok) {
+					switch (result.error.kind) {
+						case "account_not_found":
+						case "category_not_found":
+							return json({ error: result.error.message }, 404);
+						case "posting_key_conflict":
+							return json({ error: result.error.message }, 409);
+						case "transfer_account_invalid":
+						case "invariant_violation":
+							return json({ error: result.error.message }, 400);
+					}
+				}
+
+				let transaction = result.outcome.snapshot;
+
+				if (tags !== undefined) {
+					await syncTransactionTags(db, transaction.id, normalizedTags);
+					transaction = {
+						...transaction,
+						tags: normalizedTags,
+					};
+				}
+
+				return json(
+					{ transaction },
+					result.outcome.kind === "posted" ? 201 : 200,
+				);
 			},
 		},
 	},

@@ -54,10 +54,11 @@ const successEnvelopeSchema = z.object({
 	success: z.boolean(),
 });
 
-type TransactionInput = {
+type TransactionCreateInput = {
 	accountId: string;
 	amount: number;
 	transactionType: "expense" | "income" | "transfer";
+	postingKey: string;
 	categoryId?: string | null;
 	merchant?: string;
 	notes?: string;
@@ -67,7 +68,9 @@ type TransactionInput = {
 	tags?: string[];
 };
 
-type TransactionUpdateInput = Partial<TransactionInput>;
+type TransactionUpdateInput = {
+	postingKey: string;
+} & Partial<Omit<TransactionCreateInput, "postingKey">>;
 
 export function createTransactionsDataAccess(user?: User) {
 	const client = createApiClient(user);
@@ -81,7 +84,7 @@ export function createTransactionsDataAccess(user?: User) {
 			);
 			return unwrapApiResult(result);
 		},
-		async createTransaction(input: TransactionInput) {
+		async createTransaction(input: TransactionCreateInput) {
 			const result = await client.post(
 				"/api/transactions",
 				input,
@@ -101,8 +104,10 @@ export function createTransactionsDataAccess(user?: User) {
 			return unwrapApiResult(result);
 		},
 		async deleteTransaction(transactionId: string) {
+			const postingKey = crypto.randomUUID();
+			const params = new URLSearchParams({ postingKey });
 			const result = await client.delete(
-				`/api/transactions/${transactionId}`,
+				`/api/transactions/${transactionId}?${params.toString()}`,
 				successEnvelopeSchema,
 			);
 			return unwrapApiResult(result);
@@ -114,7 +119,7 @@ export async function fetchTransactions(user?: User, limit = 60) {
 	return createTransactionsDataAccess(user).fetchTransactions(limit);
 }
 
-export async function createTransaction(input: TransactionInput, user?: User) {
+export async function createTransaction(input: TransactionCreateInput, user?: User) {
 	return createTransactionsDataAccess(user).createTransaction(input);
 }
 

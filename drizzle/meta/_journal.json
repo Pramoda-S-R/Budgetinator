@@ -85,6 +85,13 @@
       "when": 1780130870150,
       "tag": "0011_majestic_doorman",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1780153200000,
+      "tag": "0012_financial_posting_idempotency",
+      "breakpoints": true
     }
   ]
 }

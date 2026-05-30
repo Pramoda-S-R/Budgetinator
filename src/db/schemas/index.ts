@@ -6,6 +6,7 @@ export { categoryGroups } from "./category-groups";
 export { contacts } from "./contacts";
 export { emiPayments } from "./emi-payments";
 export { emis } from "./emis";
+export { financialPostingIdempotency } from "./financial-posting-idempotency";
 export { forecastSnapshots } from "./forecast-snapshots";
 export { investmentEntries } from "./investment-entries";
 export { investments } from "./investments";
@@ -27,6 +28,7 @@ import type { categoryGroups } from "./category-groups";
 import type { contacts } from "./contacts";
 import type { emiPayments } from "./emi-payments";
 import type { emis } from "./emis";
+import type { financialPostingIdempotency } from "./financial-posting-idempotency";
 import type { forecastSnapshots } from "./forecast-snapshots";
 import type { investmentEntries } from "./investment-entries";
 import type { investments } from "./investments";
@@ -93,6 +95,11 @@ export type NewEmi = typeof emis.$inferInsert;
 
 export type EmiPayment = typeof emiPayments.$inferSelect;
 export type NewEmiPayment = typeof emiPayments.$inferInsert;
+
+export type FinancialPostingIdempotencyRecord =
+	typeof financialPostingIdempotency.$inferSelect;
+export type NewFinancialPostingIdempotencyRecord =
+	typeof financialPostingIdempotency.$inferInsert;
 
 export type RecurringRule = typeof recurringRules.$inferSelect;
 export type NewRecurringRule = typeof recurringRules.$inferInsert;
