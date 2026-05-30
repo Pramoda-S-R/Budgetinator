@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { CreditCard } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Cell, Pie, PieChart } from "recharts";
 import { toast } from "sonner";
 import {
@@ -213,6 +213,7 @@ function CreditCardsPage() {
 	const [newCardBillingDate, setNewCardBillingDate] = useState(
 		toLocalDateInputValue(new Date()),
 	);
+	const createCardInFlightRef = useRef(false);
 	const [cardPendingDelete, setCardPendingDelete] = useState<{
 		id: string;
 		name: string;
@@ -332,6 +333,9 @@ function CreditCardsPage() {
 		[creditLimitSummary.availableLimit, creditLimitSummary.usedWithinLimit],
 	);
 
+	const accountsQueryKey = ["accounts", currentUser?.id] as const;
+	const transactionsQueryKey = ["transactions", currentUser?.id] as const;
+
 	const createCardMutation = useMutation({
 		mutationFn: (input: {
 			name: string;
@@ -347,9 +351,15 @@ function CreditCardsPage() {
 				nextBillingDate: input.nextBillingDate,
 				recordedAt: toLocalDateInputValue(new Date()),
 			}),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ["accounts", currentUser?.id],
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: accountsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: accountsQueryKey,
+				type: "active",
+				exact: true,
 			});
 			setNewCardName("");
 			setNewCardOutstanding("0");
@@ -371,9 +381,15 @@ function CreditCardsPage() {
 				creditLimit: payload.creditLimit,
 				nextBillingDate: payload.nextBillingDate,
 			}),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ["accounts", currentUser?.id],
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: accountsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: accountsQueryKey,
+				type: "active",
+				exact: true,
 			});
 			toast.success("Card details saved.");
 		},
@@ -381,9 +397,15 @@ function CreditCardsPage() {
 
 	const deleteCardMutation = useMutation({
 		mutationFn: (accountId: string) => accountsApi.deleteAccount(accountId),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ["accounts", currentUser?.id],
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: accountsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: accountsQueryKey,
+				type: "active",
+				exact: true,
 			});
 			toast.success("Credit card deleted.");
 		},
@@ -399,15 +421,25 @@ function CreditCardsPage() {
 			emiAmount?: number;
 			emiLabel?: string;
 		}) => creditCardsApi.payCreditCardBill(payload),
-		onSuccess: async (result) => {
-			await Promise.all([
-				queryClient.invalidateQueries({
-					queryKey: ["accounts", currentUser?.id],
-				}),
-				queryClient.invalidateQueries({
-					queryKey: ["transactions", currentUser?.id],
-				}),
-			]);
+		onSuccess: (result) => {
+			void queryClient.invalidateQueries({
+				queryKey: accountsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: accountsQueryKey,
+				type: "active",
+				exact: true,
+			});
+			void queryClient.invalidateQueries({
+				queryKey: transactionsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: transactionsQueryKey,
+				type: "active",
+				exact: true,
+			});
 			toast.success(
 				`Payment recorded. Outstanding now ${result.payment.outstandingAfter}.`,
 			);
@@ -481,7 +513,7 @@ function CreditCardsPage() {
 	}
 
 	async function addCard() {
-		if (createCardMutation.isPending) {
+		if (createCardInFlightRef.current || createCardMutation.isPending) {
 			return;
 		}
 
@@ -510,6 +542,7 @@ function CreditCardsPage() {
 		}
 
 		try {
+			createCardInFlightRef.current = true;
 			await createCardMutation.mutateAsync({
 				name,
 				currentBalance: -Math.abs(outstanding),
@@ -517,7 +550,11 @@ function CreditCardsPage() {
 				nextBillingDate: newCardBillingDate,
 			});
 		} catch {
-			toast.error("Unable to create credit card.");
+			toast.error("Unable to create credit card.", {
+				id: "credit-card-create-error",
+			});
+		} finally {
+			createCardInFlightRef.current = false;
 		}
 	}
 
@@ -543,7 +580,9 @@ function CreditCardsPage() {
 				nextBillingDate,
 			});
 		} catch {
-			toast.error("Unable to save card details.");
+			toast.error("Unable to save card details.", {
+				id: `credit-card-save-error-${accountId}`,
+			});
 		}
 	}
 
@@ -560,7 +599,9 @@ function CreditCardsPage() {
 			await deleteCardMutation.mutateAsync(cardPendingDelete.id);
 			setCardPendingDelete(null);
 		} catch {
-			toast.error("Unable to delete credit card.");
+			toast.error("Unable to delete credit card.", {
+				id: `credit-card-delete-error-${cardPendingDelete.id}`,
+			});
 		}
 	}
 
@@ -632,7 +673,9 @@ function CreditCardsPage() {
 		try {
 			await payBillMutation.mutateAsync(payload);
 		} catch {
-			toast.error("Unable to process bill payment.");
+			toast.error("Unable to process bill payment.", {
+				id: `credit-card-payment-error-${cardId}-${action}`,
+			});
 		}
 	}
 

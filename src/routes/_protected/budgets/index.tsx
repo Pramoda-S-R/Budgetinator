@@ -203,10 +203,17 @@ function BudgetsPage() {
 
 	const deletePresetM = useMutation({
 		mutationFn: (id: string) => budgetsApi.deleteBudgetPreset(id),
-		onSuccess: () =>
-			queryClient.invalidateQueries({
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
 				queryKey: ["budget-presets", currentUser?.id],
-			}),
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: ["budget-presets", currentUser?.id],
+				type: "active",
+				exact: true,
+			});
+		},
 	});
 
 	const applyMutation = useMutation({

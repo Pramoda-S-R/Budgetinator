@@ -213,6 +213,7 @@ function LoansPage() {
 	const invalidateEmis = () => {
 		qc.invalidateQueries({ queryKey: ["emis", user?.id] });
 		qc.invalidateQueries({ queryKey: ["emiPayments", user?.id] });
+		qc.invalidateQueries({ queryKey: ["accounts", user?.id] });
 	};
 
 	const createContactM = useMutation({

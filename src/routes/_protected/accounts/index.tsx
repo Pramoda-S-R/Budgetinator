@@ -13,7 +13,7 @@ import {
 	Wallet,
 } from "lucide-react";
 import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "#/components/ui/button";
@@ -206,9 +206,12 @@ function AccountsPage() {
 	const [recordedAt, setRecordedAt] = useState(
 		toLocalDateInputValue(new Date()),
 	);
+	const createAccountInFlightRef = useRef(false);
+	const deleteAccountInFlightRef = useRef(false);
 	const [balanceDialogAccount, setBalanceDialogAccount] =
 		useState<Account | null>(null);
 	const [balanceDraft, setBalanceDraft] = useState("");
+	const accountsQueryKey = ["accounts", currentUser?.id] as const;
 
 	const accountsQuery = useQuery({
 		queryKey: ["accounts", currentUser?.id],
@@ -229,9 +232,15 @@ function AccountsPage() {
 			currentBalance: number;
 			recordedAt: string;
 		}) => accountsApi.createAccount(input),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ["accounts", currentUser?.id],
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: accountsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: accountsQueryKey,
+				type: "active",
+				exact: true,
 			});
 			setName("");
 			setCurrentBalance("0");
@@ -244,18 +253,30 @@ function AccountsPage() {
 			accountsApi.updateAccount(payload.accountId, {
 				currentBalance: payload.currentBalance,
 			}),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ["accounts", currentUser?.id],
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: accountsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: accountsQueryKey,
+				type: "active",
+				exact: true,
 			});
 		},
 	});
 
 	const deleteAccountMutation = useMutation({
 		mutationFn: (accountId: string) => accountsApi.deleteAccount(accountId),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ["accounts", currentUser?.id],
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: accountsQueryKey,
+				exact: true,
+			});
+			void queryClient.refetchQueries({
+				queryKey: accountsQueryKey,
+				type: "active",
+				exact: true,
 			});
 		},
 	});
@@ -333,8 +354,12 @@ function AccountsPage() {
 
 	async function onCreateAccount(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
+		if (createAccountInFlightRef.current || createAccountMutation.isPending) {
+			return;
+		}
 
 		try {
+			createAccountInFlightRef.current = true;
 			await createAccountMutation.mutateAsync({
 				name,
 				accountType,
@@ -342,15 +367,28 @@ function AccountsPage() {
 				recordedAt,
 			});
 		} catch {
-			toast.error("Unable to create account.");
+			toast.error("Unable to create account.", {
+				id: "account-create-error",
+			});
+		} finally {
+			createAccountInFlightRef.current = false;
 		}
 	}
 
 	async function onDeleteAccount(accountId: string) {
+		if (deleteAccountInFlightRef.current || deleteAccountMutation.isPending) {
+			return;
+		}
+
 		try {
+			deleteAccountInFlightRef.current = true;
 			await deleteAccountMutation.mutateAsync(accountId);
 		} catch {
-			toast.error("Unable to delete account.");
+			toast.error("Unable to delete account.", {
+				id: "account-delete-error",
+			});
+		} finally {
+			deleteAccountInFlightRef.current = false;
 		}
 	}
 
@@ -455,7 +493,11 @@ function AccountsPage() {
 							/>
 						</div>
 						<div className="flex items-end">
-							<Button type="submit" className="w-full">
+							<Button
+								type="submit"
+								className="w-full"
+								disabled={createAccountMutation.isPending}
+							>
 								Add Account
 							</Button>
 						</div>
@@ -512,6 +554,7 @@ function AccountsPage() {
 												<Button
 													variant="destructive"
 													onClick={() => onDeleteAccount(account.id)}
+													disabled={deleteAccountMutation.isPending}
 												>
 													Delete
 												</Button>

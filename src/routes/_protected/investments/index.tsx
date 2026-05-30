@@ -185,6 +185,21 @@ function InvestmentsPage() {
 		qc.invalidateQueries({ queryKey: ["investments", user?.id] });
 		qc.invalidateQueries({ queryKey: ["investmentEntries", user?.id] });
 		qc.invalidateQueries({ queryKey: ["investmentValuations", user?.id] });
+		qc.invalidateQueries({ queryKey: ["accounts", user?.id] });
+	};
+
+	const refreshPortfolioQueries = () => {
+		invalidateAll();
+		qc.refetchQueries({ queryKey: ["investments", user?.id], type: "active" });
+		qc.refetchQueries({
+			queryKey: ["investmentEntries", user?.id],
+			type: "active",
+		});
+		qc.refetchQueries({
+			queryKey: ["investmentValuations", user?.id],
+			type: "active",
+		});
+		qc.refetchQueries({ queryKey: ["accounts", user?.id], type: "active" });
 	};
 
 	const createInvM = useMutation({
@@ -195,7 +210,7 @@ function InvestmentsPage() {
 				symbol: newSymbol || null,
 			}),
 		onSuccess: () => {
-			invQ.refetch();
+			refreshPortfolioQueries();
 			setNewName("");
 			setNewType("");
 			setNewSymbol("");
@@ -214,8 +229,7 @@ function InvestmentsPage() {
 				notes: entryNotes,
 			}),
 		onSuccess: () => {
-			entryQ.refetch();
-			qc.invalidateQueries({ queryKey: ["accounts", user?.id] });
+			refreshPortfolioQueries();
 			setEntryAmount("");
 			setEntryUnits("");
 			setEntryDate("");
@@ -232,7 +246,7 @@ function InvestmentsPage() {
 				valuationDate: valDate ? new Date(valDate) : undefined,
 			}),
 		onSuccess: () => {
-			valQ.refetch();
+			refreshPortfolioQueries();
 			setValAmount("");
 			setValDate("");
 		},
@@ -240,22 +254,22 @@ function InvestmentsPage() {
 
 	const deleteInvM = useMutation({
 		mutationFn: (id: string) => investmentsApi.deleteInvestmentById(id),
-		onSuccess: invalidateAll,
+		onSuccess: refreshPortfolioQueries,
 	});
 
 	const liquidateM = useMutation({
 		mutationFn: (id: string) => investmentsApi.liquidateInvestment(id),
-		onSuccess: () => invQ.refetch(),
+		onSuccess: refreshPortfolioQueries,
 	});
 
 	const deleteEntryM = useMutation({
 		mutationFn: (id: string) => investmentsApi.deleteInvestmentEntry(id),
-		onSuccess: () => entryQ.refetch(),
+		onSuccess: refreshPortfolioQueries,
 	});
 
 	const deleteValM = useMutation({
 		mutationFn: (id: string) => investmentsApi.deleteInvestmentValuation(id),
-		onSuccess: () => valQ.refetch(),
+		onSuccess: refreshPortfolioQueries,
 	});
 
 	const investmentNameMap = useMemo(

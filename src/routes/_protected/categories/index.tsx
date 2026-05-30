@@ -189,6 +189,12 @@ function CategoriesPage() {
 	const [draggedCategoryId, setDraggedCategoryId] = useState<string | null>(
 		null,
 	);
+	const [pendingGroupActionIds, setPendingGroupActionIds] = useState<
+		Set<string>
+	>(new Set());
+	const [pendingCategoryActionIds, setPendingCategoryActionIds] = useState<
+		Set<string>
+	>(new Set());
 
 	const categoryGroupsQuery = useQuery({
 		queryKey: ["category-groups", currentUser?.id, showArchived],
@@ -308,8 +314,16 @@ function CategoriesPage() {
 			queryClient.invalidateQueries({
 				queryKey: ["category-groups", currentUser?.id],
 			}),
+			queryClient.refetchQueries({
+				queryKey: ["category-groups", currentUser?.id],
+				type: "active",
+			}),
 			queryClient.invalidateQueries({
 				queryKey: ["categories", currentUser?.id],
+			}),
+			queryClient.refetchQueries({
+				queryKey: ["categories", currentUser?.id],
+				type: "active",
 			}),
 		]);
 	}
@@ -471,6 +485,12 @@ function CategoriesPage() {
 	}
 
 	async function onToggleGroupArchive(group: CategoryGroup) {
+		if (pendingGroupActionIds.has(group.id)) {
+			return;
+		}
+
+		setPendingGroupActionIds((prev) => new Set(prev).add(group.id));
+
 		try {
 			await updateGroupMutation.mutateAsync({
 				groupId: group.id,
@@ -479,10 +499,22 @@ function CategoriesPage() {
 			await refreshCategoriesState();
 		} catch {
 			toast.error("Unable to update category group.");
+		} finally {
+			setPendingGroupActionIds((prev) => {
+				const next = new Set(prev);
+				next.delete(group.id);
+				return next;
+			});
 		}
 	}
 
 	async function onToggleCategoryArchive(category: Category) {
+		if (pendingCategoryActionIds.has(category.id)) {
+			return;
+		}
+
+		setPendingCategoryActionIds((prev) => new Set(prev).add(category.id));
+
 		try {
 			await updateCategoryMutation.mutateAsync({
 				categoryId: category.id,
@@ -491,24 +523,54 @@ function CategoriesPage() {
 			await refreshCategoriesState();
 		} catch {
 			toast.error("Unable to update category.");
+		} finally {
+			setPendingCategoryActionIds((prev) => {
+				const next = new Set(prev);
+				next.delete(category.id);
+				return next;
+			});
 		}
 	}
 
 	async function onDeleteGroup(groupId: string) {
+		if (pendingGroupActionIds.has(groupId)) {
+			return;
+		}
+
+		setPendingGroupActionIds((prev) => new Set(prev).add(groupId));
+
 		try {
 			await deleteGroupMutation.mutateAsync(groupId);
 			await refreshCategoriesState();
 		} catch {
 			toast.error("Unable to delete category group.");
+		} finally {
+			setPendingGroupActionIds((prev) => {
+				const next = new Set(prev);
+				next.delete(groupId);
+				return next;
+			});
 		}
 	}
 
 	async function onDeleteCategory(categoryId: string) {
+		if (pendingCategoryActionIds.has(categoryId)) {
+			return;
+		}
+
+		setPendingCategoryActionIds((prev) => new Set(prev).add(categoryId));
+
 		try {
 			await deleteCategoryMutation.mutateAsync(categoryId);
 			await refreshCategoriesState();
 		} catch {
 			toast.error("Unable to delete category.");
+		} finally {
+			setPendingCategoryActionIds((prev) => {
+				const next = new Set(prev);
+				next.delete(categoryId);
+				return next;
+			});
 		}
 	}
 
@@ -746,12 +808,14 @@ function CategoriesPage() {
 									<Button
 										variant="outline"
 										onClick={() => onToggleGroupArchive(group)}
+										disabled={pendingGroupActionIds.has(group.id)}
 									>
 										{group.isArchived ? "Unarchive" : "Archive"}
 									</Button>
 									<Button
 										variant="destructive"
 										onClick={() => onDeleteGroup(group.id)}
+										disabled={pendingGroupActionIds.has(group.id)}
 									>
 										Delete
 									</Button>
@@ -794,12 +858,14 @@ function CategoriesPage() {
 												<Button
 													variant="outline"
 													onClick={() => onToggleCategoryArchive(category)}
+													disabled={pendingCategoryActionIds.has(category.id)}
 												>
 													{category.isArchived ? "Unarchive" : "Archive"}
 												</Button>
 												<Button
 													variant="destructive"
 													onClick={() => onDeleteCategory(category.id)}
+													disabled={pendingCategoryActionIds.has(category.id)}
 												>
 													Delete
 												</Button>
