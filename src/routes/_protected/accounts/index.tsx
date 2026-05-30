@@ -13,7 +13,8 @@ import {
 	Wallet,
 } from "lucide-react";
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "#/components/ui/button";
 import { Calendar } from "#/components/ui/calendar";
@@ -205,7 +206,6 @@ function AccountsPage() {
 	const [recordedAt, setRecordedAt] = useState(
 		toLocalDateInputValue(new Date()),
 	);
-	const [error, setError] = useState<string | null>(null);
 	const [balanceDialogAccount, setBalanceDialogAccount] =
 		useState<Account | null>(null);
 	const [balanceDraft, setBalanceDraft] = useState("");
@@ -311,6 +311,12 @@ function AccountsPage() {
 		});
 	}, [accounts, totalNetWorth]);
 
+	useEffect(() => {
+		if (accountsQuery.isError) {
+			toast.error("Unable to load accounts.");
+		}
+	}, [accountsQuery.isError]);
+
 	function formatDisplayedBalance(account: {
 		accountType: string;
 		currentBalance: string;
@@ -327,7 +333,6 @@ function AccountsPage() {
 
 	async function onCreateAccount(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setError(null);
 
 		try {
 			await createAccountMutation.mutateAsync({
@@ -337,16 +342,15 @@ function AccountsPage() {
 				recordedAt,
 			});
 		} catch {
-			setError("Unable to create account");
+			toast.error("Unable to create account.");
 		}
 	}
 
 	async function onDeleteAccount(accountId: string) {
-		setError(null);
 		try {
 			await deleteAccountMutation.mutateAsync(accountId);
 		} catch {
-			setError("Unable to delete account");
+			toast.error("Unable to delete account.");
 		}
 	}
 
@@ -356,7 +360,6 @@ function AccountsPage() {
 	}
 
 	function onUpdateBalance(account: Account) {
-		setError(null);
 		setBalanceDialogAccount(account);
 		setBalanceDraft(account.currentBalance);
 	}
@@ -370,7 +373,7 @@ function AccountsPage() {
 
 		const value = Number(balanceDraft);
 		if (!Number.isFinite(value)) {
-			setError("Balance must be a valid number");
+			toast.error("Balance must be a valid number.");
 			return;
 		}
 
@@ -381,7 +384,7 @@ function AccountsPage() {
 			});
 			closeBalanceDialog();
 		} catch {
-			setError("Unable to update balance");
+			toast.error("Unable to update balance.");
 		}
 	}
 
@@ -457,8 +460,6 @@ function AccountsPage() {
 							</Button>
 						</div>
 					</form>
-
-					{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				</CardContent>
 			</Card>
 
@@ -469,10 +470,6 @@ function AccountsPage() {
 				<CardContent>
 					{accountsQuery.isLoading ? (
 						<p className="text-sm text-muted-foreground">Loading accounts...</p>
-					) : null}
-
-					{accountsQuery.isError ? (
-						<p className="text-sm text-destructive">Unable to load accounts</p>
 					) : null}
 
 					{!accountsQuery.isLoading && accounts.length === 0 ? (

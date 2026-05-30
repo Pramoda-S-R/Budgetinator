@@ -94,13 +94,30 @@ const budgetPresetsEnvelopeSchema = z.object({
 	presets: z.array(budgetPresetSchema),
 });
 
-const budgetPresetEnvelopeSchema = z.object({
-	preset: budgetPresetSchema,
+const createdBudgetPresetEnvelopeSchema = z.object({
+	preset: z.object({
+		id: z.string(),
+		name: z.string(),
+		description: z.string(),
+		createdAt: z.string(),
+	}),
 });
 
 const monthlyBudgetEnvelopeSchema = z.object({
 	monthlyBudget: monthlyBudgetSchema,
 	allocations: z.array(monthlyBudgetAllocationSchema),
+});
+
+const applyPresetMonthlyBudgetEnvelopeSchema = z.object({
+	monthlyBudget: monthlyBudgetSchema,
+	allocations: z.array(
+		z.object({
+			id: z.string(),
+			categoryGroupId: z.string().nullable(),
+			categoryId: z.string().nullable(),
+			allocatedAmount: z.string(),
+		}),
+	),
 });
 
 const monthlyBudgetOnlyEnvelopeSchema = z.object({
@@ -130,7 +147,7 @@ export function createBudgetsDataAccess(user?: User) {
 			const result = await client.post(
 				"/api/budget-presets",
 				input,
-				budgetPresetEnvelopeSchema,
+				createdBudgetPresetEnvelopeSchema,
 			);
 			return unwrapApiResult(result);
 		},
@@ -138,7 +155,7 @@ export function createBudgetsDataAccess(user?: User) {
 			const result = await client.post(
 				"/api/monthly-budgets/apply-preset",
 				input,
-				monthlyBudgetEnvelopeSchema,
+				applyPresetMonthlyBudgetEnvelopeSchema,
 			);
 			return unwrapApiResult(result);
 		},

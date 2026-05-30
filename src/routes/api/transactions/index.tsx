@@ -2,9 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { db } from "#/db";
-import {
-	createPostgresFinancialPostingAdapter,
-} from "#/lib/financial-posting/adapters/postgres";
+import { createPostgresFinancialPostingAdapter } from "#/lib/financial-posting/adapters/postgres";
 import { createFinancialPostingModule } from "#/lib/financial-posting/module";
 import { TRANSACTION_CREATE_OPERATION_KIND } from "#/lib/financial-posting/operation-kind";
 import { requireCurrentUser } from "#/lib/server-auth";

@@ -10,6 +10,7 @@ import {
 	Wallet,
 } from "lucide-react";
 import { type SubmitEvent, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Calendar } from "#/components/ui/calendar";
@@ -64,10 +65,10 @@ const TRANSACTION_TYPE_ICON: Record<
 };
 
 export const Route = createFileRoute("/_protected/transactions/")({
-  loader: () => ({
-    initialTransactionDate: toLocalDateInputValue(new Date()),
-  }),
-  component: TransactionsPage,
+	loader: () => ({
+		initialTransactionDate: toLocalDateInputValue(new Date()),
+	}),
+	component: TransactionsPage,
 });
 
 function TransactionsPage() {
@@ -101,9 +102,10 @@ function TransactionsPage() {
 	>("expense");
 	const [transferAccountId, setTransferAccountId] = useState("");
 	const { initialTransactionDate } = Route.useLoaderData();
-	const [transactionDate, setTransactionDate] = useState(initialTransactionDate);
+	const [transactionDate, setTransactionDate] = useState(
+		initialTransactionDate,
+	);
 	const [isRecurring, setIsRecurring] = useState(false);
-	const [formError, setFormError] = useState<string | null>(null);
 
 	const accountsQuery = useQuery({
 		queryKey: ["accounts", currentUser?.id],
@@ -269,7 +271,6 @@ function TransactionsPage() {
 					queryKey: ["accounts", currentUser?.id],
 				}),
 			]);
-			setFormError(null);
 			setAmount("");
 			setMerchant("");
 			setNotes("");
@@ -279,7 +280,7 @@ function TransactionsPage() {
 			setDialogOpen(false);
 		},
 		onError: () => {
-			setFormError("Unable to create transaction");
+			toast.error("Unable to create transaction.");
 		},
 	});
 
@@ -294,14 +295,16 @@ function TransactionsPage() {
 				queryKey: ["accounts", currentUser?.id],
 			});
 		},
+		onError: () => {
+			toast.error("Unable to delete transaction.");
+		},
 	});
 
 	const handleCreate = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		setFormError(null);
 
 		if (!accountId || !transactionType || !amount) {
-			setFormError("Complete required fields");
+			toast.error("Complete required fields.");
 			return;
 		}
 
@@ -339,7 +342,11 @@ function TransactionsPage() {
 	};
 
 	const handleDelete = async (transactionId: string) => {
-		await deleteMutation.mutateAsync(transactionId);
+		try {
+			await deleteMutation.mutateAsync(transactionId);
+		} catch {
+			// handled in mutation
+		}
 	};
 
 	useHotkey("N", () => setDialogOpen(true), { enabled: !dialogOpen });
@@ -626,9 +633,6 @@ function TransactionsPage() {
 												Mark as recurring
 											</Label>
 										</div>
-										{formError ? (
-											<p className="text-sm text-destructive">{formError}</p>
-										) : null}
 										<DialogFooter>
 											<Button
 												type="submit"

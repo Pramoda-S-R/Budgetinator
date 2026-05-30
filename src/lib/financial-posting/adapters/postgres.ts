@@ -16,9 +16,9 @@ import type {
 	FinancialPostingAdapterTx,
 	PostingKeyReservation,
 	ReservePostingKeyInput,
+	TransactionRecord,
 	TransactionSnapshot,
 	UpdateTransactionEventInput,
-	TransactionRecord,
 } from "../interface";
 
 type Database = typeof database;

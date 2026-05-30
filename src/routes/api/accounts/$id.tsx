@@ -114,14 +114,18 @@ export const Route = createFileRoute("/api/accounts/$id")({
 						const [record] = await tx
 							.update(accounts)
 							.set(updates)
-							.where(and(eq(accounts.id, accountId), eq(accounts.userId, user.id)))
+							.where(
+								and(eq(accounts.id, accountId), eq(accounts.userId, user.id)),
+							)
 							.returning();
 						updated = record ?? null;
 					} else {
 						const [record] = await tx
 							.select()
 							.from(accounts)
-							.where(and(eq(accounts.id, accountId), eq(accounts.userId, user.id)))
+							.where(
+								and(eq(accounts.id, accountId), eq(accounts.userId, user.id)),
+							)
 							.limit(1);
 						updated = record ?? null;
 					}

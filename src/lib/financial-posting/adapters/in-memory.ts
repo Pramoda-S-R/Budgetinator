@@ -2,7 +2,6 @@ import { toNumericString } from "#/lib/transaction-ledger";
 
 import type {
 	CompletePostingReservationInput,
-	CreateTransactionEventInput,
 	FinancialPostingAdapter,
 	FinancialPostingAdapterTx,
 	PostingKeyReservation,
@@ -36,7 +35,11 @@ export type InMemoryFinancialPostingState = {
 	categories: Map<string, InMemoryCategory>;
 	idempotency: Map<string, IdempotencyRecord>;
 	transactions: Map<string, TransactionRecord>;
-	accountBalanceHistory: Array<{ accountId: string; balance: string; recordedAt: Date }>;
+	accountBalanceHistory: Array<{
+		accountId: string;
+		balance: string;
+		recordedAt: Date;
+	}>;
 };
 
 export type InMemoryFinancialPostingAdapter = FinancialPostingAdapter & {
@@ -56,7 +59,9 @@ function idempotencyKey(input: ReservePostingKeyInput): string {
 
 function createState(initial?: InitialState): InMemoryFinancialPostingState {
 	return {
-		accounts: new Map((initial?.accounts ?? []).map((account) => [account.id, account])),
+		accounts: new Map(
+			(initial?.accounts ?? []).map((account) => [account.id, account]),
+		),
 		categories: new Map(
 			(initial?.categories ?? []).map((category) => [category.id, category]),
 		),
@@ -192,7 +197,9 @@ export function createInMemoryFinancialPostingAdapter(
 			}
 
 			const filteredUpdates = Object.fromEntries(
-				Object.entries(input.updates).filter(([, value]) => value !== undefined),
+				Object.entries(input.updates).filter(
+					([, value]) => value !== undefined,
+				),
 			);
 
 			const updated: TransactionRecord = {

@@ -186,8 +186,13 @@ export type TransactionUpdateFields = {
 };
 
 export type FinancialPostingAdapterTx = {
-	reservePostingKey(input: ReservePostingKeyInput): Promise<PostingKeyReservation>;
-	loadOwnedAccountIds(userId: string, accountIds: string[]): Promise<Set<string>>;
+	reservePostingKey(
+		input: ReservePostingKeyInput,
+	): Promise<PostingKeyReservation>;
+	loadOwnedAccountIds(
+		userId: string,
+		accountIds: string[],
+	): Promise<Set<string>>;
 	categoryExists(userId: string, categoryId: string): Promise<boolean>;
 	createTransactionEvent(
 		input: CreateTransactionEventInput,
@@ -199,8 +204,14 @@ export type FinancialPostingAdapterTx = {
 	updateTransactionEvent(
 		input: UpdateTransactionEventInput,
 	): Promise<CreatedTransactionEvent | null>;
-	deleteTransactionEvent(userId: string, transactionId: string): Promise<boolean>;
-	applyBalanceAdjustments(userId: string, deltas: AccountDelta[]): Promise<void>;
+	deleteTransactionEvent(
+		userId: string,
+		transactionId: string,
+	): Promise<boolean>;
+	applyBalanceAdjustments(
+		userId: string,
+		deltas: AccountDelta[],
+	): Promise<void>;
 	completePostingReservation(
 		input: CompletePostingReservationInput,
 	): Promise<void>;

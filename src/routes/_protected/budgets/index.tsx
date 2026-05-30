@@ -22,7 +22,8 @@ import {
 	Wallet,
 } from "lucide-react";
 import type { FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
@@ -131,7 +132,6 @@ function BudgetsPage() {
 	const [presetName, setPresetName] = useState("");
 	const [presetDesc, setPresetDesc] = useState("");
 	const [rows, setRows] = useState<AllocationRow[]>([INITIAL_ALLOCATION_ROW]);
-	const [presetError, setPresetError] = useState<string | null>(null);
 	const [showCreatePreset, setShowCreatePreset] = useState(false);
 
 	// Monthly budget
@@ -142,6 +142,8 @@ function BudgetsPage() {
 	const [expectedIncome, setExpectedIncome] = useState("0");
 	const [editingIncome, setEditingIncome] = useState(false);
 	const [incomeInput, setIncomeInput] = useState("0");
+	const createPresetInFlightRef = useRef(false);
+	const applyPresetInFlightRef = useRef(false);
 	const yearOptions = useMemo(() => {
 		const currentYear = new Date().getFullYear();
 		const years = new Set<number>([selectedYear, currentYear]);
@@ -184,14 +186,17 @@ function BudgetsPage() {
 				allocationPercent?: number | null;
 			}>;
 		}) => budgetsApi.createBudgetPreset(input),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({
-				queryKey: ["budget-presets"],
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: ["budget-presets", currentUser?.id],
+			});
+			void queryClient.refetchQueries({
+				queryKey: ["budget-presets", currentUser?.id],
+				type: "active",
 			});
 			setPresetName("");
 			setPresetDesc("");
 			setRows([createRow()]);
-			setPresetError(null);
 			setShowCreatePreset(false);
 		},
 	});
@@ -211,10 +216,14 @@ function BudgetsPage() {
 			month: number;
 			expectedIncome?: number;
 		}) => budgetsApi.applyPresetToMonth(input),
-		onSuccess: async (_, input) => {
+		onSuccess: (_, input) => {
 			const appliedMonthKey = `${input.year}-${String(input.month).padStart(2, "0")}`;
-			await queryClient.invalidateQueries({
+			void queryClient.invalidateQueries({
 				queryKey: ["monthly-budget", currentUser?.id, appliedMonthKey],
+			});
+			void queryClient.refetchQueries({
+				queryKey: ["monthly-budget", currentUser?.id, appliedMonthKey],
+				type: "active",
 			});
 		},
 	});
@@ -231,11 +240,30 @@ function BudgetsPage() {
 	});
 
 	const deleteMonthlyM = useMutation({
-		mutationFn: () => budgetsApi.deleteMonthlyBudget(monthKey),
-		onSuccess: () =>
-			queryClient.invalidateQueries({
-				queryKey: ["monthly-budget", currentUser?.id, monthKey],
-			}),
+		mutationFn: (monthKeyToDelete: string) =>
+			budgetsApi.deleteMonthlyBudget(monthKeyToDelete),
+		onSuccess: async (_, deletedMonthKey) => {
+			const monthlyBudgetQueryKey = [
+				"monthly-budget",
+				currentUser?.id,
+				deletedMonthKey,
+			] as const;
+
+			await queryClient.resetQueries({
+				queryKey: monthlyBudgetQueryKey,
+				exact: true,
+			});
+			await queryClient.refetchQueries({
+				queryKey: monthlyBudgetQueryKey,
+				type: "active",
+				exact: true,
+			});
+		},
+		onError: () => {
+			toast.error("Unable to delete budget.", {
+				id: "budget-delete-error",
+			});
+		},
 	});
 
 	const updateAllocM = useMutation({
@@ -293,8 +321,13 @@ function BudgetsPage() {
 		[allocations],
 	);
 
-	const handleCreatePreset = (e: FormEvent) => {
+	const handleCreatePreset = async (e: FormEvent) => {
 		e.preventDefault();
+
+		if (createPresetInFlightRef.current || createMutation.isPending) {
+			return;
+		}
+
 		const allocs = rows
 			.filter((r) => Number(r.amount) > 0)
 			.map((r) => ({
@@ -303,24 +336,50 @@ function BudgetsPage() {
 				allocatedAmount: Number(r.amount),
 			}));
 		if (!presetName.trim() || !allocs.length) {
-			setPresetError("Name and at least one allocation required");
+			toast.error("Name and at least one allocation required.", {
+				id: "budget-preset-validation",
+			});
 			return;
 		}
-		createMutation.mutate({
-			name: presetName,
-			description: presetDesc,
-			allocations: allocs,
-		});
+
+		try {
+			createPresetInFlightRef.current = true;
+			await createMutation.mutateAsync({
+				name: presetName,
+				description: presetDesc,
+				allocations: allocs,
+			});
+		} catch {
+			toast.error("Unable to save preset.", {
+				id: "budget-preset-save-error",
+			});
+		} finally {
+			createPresetInFlightRef.current = false;
+		}
 	};
 
-	const handleApply = () => {
+	const handleApply = async () => {
+		if (applyPresetInFlightRef.current || applyMutation.isPending) {
+			return;
+		}
+
 		if (!selectedPreset) return;
-		applyMutation.mutate({
-			presetId: selectedPreset,
-			year: selectedYear,
-			month: selectedMonth + 1,
-			expectedIncome: Number(expectedIncome),
-		});
+
+		try {
+			applyPresetInFlightRef.current = true;
+			await applyMutation.mutateAsync({
+				presetId: selectedPreset,
+				year: selectedYear,
+				month: selectedMonth + 1,
+				expectedIncome: Number(expectedIncome),
+			});
+		} catch {
+			toast.error("Unable to apply preset.", {
+				id: "budget-preset-apply-error",
+			});
+		} finally {
+			applyPresetInFlightRef.current = false;
+		}
 	};
 
 	return (
@@ -469,9 +528,6 @@ function BudgetsPage() {
 									</div>
 								))}
 							</div>
-							{presetError && (
-								<p className="text-sm text-destructive">{presetError}</p>
-							)}
 							<div className="flex gap-2">
 								<Button variant="outline" type="button" onClick={addRow}>
 									Add Allocation
@@ -598,11 +654,6 @@ function BudgetsPage() {
 							>
 								Apply Preset
 							</Button>
-							{applyMutation.isError && (
-								<p className="text-sm text-destructive">
-									Unable to apply preset
-								</p>
-							)}
 						</div>
 					)}
 
@@ -815,7 +866,7 @@ function BudgetsPage() {
 									</Button>
 									<Button
 										variant="destructive"
-										onClick={() => deleteMonthlyM.mutate()}
+										onClick={() => deleteMonthlyM.mutate(monthKey)}
 										disabled={deleteMonthlyM.isPending}
 									>
 										Delete Budget

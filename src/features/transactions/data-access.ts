@@ -119,7 +119,10 @@ export async function fetchTransactions(user?: User, limit = 60) {
 	return createTransactionsDataAccess(user).fetchTransactions(limit);
 }
 
-export async function createTransaction(input: TransactionCreateInput, user?: User) {
+export async function createTransaction(
+	input: TransactionCreateInput,
+	user?: User,
+) {
 	return createTransactionsDataAccess(user).createTransaction(input);
 }
 

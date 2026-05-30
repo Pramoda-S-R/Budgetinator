@@ -18,14 +18,14 @@ import type {
 	TransactionDeletePayload,
 	TransactionRecord,
 	TransactionSnapshot,
-	TransactionUpdatePayload,
 	TransactionUpdatePatch,
+	TransactionUpdatePayload,
 } from "./interface";
 import {
-	TRANSACTION_DELETE_OPERATION_KIND,
-	TRANSACTION_CREATE_OPERATION_KIND,
-	TRANSACTION_UPDATE_OPERATION_KIND,
 	type OperationKind,
+	TRANSACTION_CREATE_OPERATION_KIND,
+	TRANSACTION_DELETE_OPERATION_KIND,
+	TRANSACTION_UPDATE_OPERATION_KIND,
 } from "./operation-kind";
 
 const RESULT_SCHEMA_VERSION = 1;
@@ -180,7 +180,10 @@ function normalizeUpdatePatch(
 	patch: TransactionUpdatePatch,
 ): PostingFailure | { ok: true; patch: CanonicalUpdatePayload["patch"] } {
 	if (!Object.keys(patch).length) {
-		return failure("invariant_violation", "At least one field must be provided");
+		return failure(
+			"invariant_violation",
+			"At least one field must be provided",
+		);
 	}
 
 	const normalized: CanonicalUpdatePayload["patch"] = {};
@@ -229,7 +232,10 @@ function normalizeUpdatePatch(
 	}
 
 	if (!Object.keys(normalized).length) {
-		return failure("invariant_violation", "At least one field must be provided");
+		return failure(
+			"invariant_violation",
+			"At least one field must be provided",
+		);
 	}
 
 	return { ok: true, patch: normalized };
@@ -315,7 +321,10 @@ function mergeRecord(
 }
 
 function validateTransferState(
-	record: Pick<TransactionRecord, "transactionType" | "accountId" | "transferAccountId">,
+	record: Pick<
+		TransactionRecord,
+		"transactionType" | "accountId" | "transferAccountId"
+	>,
 ): PostingFailure | null {
 	if (record.transactionType !== "transfer") {
 		return null;

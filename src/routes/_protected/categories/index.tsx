@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import type { DragEvent, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
@@ -171,7 +172,6 @@ function CategoriesPage() {
 		[currentUser],
 	);
 	const [showArchived, setShowArchived] = useState(false);
-	const [error, setError] = useState<string | null>(null);
 
 	const [groupName, setGroupName] = useState("");
 	const [groupType, setGroupType] = useState("expense");
@@ -316,7 +316,6 @@ function CategoriesPage() {
 
 	async function onCreateGroup(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setError(null);
 
 		try {
 			await createGroupMutation.mutateAsync({
@@ -326,16 +325,15 @@ function CategoriesPage() {
 				color: groupColor,
 			});
 		} catch {
-			setError("Unable to create category group");
+			toast.error("Unable to create category group.");
 		}
 	}
 
 	async function onCreateCategory(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		setError(null);
 
 		if (!selectedGroupId) {
-			setError("Create a group first");
+			toast.error("Create a group first.");
 			return;
 		}
 
@@ -348,7 +346,7 @@ function CategoriesPage() {
 				color: categoryColor,
 			});
 		} catch {
-			setError("Unable to create category");
+			toast.error("Unable to create category.");
 		}
 	}
 
@@ -443,11 +441,10 @@ function CategoriesPage() {
 			return;
 		}
 
-		setError(null);
 		try {
 			await reorderGroups(draggedGroupId, groupId);
 		} catch {
-			setError("Unable to reorder category groups");
+			toast.error("Unable to reorder category groups.");
 		} finally {
 			setDraggedGroupId(null);
 		}
@@ -464,19 +461,16 @@ function CategoriesPage() {
 			return;
 		}
 
-		setError(null);
 		try {
 			await reorderCategories(groupId, draggedCategoryId, categoryId);
 		} catch {
-			setError("Unable to reorder categories");
+			toast.error("Unable to reorder categories.");
 		} finally {
 			setDraggedCategoryId(null);
 		}
 	}
 
 	async function onToggleGroupArchive(group: CategoryGroup) {
-		setError(null);
-
 		try {
 			await updateGroupMutation.mutateAsync({
 				groupId: group.id,
@@ -484,13 +478,11 @@ function CategoriesPage() {
 			});
 			await refreshCategoriesState();
 		} catch {
-			setError("Unable to update category group");
+			toast.error("Unable to update category group.");
 		}
 	}
 
 	async function onToggleCategoryArchive(category: Category) {
-		setError(null);
-
 		try {
 			await updateCategoryMutation.mutateAsync({
 				categoryId: category.id,
@@ -498,29 +490,25 @@ function CategoriesPage() {
 			});
 			await refreshCategoriesState();
 		} catch {
-			setError("Unable to update category");
+			toast.error("Unable to update category.");
 		}
 	}
 
 	async function onDeleteGroup(groupId: string) {
-		setError(null);
-
 		try {
 			await deleteGroupMutation.mutateAsync(groupId);
 			await refreshCategoriesState();
 		} catch {
-			setError("Unable to delete category group");
+			toast.error("Unable to delete category group.");
 		}
 	}
 
 	async function onDeleteCategory(categoryId: string) {
-		setError(null);
-
 		try {
 			await deleteCategoryMutation.mutateAsync(categoryId);
 			await refreshCategoriesState();
 		} catch {
-			setError("Unable to delete category");
+			toast.error("Unable to delete category.");
 		}
 	}
 
@@ -548,8 +536,6 @@ function CategoriesPage() {
 							</p>
 						) : null}
 					</div>
-
-					{error ? <p className="text-sm text-destructive">{error}</p> : null}
 				</CardContent>
 			</Card>
 

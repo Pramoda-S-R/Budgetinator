@@ -2,9 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { db } from "#/db";
-import {
-	createPostgresFinancialPostingAdapter,
-} from "#/lib/financial-posting/adapters/postgres";
+import { createPostgresFinancialPostingAdapter } from "#/lib/financial-posting/adapters/postgres";
 import { createFinancialPostingModule } from "#/lib/financial-posting/module";
 import {
 	TRANSACTION_DELETE_OPERATION_KIND,
@@ -81,14 +79,18 @@ export const Route = createFileRoute("/api/transactions/$id")({
 				const parsedBody = updateTransactionSchema.safeParse(payload);
 				if (!parsedBody.success) {
 					return json(
-						{ error: "Invalid request body", issues: parsedBody.error.flatten() },
+						{
+							error: "Invalid request body",
+							issues: parsedBody.error.flatten(),
+						},
 						400,
 					);
 				}
 
 				const user = await requireCurrentUser(request);
 				const { postingKey, tags, ...patch } = parsedBody.data;
-				const normalizedTags = tags === undefined ? undefined : normalizeTags(tags);
+				const normalizedTags =
+					tags === undefined ? undefined : normalizeTags(tags);
 
 				const result = await financialPosting.postTransactionUpdate({
 					userId: user.id,
@@ -98,7 +100,8 @@ export const Route = createFileRoute("/api/transactions/$id")({
 						transactionId: parsedParams.data.id,
 						patch: {
 							...patch,
-							categoryId: "categoryId" in patch ? (patch.categoryId ?? null) : undefined,
+							categoryId:
+								"categoryId" in patch ? (patch.categoryId ?? null) : undefined,
 							transferAccountId:
 								"transferAccountId" in patch
 									? (patch.transferAccountId ?? null)
@@ -127,7 +130,8 @@ export const Route = createFileRoute("/api/transactions/$id")({
 					return json({ error: "Invalid transaction id" }, 400);
 				}
 
-				const postingKey = new URL(request.url).searchParams.get("postingKey") ?? "";
+				const postingKey =
+					new URL(request.url).searchParams.get("postingKey") ?? "";
 				if (!postingKey.trim()) {
 					return json({ error: "postingKey query parameter is required" }, 400);
 				}
