@@ -355,7 +355,9 @@ function CreditCardsPage() {
 			setNewCardOutstanding("0");
 			setNewCardLimit("");
 			setNewCardBillingDate(toLocalDateInputValue(new Date()));
-			toast.success("Credit card added.");
+			toast.success("Credit card added.", {
+				id: "credit-card-added",
+			});
 		},
 	});
 
@@ -479,6 +481,10 @@ function CreditCardsPage() {
 	}
 
 	async function addCard() {
+		if (createCardMutation.isPending) {
+			return;
+		}
+
 		const name = newCardName.trim();
 		const outstanding = Number(newCardOutstanding);
 		const creditLimit = Number(newCardLimit);
