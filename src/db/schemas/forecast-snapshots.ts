@@ -8,8 +8,14 @@ export const forecastSnapshots = pgTable("forecast_snapshots", {
 		.notNull()
 		.references(() => users.id, { onDelete: "cascade" }),
 	forecastMonth: timestamp("forecast_month", { withTimezone: true }).notNull(),
-	predictedSpend: numeric("predicted_spend", { precision: 14, scale: 2 }).notNull(),
-	predictedSavings: numeric("predicted_savings", { precision: 14, scale: 2 }).notNull(),
+	predictedSpend: numeric("predicted_spend", {
+		precision: 14,
+		scale: 2,
+	}).notNull(),
+	predictedSavings: numeric("predicted_savings", {
+		precision: 14,
+		scale: 2,
+	}).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true })
 		.defaultNow()
 		.notNull(),

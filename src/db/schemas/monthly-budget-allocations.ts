@@ -16,5 +16,8 @@ export const monthlyBudgetAllocations = pgTable("monthly_budget_allocations", {
 	categoryId: uuid("category_id").references(() => categories.id, {
 		onDelete: "set null",
 	}),
-	allocatedAmount: numeric("allocated_amount", { precision: 14, scale: 2 }).notNull(),
+	allocatedAmount: numeric("allocated_amount", {
+		precision: 14,
+		scale: 2,
+	}).notNull(),
 });

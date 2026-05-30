@@ -1,4 +1,10 @@
-import { integer, numeric, pgTable, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+	integer,
+	numeric,
+	pgTable,
+	timestamp,
+	uuid,
+} from "drizzle-orm/pg-core";
 
 import { budgetPresets } from "./budget-presets";
 import { users } from "./users";

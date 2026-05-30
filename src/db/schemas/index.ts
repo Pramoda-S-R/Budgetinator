@@ -19,26 +19,26 @@ export { transactionTags } from "./transaction-tags";
 export { transactions } from "./transactions";
 export { users } from "./users";
 
-import { accountBalanceHistory } from "./account-balance-history";
-import { accounts } from "./accounts";
-import { budgetPresets } from "./budget-presets";
-import { categories } from "./categories";
-import { categoryGroups } from "./category-groups";
-import { contacts } from "./contacts";
-import { emiPayments } from "./emi-payments";
-import { emis } from "./emis";
-import { forecastSnapshots } from "./forecast-snapshots";
-import { investmentEntries } from "./investment-entries";
-import { investments } from "./investments";
-import { loanPayments } from "./loan-payments";
-import { loans } from "./loans";
-import { monthlyBudgetAllocations } from "./monthly-budget-allocations";
-import { monthlyBudgets } from "./monthly-budgets";
-import { presetAllocations } from "./preset-allocations";
-import { recurringRules } from "./recurring-rules";
-import { transactionTags } from "./transaction-tags";
-import { transactions } from "./transactions";
-import { users } from "./users";
+import type { accountBalanceHistory } from "./account-balance-history";
+import type { accounts } from "./accounts";
+import type { budgetPresets } from "./budget-presets";
+import type { categories } from "./categories";
+import type { categoryGroups } from "./category-groups";
+import type { contacts } from "./contacts";
+import type { emiPayments } from "./emi-payments";
+import type { emis } from "./emis";
+import type { forecastSnapshots } from "./forecast-snapshots";
+import type { investmentEntries } from "./investment-entries";
+import type { investments } from "./investments";
+import type { loanPayments } from "./loan-payments";
+import type { loans } from "./loans";
+import type { monthlyBudgetAllocations } from "./monthly-budget-allocations";
+import type { monthlyBudgets } from "./monthly-budgets";
+import type { presetAllocations } from "./preset-allocations";
+import type { recurringRules } from "./recurring-rules";
+import type { transactionTags } from "./transaction-tags";
+import type { transactions } from "./transactions";
+import type { users } from "./users";
 
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -68,8 +68,10 @@ export type NewPresetAllocation = typeof presetAllocations.$inferInsert;
 export type MonthlyBudget = typeof monthlyBudgets.$inferSelect;
 export type NewMonthlyBudget = typeof monthlyBudgets.$inferInsert;
 
-export type MonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferSelect;
-export type NewMonthlyBudgetAllocation = typeof monthlyBudgetAllocations.$inferInsert;
+export type MonthlyBudgetAllocation =
+	typeof monthlyBudgetAllocations.$inferSelect;
+export type NewMonthlyBudgetAllocation =
+	typeof monthlyBudgetAllocations.$inferInsert;
 
 export type Investment = typeof investments.$inferSelect;
 export type NewInvestment = typeof investments.$inferInsert;

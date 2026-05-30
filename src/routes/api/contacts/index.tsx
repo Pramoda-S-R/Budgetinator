@@ -12,7 +12,6 @@ const createContactSchema = z.object({
 	notes: z.string().trim().optional(),
 });
 
-
 export const Route = createFileRoute("/api/contacts/")({
 	server: {
 		handlers: {
@@ -23,19 +22,19 @@ export const Route = createFileRoute("/api/contacts/")({
 					.from(contacts)
 					.where(eq(contacts.userId, user.id))
 					.orderBy(desc(contacts.name));
-		return Response.json({ contacts: rows });
+				return Response.json({ contacts: rows });
 			},
 			POST: async ({ request }) => {
 				const user = await requireCurrentUser(request);
 				const payload = await request.json();
 				const parsed = createContactSchema.safeParse(payload);
 
-		if (!parsed.success) {
-			return Response.json(
-				{ error: "Invalid request body", issues: parsed.error.flatten() },
-				{ status: 400 },
-			);
-		}
+				if (!parsed.success) {
+					return Response.json(
+						{ error: "Invalid request body", issues: parsed.error.flatten() },
+						{ status: 400 },
+					);
+				}
 
 				const [created] = await db
 					.insert(contacts)
@@ -47,7 +46,7 @@ export const Route = createFileRoute("/api/contacts/")({
 					})
 					.returning();
 
-		return Response.json({ contact: created }, { status: 201 });
+				return Response.json({ contact: created }, { status: 201 });
 			},
 		},
 	},
