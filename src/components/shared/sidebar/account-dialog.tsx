@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { authClient } from "#/auth";
@@ -330,12 +331,13 @@ const AccountDialog = ({
 											session.token === currentSessionQuery.data ? (
 												<Button
 													variant="destructive"
-													onClick={() => {
-														window.location.href = "/auth/sign-out";
-													}}
-												>
-													Sign Out
-												</Button>
+													nativeButton={false}
+													render={(props) => (
+														<Link {...props} to="/auth/sign-out">
+															Sign Out
+														</Link>
+													)}
+												></Button>
 											) : (
 												<Button
 													variant="outline"

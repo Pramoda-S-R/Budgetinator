@@ -9,7 +9,7 @@ import {
 	Tag,
 	Wallet,
 } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { type SubmitEvent, useEffect, useMemo, useState } from "react";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Calendar } from "#/components/ui/calendar";
@@ -64,7 +64,10 @@ const TRANSACTION_TYPE_ICON: Record<
 };
 
 export const Route = createFileRoute("/_protected/transactions/")({
-	component: TransactionsPage,
+  loader: () => ({
+    initialTransactionDate: toLocalDateInputValue(new Date()),
+  }),
+  component: TransactionsPage,
 });
 
 function TransactionsPage() {
@@ -97,9 +100,8 @@ function TransactionsPage() {
 		"expense" | "income" | "transfer"
 	>("expense");
 	const [transferAccountId, setTransferAccountId] = useState("");
-	const [transactionDate, setTransactionDate] = useState(() =>
-		toLocalDateInputValue(new Date()),
-	);
+	const { initialTransactionDate } = Route.useLoaderData();
+	const [transactionDate, setTransactionDate] = useState(initialTransactionDate);
 	const [isRecurring, setIsRecurring] = useState(false);
 	const [formError, setFormError] = useState<string | null>(null);
 
@@ -293,7 +295,7 @@ function TransactionsPage() {
 		},
 	});
 
-	const handleCreate = async (event: FormEvent<HTMLFormElement>) => {
+	const handleCreate = async (event: SubmitEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		setFormError(null);
 

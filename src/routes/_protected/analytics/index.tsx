@@ -31,6 +31,13 @@ import { createAnalyticsDataAccess } from "#/features/analytics/data-access";
 import useCurrentUser from "#/hooks/use-current-user";
 
 export const Route = createFileRoute("/_protected/analytics/")({
+	loader: () => {
+		const now = new Date();
+		return {
+			initialYear: now.getFullYear(),
+			initialMonth: now.getMonth() + 1,
+		};
+	},
 	component: AnalyticsPage,
 });
 
@@ -90,11 +97,11 @@ function renderTooltipEntry(
 }
 
 function AnalyticsPage() {
+	const { initialYear, initialMonth } = Route.useLoaderData();
 	const user = useCurrentUser();
 	const analyticsApi = useMemo(() => createAnalyticsDataAccess(user), [user]);
-	const now = new Date();
-	const [breakdownYear, setBreakdownYear] = useState(now.getFullYear());
-	const [breakdownMonth, setBreakdownMonth] = useState(now.getMonth() + 1);
+	const [breakdownYear, setBreakdownYear] = useState(initialYear);
+	const [breakdownMonth, setBreakdownMonth] = useState(initialMonth);
 	const [trendMonths, setTrendMonths] = useState(6);
 	const [cashflowMonths, setCashflowMonths] = useState(12);
 
@@ -194,11 +201,7 @@ function AnalyticsPage() {
 	};
 
 	// Year options: current year and last 2
-	const yearOptions = [
-		now.getFullYear(),
-		now.getFullYear() - 1,
-		now.getFullYear() - 2,
-	];
+	const yearOptions = [initialYear, initialYear - 1, initialYear - 2];
 
 	return (
 		<div className="p-6 space-y-8">

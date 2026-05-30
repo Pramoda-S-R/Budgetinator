@@ -56,6 +56,11 @@ type AllocationRow = {
 	amount: string;
 };
 
+const INITIAL_ALLOCATION_ROW: AllocationRow = {
+	id: "alloc-initial",
+	amount: "",
+};
+
 const createRow = (): AllocationRow => ({
 	id:
 		typeof globalThis.crypto !== "undefined" &&
@@ -90,10 +95,18 @@ function IconGlyph({ iconName }: { iconName: string }) {
 }
 
 export const Route = createFileRoute("/_protected/budgets/")({
+	loader: () => {
+		const now = new Date();
+		return {
+			initialYear: now.getFullYear(),
+			initialMonth: now.getMonth(),
+		};
+	},
 	component: BudgetsPage,
 });
 
 function BudgetsPage() {
+	const { initialYear, initialMonth } = Route.useLoaderData();
 	const currentUser = useCurrentUser();
 	const queryClient = useQueryClient();
 	const categoriesApi = useMemo(
@@ -108,12 +121,14 @@ function BudgetsPage() {
 	// Preset form
 	const [presetName, setPresetName] = useState("");
 	const [presetDesc, setPresetDesc] = useState("");
-	const [rows, setRows] = useState<AllocationRow[]>([createRow()]);
+	const [rows, setRows] = useState<AllocationRow[]>([INITIAL_ALLOCATION_ROW]);
 	const [presetError, setPresetError] = useState<string | null>(null);
 	const [showCreatePreset, setShowCreatePreset] = useState(false);
 
 	// Monthly budget
-	const [selectedDate, setSelectedDate] = useState(() => new Date());
+	const [selectedDate, setSelectedDate] = useState(
+		() => new Date(initialYear, initialMonth, 1),
+	);
 	const monthKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}`;
 	const [selectedPreset, setSelectedPreset] = useState<string>("");
 	const [expectedIncome, setExpectedIncome] = useState("0");

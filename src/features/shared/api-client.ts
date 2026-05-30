@@ -42,6 +42,21 @@ export class ApiRequestError extends Error {
 	}
 }
 
+const CSRF_TOKEN_NAME = "csrfToken";
+const CSRF_HEADER_NAME = "x-csrf-token";
+
+function readCookie(name: string): string | undefined {
+	if (typeof document === "undefined") {
+		return undefined;
+	}
+
+	return document.cookie
+		.split(";")
+		.map((part) => part.trim())
+		.find((part) => part.startsWith(`${name}=`))
+		?.slice(name.length + 1);
+}
+
 function mergeHeaders(headersInit?: HeadersInit): Record<string, string> {
 	const headers = new Headers();
 
@@ -119,6 +134,14 @@ async function requestJson<TResponse>(
 	const headers = mergeHeaders(options.headers);
 
 	let body: BodyInit | undefined;
+	const requiresCsrfHeader = !["GET", "HEAD"].includes(options.method);
+	if (requiresCsrfHeader && !headers[CSRF_HEADER_NAME]) {
+		const csrfToken = readCookie(CSRF_TOKEN_NAME);
+		if (csrfToken) {
+			headers[CSRF_HEADER_NAME] = csrfToken;
+		}
+	}
+
 	if (options.body !== undefined) {
 		if (isBodyInitLike(options.body)) {
 			body = options.body;

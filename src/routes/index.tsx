@@ -17,14 +17,7 @@ export const Route = createFileRoute("/")({
 function Home() {
 	return (
 		<div className="relative min-h-screen overflow-hidden bg-[#0b1120] text-[#e8eeff]">
-			<div
-				className="pointer-events-none absolute inset-0 opacity-10"
-				style={{
-					backgroundImage:
-						"repeating-linear-gradient(0deg, #6a79ff 0, #6a79ff 1px, transparent 1px, transparent 20px), repeating-linear-gradient(90deg, #6a79ff 0, #6a79ff 1px, transparent 1px, transparent 20px)",
-					backgroundSize: "20px 20px",
-				}}
-			/>
+			<div className="pointer-events-none absolute inset-0 opacity-10 bg-[repeating-linear-gradient(0deg,#6a79ff_0,#6a79ff_1px,transparent_1px,transparent_20px),repeating-linear-gradient(90deg,#6a79ff_0,#6a79ff_1px,transparent_1px,transparent_20px)] bg-size-[20px_20px]" />
 
 			<main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-12">
 				<section className="mx-auto w-full max-w-4xl space-y-10 text-center">
@@ -70,23 +63,25 @@ function Home() {
 							<Button
 								size="lg"
 								className="gap-2"
-								onClick={() => {
-									window.location.href = "/auth/sign-up";
-								}}
-							>
-								Get Started
-								<ArrowRight className="size-4" />
-							</Button>
+								nativeButton={false}
+								render={(props) => (
+									<Link {...props} to="/auth/sign-up">
+										Get Started
+										<ArrowRight className="size-4" />
+									</Link>
+								)}
+							></Button>
 
 							<Button
 								size="lg"
 								variant="outline"
-								onClick={() => {
-									window.location.href = "/auth/sign-in";
-								}}
-							>
-								Sign In
-							</Button>
+								nativeButton={false}
+								render={(props) => (
+									<Link {...props} to="/auth/sign-in">
+										Sign In
+									</Link>
+								)}
+							></Button>
 						</SignedOut>
 					</div>
 
