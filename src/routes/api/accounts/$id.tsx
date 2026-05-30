@@ -3,7 +3,8 @@ import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "#/db";
-import { accountBalanceHistory, accounts, transactions } from "#/db/schema";
+import { accounts, transactions } from "#/db/schema";
+import { setAccountBalance } from "#/lib/financial-posting/account-balance";
 import { requireCurrentUser } from "#/lib/server-auth";
 
 const accountIdSchema = z.object({ id: z.string().uuid() });
@@ -94,13 +95,6 @@ export const Route = createFileRoute("/api/accounts/$id")({
 					...("isActive" in parsedBody.data
 						? { isActive: parsedBody.data.isActive }
 						: {}),
-					...("currentBalance" in parsedBody.data
-						? {
-								currentBalance: toNumericString(
-									parsedBody.data.currentBalance as number,
-								),
-							}
-						: {}),
 					...("creditLimit" in parsedBody.data
 						? {
 								creditLimit:
@@ -114,27 +108,49 @@ export const Route = createFileRoute("/api/accounts/$id")({
 						: {}),
 				};
 
-				const [updated] = await db
-					.update(accounts)
-					.set(updates)
-					.where(and(eq(accounts.id, accountId), eq(accounts.userId, user.id)))
-					.returning();
+				const account = await db.transaction(async (tx) => {
+					let updated: typeof accounts.$inferSelect | null = null;
+					if (Object.keys(updates).length > 0) {
+						const [record] = await tx
+							.update(accounts)
+							.set(updates)
+							.where(and(eq(accounts.id, accountId), eq(accounts.userId, user.id)))
+							.returning();
+						updated = record ?? null;
+					} else {
+						const [record] = await tx
+							.select()
+							.from(accounts)
+							.where(and(eq(accounts.id, accountId), eq(accounts.userId, user.id)))
+							.limit(1);
+						updated = record ?? null;
+					}
 
-				if (!updated) {
+					if (!updated) {
+						return null;
+					}
+
+					if (
+						"currentBalance" in parsedBody.data &&
+						typeof parsedBody.data.currentBalance === "number"
+					) {
+						const nextBalance = toNumericString(parsedBody.data.currentBalance);
+						await setAccountBalance(tx, {
+							userId: user.id,
+							accountId: updated.id,
+							balance: nextBalance,
+						});
+						return { ...updated, currentBalance: nextBalance };
+					}
+
+					return updated;
+				});
+
+				if (!account) {
 					return json({ error: "Account not found" }, 404);
 				}
 
-				if (
-					"currentBalance" in parsedBody.data &&
-					typeof parsedBody.data.currentBalance === "number"
-				) {
-					await db.insert(accountBalanceHistory).values({
-						accountId: updated.id,
-						balance: updated.currentBalance,
-					});
-				}
-
-				return json({ account: updated });
+				return json({ account });
 			},
 			DELETE: async ({ request, params }) => {
 				const parsedParams = accountIdSchema.safeParse(params);

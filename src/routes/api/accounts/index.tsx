@@ -3,7 +3,8 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "#/db";
-import { accountBalanceHistory, accounts } from "#/db/schema";
+import { accounts } from "#/db/schema";
+import { setAccountBalance } from "#/lib/financial-posting/account-balance";
 import { settleDueCreditCardCycles } from "#/lib/credit-card-billing.server";
 import { requireCurrentUser } from "#/lib/server-auth";
 
@@ -80,31 +81,42 @@ export const Route = createFileRoute("/api/accounts/")({
 						? false
 						: (values.includeInNetWorth ?? true);
 
-				const [created] = await db
-					.insert(accounts)
-					.values({
-						userId: user.id,
-						name: values.name,
-						accountType: values.accountType,
-						currentBalance: toNumericString(values.currentBalance),
-						...(typeof values.creditLimit === "number"
-							? { creditLimit: toNumericString(values.creditLimit) }
-							: {}),
-						...(values.nextBillingDate
-							? { nextBillingDate: values.nextBillingDate }
-							: {}),
-						includeInNetWorth,
-						isActive: values.isActive ?? true,
-					})
-					.returning();
+				const created = await db.transaction(async (tx) => {
+					const [account] = await tx
+						.insert(accounts)
+						.values({
+							userId: user.id,
+							name: values.name,
+							accountType: values.accountType,
+							currentBalance: "0.00",
+							...(typeof values.creditLimit === "number"
+								? { creditLimit: toNumericString(values.creditLimit) }
+								: {}),
+							...(values.nextBillingDate
+								? { nextBillingDate: values.nextBillingDate }
+								: {}),
+							includeInNetWorth,
+							isActive: values.isActive ?? true,
+						})
+						.returning();
 
-				if (created) {
-					await db.insert(accountBalanceHistory).values({
-						accountId: created.id,
-						balance: created.currentBalance,
+					if (!account) {
+						throw new Error("Unable to create account");
+					}
+
+					const balance = toNumericString(values.currentBalance);
+					await setAccountBalance(tx, {
+						userId: user.id,
+						accountId: account.id,
+						balance,
 						...(values.recordedAt ? { recordedAt: values.recordedAt } : {}),
 					});
-				}
+
+					return {
+						...account,
+						currentBalance: balance,
+					};
+				});
 
 				return json({ account: created }, 201);
 			},

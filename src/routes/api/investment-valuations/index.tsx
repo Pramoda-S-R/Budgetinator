@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { db } from "#/db";
 import { accountBalanceHistory, accounts, investments } from "#/db/schema";
+import { setAccountBalance } from "#/lib/financial-posting/account-balance";
 import { requireCurrentUser } from "#/lib/server-auth";
 
 // "Valuations" are now thin views over `account_balance_history` rows for the
@@ -70,27 +71,18 @@ export const Route = createFileRoute("/api/investment-valuations/")({
 				if (!inv) return json({ error: "Investment not found" }, 404);
 
 				const created = await db.transaction(async (tx) => {
-					await tx
-						.update(accounts)
-						.set({ currentBalance: valuationAmount.toFixed(2) })
-						.where(eq(accounts.id, inv.accountId));
-
-					const [history] = await tx
-						.insert(accountBalanceHistory)
-						.values({
-							accountId: inv.accountId,
-							balance: valuationAmount.toFixed(2),
-							...(valuationDate ? { recordedAt: valuationDate } : {}),
-						})
-						.returning();
-
-					return history;
+					return setAccountBalance(tx, {
+						userId: user.id,
+						accountId: inv.accountId,
+						balance: valuationAmount.toFixed(2),
+						...(valuationDate ? { recordedAt: valuationDate } : {}),
+					});
 				});
 
 				return json(
 					{
 						valuation: {
-							id: created.id,
+							id: created.historyId,
 							investmentId,
 							valuationAmount: created.balance,
 							valuationDate: created.recordedAt,
