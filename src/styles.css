@@ -59,6 +59,7 @@
   --sidebar-primary-foreground: oklch(0.977 0.014 308.299);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: #e5e7eb;
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
@@ -109,6 +110,7 @@
   --sidebar-primary-foreground: oklch(0.977 0.014 308.299);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: rgb(255 255 255 / 10%);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
 }
@@ -131,8 +133,8 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
+  --color-border: var(--border, #e5e7eb);
+  --color-input: var(--input, #e5e7eb);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -149,7 +151,7 @@
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-border: var(--sidebar-border, #e5e7eb);
   --color-sidebar-ring: var(--sidebar-ring);
   --font-heading: var(--font-mono);
   --font-mono: 'Geist Mono Variable', monospace;
@@ -160,6 +162,7 @@
 
 @layer base {
   * {
+    border-color: var(--border, #e5e7eb);
     @apply border-border outline-ring/50;
   }
   body {
