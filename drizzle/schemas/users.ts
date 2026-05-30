@@ -4,7 +4,7 @@ export const users = pgTable("users", {
 	id: uuid("id").defaultRandom().primaryKey(),
 	email: text("email").notNull().unique(),
 	name: text("name").notNull(),
-	currencyCode: text("currency_code").notNull().default("USD"),
+	currencyCode: text("currency_code").notNull().default("INR"),
 	timezone: text("timezone").notNull().default("UTC"),
 	createdAt: timestamp("created_at", { withTimezone: true })
 		.defaultNow()

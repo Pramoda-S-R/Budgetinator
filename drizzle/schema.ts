@@ -19,7 +19,7 @@ export const users = pgTable("users", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	email: text().notNull(),
 	name: text().notNull(),
-	currencyCode: text("currency_code").default('USD').notNull(),
+	currencyCode: text("currency_code").default('INR').notNull(),
 	timezone: text().default('UTC').notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [

@@ -77,7 +77,7 @@ export async function requireCurrentUser(request: Request) {
 			id: sessionUser.id,
 			email,
 			name,
-			currencyCode: "USD",
+			currencyCode: "INR",
 			timezone: "UTC",
 		})
 		.onConflictDoNothing();

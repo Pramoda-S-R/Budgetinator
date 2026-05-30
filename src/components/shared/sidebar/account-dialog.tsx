@@ -28,7 +28,7 @@ const AccountDialog = ({
 	const queryClient = useQueryClient();
 
 	const [name, setName] = useState("");
-	const [currencyCode, setCurrencyCode] = useState("USD");
+	const [currencyCode, setCurrencyCode] = useState("INR");
 	const [timezone, setTimezone] = useState("UTC");
 	const [error, setError] = useState<string | null>(null);
 	const [currentPassword, setCurrentPassword] = useState("");
@@ -218,7 +218,7 @@ const AccountDialog = ({
 										onChange={(event) =>
 											setCurrencyCode(event.target.value.toUpperCase())
 										}
-										placeholder="USD"
+										placeholder="INR"
 										minLength={3}
 										maxLength={3}
 										required

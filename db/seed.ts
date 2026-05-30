@@ -23,7 +23,7 @@ await db
   .values({
     email: seedEmail,
     name: 'Demo User',
-    currencyCode: 'USD',
+    currencyCode: 'INR',
     timezone: 'UTC',
   })
   .onConflictDoNothing({ target: users.email })

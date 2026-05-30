@@ -271,7 +271,7 @@ function CreditCardsPage() {
 		[expenseCategories],
 	);
 
-	const currencyCode = profileQuery.data?.profile.currencyCode ?? "USD";
+	const currencyCode = profileQuery.data?.profile.currencyCode ?? "INR";
 
 	const creditLimitSummary = useMemo(() => {
 		let totalOutstanding = 0;

@@ -262,7 +262,7 @@ function AccountsPage() {
 
 	const accounts = accountsQuery.data?.accounts ?? [];
 	const totalNetWorth = accountsQuery.data?.totalNetWorth ?? "0";
-	const currencyCode = profileQuery.data?.profile.currencyCode ?? "USD";
+	const currencyCode = profileQuery.data?.profile.currencyCode ?? "INR";
 
 	const groupedAccounts = useMemo(() => {
 		const accountsByType = new Map<string, Account[]>();
@@ -395,6 +395,7 @@ function AccountsPage() {
 					<div className="flex items-center justify-between gap-3">
 						<CardTitle>Accounts</CardTitle>
 						<Button
+							nativeButton={false}
 							variant="outline"
 							render={(props) => (
 								<Link {...props} to="/credit-cards">

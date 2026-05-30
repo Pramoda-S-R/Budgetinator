@@ -78,6 +78,13 @@
       "when": 1780122149678,
       "tag": "0010_broad_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1780130870150,
+      "tag": "0011_majestic_doorman",
+      "breakpoints": true
     }
   ]
 }

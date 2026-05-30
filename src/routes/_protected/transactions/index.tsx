@@ -130,7 +130,7 @@ function TransactionsPage() {
 	const accounts = accountsQuery.data?.accounts ?? [];
 	const categories = categoriesQuery.data?.categories ?? [];
 	const transactions = transactionsQuery.data?.transactions ?? [];
-	const currencyCode = profileQuery.data?.profile.currencyCode ?? "USD";
+	const currencyCode = profileQuery.data?.profile.currencyCode ?? "INR";
 
 	const accountOptions = useMemo(() => accounts, [accounts]);
 

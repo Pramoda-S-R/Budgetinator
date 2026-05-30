@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     email TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
-    currency_code TEXT NOT NULL DEFAULT 'USD',
+    currency_code TEXT NOT NULL DEFAULT 'INR',
     timezone TEXT NOT NULL DEFAULT 'UTC',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS categories (
 );
 
 INSERT INTO users (email, name, currency_code, timezone)
-VALUES ('demo@budgetinator.dev', 'Demo User', 'USD', 'UTC')
+VALUES ('demo@budgetinator.dev', 'Demo User', 'INR', 'UTC')
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO accounts (user_id, name, account_type, current_balance, include_in_net_worth, is_active)

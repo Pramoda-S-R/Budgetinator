@@ -1,0 +1,1 @@
+ALTER TABLE "users" ALTER COLUMN "currency_code" SET DEFAULT 'INR';
