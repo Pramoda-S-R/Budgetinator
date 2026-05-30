@@ -2,11 +2,12 @@ import {
 	Calendar,
 	ChartPie,
 	CreditCard,
+	HandCoins,
+	Landmark,
 	LayoutDashboard,
 	RefreshCw,
 	Tags,
 	TrendingUp,
-	Users,
 	Wallet,
 } from "lucide-react";
 import type { MenuItem } from "#/types";
@@ -16,11 +17,6 @@ export const menuItems: MenuItem[] = [
 		title: "Dashboard",
 		url: "/dashboard",
 		icon: LayoutDashboard,
-	},
-	{
-		title: "Accounts",
-		url: "/accounts",
-		icon: Users,
 	},
 	{
 		title: "Transactions",
@@ -38,6 +34,16 @@ export const menuItems: MenuItem[] = [
 		icon: Calendar,
 	},
 	{
+		title: "Accounts",
+		url: "/accounts",
+		icon: Landmark,
+	},
+	{
+		title: "Credit Cards",
+		url: "/credit-cards",
+		icon: CreditCard,
+	},
+	{
 		title: "Investments",
 		url: "/investments",
 		icon: ChartPie,
@@ -45,16 +51,16 @@ export const menuItems: MenuItem[] = [
 	{
 		title: "Loans & EMIs",
 		url: "/loans",
-		icon: CreditCard,
-	},
-	{
-		title: "Analytics",
-		url: "/analytics",
-		icon: TrendingUp,
+		icon: HandCoins,
 	},
 	{
 		title: "Recurring",
 		url: "/recurring",
 		icon: RefreshCw,
+	},
+	{
+		title: "Analytics",
+		url: "/analytics",
+		icon: TrendingUp,
 	},
 ];

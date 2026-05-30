@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "#/db";
 import { accounts, monthlyBudgets, transactions } from "#/db/schema";
+import { settleDueCreditCardCycles } from "#/lib/credit-card-billing.server";
 import { requireCurrentUser } from "#/lib/server-auth";
 
 function json(data: unknown, status = 200) {
@@ -16,6 +17,8 @@ export const Route = createFileRoute("/api/dashboard/summary")({
 		handlers: {
 			GET: async ({ request }) => {
 				const user = await requireCurrentUser(request);
+				await settleDueCreditCardCycles(user.id);
+
 				const now = new Date();
 				const year = now.getUTCFullYear();
 				const month = now.getUTCMonth() + 1;
@@ -30,6 +33,7 @@ export const Route = createFileRoute("/api/dashboard/summary")({
 						and(
 							eq(accounts.userId, user.id),
 							eq(accounts.includeInNetWorth, true),
+							sql`${accounts.accountType} <> 'credit_card'`,
 						),
 					);
 

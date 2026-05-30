@@ -79,7 +79,10 @@ function renderTooltipEntry(
 			<span className="font-medium" style={{ color: entryColor }}>
 				{String(name ?? "Value")}
 			</span>
-			<span className="font-mono font-semibold tabular-nums" style={{ color: entryColor }}>
+			<span
+				className="font-mono font-semibold tabular-nums"
+				style={{ color: entryColor }}
+			>
 				{renderedValue}
 			</span>
 		</div>

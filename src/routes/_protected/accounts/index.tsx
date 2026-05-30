@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Banknote,
 	Briefcase,
@@ -18,6 +18,14 @@ import { useMemo, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { Calendar } from "#/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "#/components/ui/dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -43,10 +51,7 @@ const ACCOUNT_TYPE_OPTIONS = [
 	{ value: "bank", label: "Bank" },
 	{ value: "cash", label: "Cash" },
 	{ value: "wallet", label: "Wallet" },
-	{ value: "credit_card", label: "Credit Card" },
-	{ value: "investment", label: "Investment" },
 	{ value: "salary", label: "Salary" },
-	{ value: "loan", label: "Loan" },
 ];
 
 const ACCOUNT_TYPE_LABELS = ACCOUNT_TYPE_OPTIONS.reduce<Record<string, string>>(
@@ -201,6 +206,9 @@ function AccountsPage() {
 		toLocalDateInputValue(new Date()),
 	);
 	const [error, setError] = useState<string | null>(null);
+	const [balanceDialogAccount, setBalanceDialogAccount] =
+		useState<Account | null>(null);
+	const [balanceDraft, setBalanceDraft] = useState("");
 
 	const accountsQuery = useQuery({
 		queryKey: ["accounts", currentUser?.id],
@@ -303,6 +311,20 @@ function AccountsPage() {
 		});
 	}, [accounts, totalNetWorth]);
 
+	function formatDisplayedBalance(account: {
+		accountType: string;
+		currentBalance: string;
+	}) {
+		const raw = Number(account.currentBalance);
+		const safe = Number.isFinite(raw) ? raw : 0;
+
+		if (account.accountType === "credit_card") {
+			return Math.abs(safe).toFixed(2);
+		}
+
+		return safe.toFixed(2);
+	}
+
 	async function onCreateAccount(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setError(null);
@@ -328,16 +350,25 @@ function AccountsPage() {
 		}
 	}
 
-	async function onUpdateBalance(account: Account) {
-		const input = window.prompt(
-			`Update balance for ${account.name}`,
-			account.currentBalance,
-		);
-		if (!input) {
+	function closeBalanceDialog() {
+		setBalanceDialogAccount(null);
+		setBalanceDraft("");
+	}
+
+	function onUpdateBalance(account: Account) {
+		setError(null);
+		setBalanceDialogAccount(account);
+		setBalanceDraft(account.currentBalance);
+	}
+
+	async function onSaveBalance(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+
+		if (!balanceDialogAccount) {
 			return;
 		}
 
-		const value = Number(input);
+		const value = Number(balanceDraft);
 		if (!Number.isFinite(value)) {
 			setError("Balance must be a valid number");
 			return;
@@ -345,9 +376,10 @@ function AccountsPage() {
 
 		try {
 			await updateAccountMutation.mutateAsync({
-				accountId: account.id,
+				accountId: balanceDialogAccount.id,
 				currentBalance: value,
 			});
+			closeBalanceDialog();
 		} catch {
 			setError("Unable to update balance");
 		}
@@ -360,7 +392,17 @@ function AccountsPage() {
 			) : null}
 			<Card>
 				<CardHeader>
-					<CardTitle>Accounts</CardTitle>
+					<div className="flex items-center justify-between gap-3">
+						<CardTitle>Accounts</CardTitle>
+						<Button
+							variant="outline"
+							render={(props) => (
+								<Link {...props} to="/credit-cards">
+									Manage Credit Cards
+								</Link>
+							)}
+						/>
+					</div>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<p className="text-sm text-muted-foreground">Total Net Worth</p>
@@ -456,8 +498,10 @@ function AccountsPage() {
 													{account.name}
 												</p>
 												<p className="text-xs text-muted-foreground">
-													{currencyCode}{" "}
-													{Number(account.currentBalance).toFixed(2)}
+													{account.accountType === "credit_card"
+														? "Outstanding: "
+														: "Balance: "}
+													{currencyCode} {formatDisplayedBalance(account)}
 												</p>
 											</div>
 											<div className="flex gap-2">
@@ -482,6 +526,51 @@ function AccountsPage() {
 					</div>
 				</CardContent>
 			</Card>
+
+			<Dialog
+				open={Boolean(balanceDialogAccount)}
+				onOpenChange={(open) => {
+					if (!open) {
+						closeBalanceDialog();
+					}
+				}}
+			>
+				<DialogContent className="max-w-sm">
+					<DialogHeader>
+						<DialogTitle>Update Balance</DialogTitle>
+						<DialogDescription>
+							Set the latest balance for {balanceDialogAccount?.name}.
+						</DialogDescription>
+					</DialogHeader>
+					<form className="space-y-4" onSubmit={onSaveBalance}>
+						<div className="space-y-2">
+							<Label htmlFor="edit-account-balance">Current Balance</Label>
+							<Input
+								id="edit-account-balance"
+								type="number"
+								step="0.01"
+								value={balanceDraft}
+								onChange={(event) => setBalanceDraft(event.target.value)}
+								autoFocus
+								required
+							/>
+						</div>
+						<DialogFooter>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={closeBalanceDialog}
+								disabled={updateAccountMutation.isPending}
+							>
+								Cancel
+							</Button>
+							<Button type="submit" disabled={updateAccountMutation.isPending}>
+								Save
+							</Button>
+						</DialogFooter>
+					</form>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

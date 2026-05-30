@@ -1,12 +1,19 @@
 import { relations } from "drizzle-orm/relations";
-import { users, accounts, accountBalanceHistory, categoryGroups, categories, budgetPresets, monthlyBudgets, monthlyBudgetAllocations, presetAllocations, transactions, transactionTags, investments, investmentEntries, contacts, emis, emiPayments, forecastSnapshots, loans, loanPayments, recurringRules } from "./schema";
+import { accounts, accountBalanceHistory, users, categoryGroups, categories, budgetPresets, monthlyBudgets, monthlyBudgetAllocations, presetAllocations, transactions, transactionTags, investments, investmentEntries, contacts, emis, emiPayments, forecastSnapshots, loans, loanPayments, recurringRules } from "./schema";
+
+export const accountBalanceHistoryRelations = relations(accountBalanceHistory, ({one}) => ({
+	account: one(accounts, {
+		fields: [accountBalanceHistory.accountId],
+		references: [accounts.id]
+	}),
+}));
 
 export const accountsRelations = relations(accounts, ({one, many}) => ({
+	accountBalanceHistories: many(accountBalanceHistory),
 	user: one(users, {
 		fields: [accounts.userId],
 		references: [users.id]
 	}),
-	accountBalanceHistories: many(accountBalanceHistory),
 	transactions_accountId: many(transactions, {
 		relationName: "transactions_accountId_accounts_id"
 	}),
@@ -32,13 +39,6 @@ export const usersRelations = relations(users, ({many}) => ({
 	recurringRules: many(recurringRules),
 	loans: many(loans),
 	emis: many(emis),
-}));
-
-export const accountBalanceHistoryRelations = relations(accountBalanceHistory, ({one}) => ({
-	account: one(accounts, {
-		fields: [accountBalanceHistory.accountId],
-		references: [accounts.id]
-	}),
 }));
 
 export const categoryGroupsRelations = relations(categoryGroups, ({one, many}) => ({

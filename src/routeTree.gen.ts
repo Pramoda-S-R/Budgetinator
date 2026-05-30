@@ -34,6 +34,7 @@ import { Route as ProtectedRecurringIndexRouteImport } from './routes/_protected
 import { Route as ProtectedLoansIndexRouteImport } from './routes/_protected/loans/index'
 import { Route as ProtectedInvestmentsIndexRouteImport } from './routes/_protected/investments/index'
 import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
+import { Route as ProtectedCreditCardsIndexRouteImport } from './routes/_protected/credit-cards/index'
 import { Route as ProtectedCategoriesIndexRouteImport } from './routes/_protected/categories/index'
 import { Route as ProtectedBudgetsIndexRouteImport } from './routes/_protected/budgets/index'
 import { Route as ProtectedAnalyticsIndexRouteImport } from './routes/_protected/analytics/index'
@@ -53,6 +54,7 @@ import { Route as ApiEmiPaymentsIdRouteImport } from './routes/api/emi-payments/
 import { Route as ApiDashboardSummaryRouteImport } from './routes/api/dashboard/summary'
 import { Route as ApiDashboardCashflowRouteImport } from './routes/api/dashboard/cashflow'
 import { Route as ApiDashboardBudgetStatusRouteImport } from './routes/api/dashboard/budget-status'
+import { Route as ApiCreditCardsPaymentsRouteImport } from './routes/api/credit-cards/payments'
 import { Route as ApiContactsIdRouteImport } from './routes/api/contacts/$id'
 import { Route as ApiCategoryGroupsIdRouteImport } from './routes/api/category-groups/$id'
 import { Route as ApiCategoriesIdRouteImport } from './routes/api/categories/$id'
@@ -192,6 +194,12 @@ const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
   path: '/dashboard/',
   getParentRoute: () => ProtectedRoute,
 } as any)
+const ProtectedCreditCardsIndexRoute =
+  ProtectedCreditCardsIndexRouteImport.update({
+    id: '/credit-cards/',
+    path: '/credit-cards/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 const ProtectedCategoriesIndexRoute =
   ProtectedCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -292,6 +300,11 @@ const ApiDashboardBudgetStatusRoute =
     path: '/api/dashboard/budget-status',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiCreditCardsPaymentsRoute = ApiCreditCardsPaymentsRouteImport.update({
+  id: '/api/credit-cards/payments',
+  path: '/api/credit-cards/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiContactsIdRoute = ApiContactsIdRouteImport.update({
   id: '/api/contacts/$id',
   path: '/api/contacts/$id',
@@ -360,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
   '/api/contacts/$id': typeof ApiContactsIdRoute
+  '/api/credit-cards/payments': typeof ApiCreditCardsPaymentsRoute
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
@@ -379,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/analytics/': typeof ProtectedAnalyticsIndexRoute
   '/budgets/': typeof ProtectedBudgetsIndexRoute
   '/categories/': typeof ProtectedCategoriesIndexRoute
+  '/credit-cards/': typeof ProtectedCreditCardsIndexRoute
   '/dashboard/': typeof ProtectedDashboardIndexRoute
   '/investments/': typeof ProtectedInvestmentsIndexRoute
   '/loans/': typeof ProtectedLoansIndexRoute
@@ -415,6 +430,7 @@ export interface FileRoutesByTo {
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
   '/api/contacts/$id': typeof ApiContactsIdRoute
+  '/api/credit-cards/payments': typeof ApiCreditCardsPaymentsRoute
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
@@ -434,6 +450,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof ProtectedAnalyticsIndexRoute
   '/budgets': typeof ProtectedBudgetsIndexRoute
   '/categories': typeof ProtectedCategoriesIndexRoute
+  '/credit-cards': typeof ProtectedCreditCardsIndexRoute
   '/dashboard': typeof ProtectedDashboardIndexRoute
   '/investments': typeof ProtectedInvestmentsIndexRoute
   '/loans': typeof ProtectedLoansIndexRoute
@@ -472,6 +489,7 @@ export interface FileRoutesById {
   '/api/categories/$id': typeof ApiCategoriesIdRoute
   '/api/category-groups/$id': typeof ApiCategoryGroupsIdRoute
   '/api/contacts/$id': typeof ApiContactsIdRoute
+  '/api/credit-cards/payments': typeof ApiCreditCardsPaymentsRoute
   '/api/dashboard/budget-status': typeof ApiDashboardBudgetStatusRoute
   '/api/dashboard/cashflow': typeof ApiDashboardCashflowRoute
   '/api/dashboard/summary': typeof ApiDashboardSummaryRoute
@@ -491,6 +509,7 @@ export interface FileRoutesById {
   '/_protected/analytics/': typeof ProtectedAnalyticsIndexRoute
   '/_protected/budgets/': typeof ProtectedBudgetsIndexRoute
   '/_protected/categories/': typeof ProtectedCategoriesIndexRoute
+  '/_protected/credit-cards/': typeof ProtectedCreditCardsIndexRoute
   '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
   '/_protected/investments/': typeof ProtectedInvestmentsIndexRoute
   '/_protected/loans/': typeof ProtectedLoansIndexRoute
@@ -529,6 +548,7 @@ export interface FileRouteTypes {
     | '/api/categories/$id'
     | '/api/category-groups/$id'
     | '/api/contacts/$id'
+    | '/api/credit-cards/payments'
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
@@ -548,6 +568,7 @@ export interface FileRouteTypes {
     | '/analytics/'
     | '/budgets/'
     | '/categories/'
+    | '/credit-cards/'
     | '/dashboard/'
     | '/investments/'
     | '/loans/'
@@ -584,6 +605,7 @@ export interface FileRouteTypes {
     | '/api/categories/$id'
     | '/api/category-groups/$id'
     | '/api/contacts/$id'
+    | '/api/credit-cards/payments'
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
@@ -603,6 +625,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/budgets'
     | '/categories'
+    | '/credit-cards'
     | '/dashboard'
     | '/investments'
     | '/loans'
@@ -640,6 +663,7 @@ export interface FileRouteTypes {
     | '/api/categories/$id'
     | '/api/category-groups/$id'
     | '/api/contacts/$id'
+    | '/api/credit-cards/payments'
     | '/api/dashboard/budget-status'
     | '/api/dashboard/cashflow'
     | '/api/dashboard/summary'
@@ -659,6 +683,7 @@ export interface FileRouteTypes {
     | '/_protected/analytics/'
     | '/_protected/budgets/'
     | '/_protected/categories/'
+    | '/_protected/credit-cards/'
     | '/_protected/dashboard/'
     | '/_protected/investments/'
     | '/_protected/loans/'
@@ -697,6 +722,7 @@ export interface RootRouteChildren {
   ApiCategoriesIdRoute: typeof ApiCategoriesIdRoute
   ApiCategoryGroupsIdRoute: typeof ApiCategoryGroupsIdRoute
   ApiContactsIdRoute: typeof ApiContactsIdRoute
+  ApiCreditCardsPaymentsRoute: typeof ApiCreditCardsPaymentsRoute
   ApiDashboardBudgetStatusRoute: typeof ApiDashboardBudgetStatusRoute
   ApiDashboardCashflowRoute: typeof ApiDashboardCashflowRoute
   ApiDashboardSummaryRoute: typeof ApiDashboardSummaryRoute
@@ -906,6 +932,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
+    '/_protected/credit-cards/': {
+      id: '/_protected/credit-cards/'
+      path: '/credit-cards'
+      fullPath: '/credit-cards/'
+      preLoaderRoute: typeof ProtectedCreditCardsIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
     '/_protected/categories/': {
       id: '/_protected/categories/'
       path: '/categories'
@@ -1039,6 +1072,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDashboardBudgetStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/credit-cards/payments': {
+      id: '/api/credit-cards/payments'
+      path: '/api/credit-cards/payments'
+      fullPath: '/api/credit-cards/payments'
+      preLoaderRoute: typeof ApiCreditCardsPaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/contacts/$id': {
       id: '/api/contacts/$id'
       path: '/api/contacts/$id'
@@ -1117,6 +1157,7 @@ interface ProtectedRouteChildren {
   ProtectedAnalyticsIndexRoute: typeof ProtectedAnalyticsIndexRoute
   ProtectedBudgetsIndexRoute: typeof ProtectedBudgetsIndexRoute
   ProtectedCategoriesIndexRoute: typeof ProtectedCategoriesIndexRoute
+  ProtectedCreditCardsIndexRoute: typeof ProtectedCreditCardsIndexRoute
   ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
   ProtectedInvestmentsIndexRoute: typeof ProtectedInvestmentsIndexRoute
   ProtectedLoansIndexRoute: typeof ProtectedLoansIndexRoute
@@ -1129,6 +1170,7 @@ const ProtectedRouteChildren: ProtectedRouteChildren = {
   ProtectedAnalyticsIndexRoute: ProtectedAnalyticsIndexRoute,
   ProtectedBudgetsIndexRoute: ProtectedBudgetsIndexRoute,
   ProtectedCategoriesIndexRoute: ProtectedCategoriesIndexRoute,
+  ProtectedCreditCardsIndexRoute: ProtectedCreditCardsIndexRoute,
   ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
   ProtectedInvestmentsIndexRoute: ProtectedInvestmentsIndexRoute,
   ProtectedLoansIndexRoute: ProtectedLoansIndexRoute,
@@ -1156,6 +1198,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCategoriesIdRoute: ApiCategoriesIdRoute,
   ApiCategoryGroupsIdRoute: ApiCategoryGroupsIdRoute,
   ApiContactsIdRoute: ApiContactsIdRoute,
+  ApiCreditCardsPaymentsRoute: ApiCreditCardsPaymentsRoute,
   ApiDashboardBudgetStatusRoute: ApiDashboardBudgetStatusRoute,
   ApiDashboardCashflowRoute: ApiDashboardCashflowRoute,
   ApiDashboardSummaryRoute: ApiDashboardSummaryRoute,

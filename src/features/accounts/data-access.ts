@@ -7,6 +7,8 @@ export type Account = {
 	name: string;
 	accountType: string;
 	currentBalance: string;
+	creditLimit: string | null;
+	nextBillingDate: string | null;
 	includeInNetWorth: boolean;
 	isActive: boolean;
 	createdAt: string;
@@ -22,6 +24,8 @@ const accountSchema = z.object({
 	name: z.string(),
 	accountType: z.string(),
 	currentBalance: z.string(),
+	creditLimit: z.string().nullable(),
+	nextBillingDate: z.string().nullable(),
 	includeInNetWorth: z.boolean(),
 	isActive: z.boolean(),
 	createdAt: z.string(),
@@ -44,6 +48,8 @@ type CreateAccountInput = {
 	name: string;
 	accountType: string;
 	currentBalance: number;
+	creditLimit?: number;
+	nextBillingDate?: string;
 	recordedAt?: string;
 	includeInNetWorth?: boolean;
 	isActive?: boolean;
@@ -53,6 +59,8 @@ type UpdateAccountInput = {
 	name?: string;
 	accountType?: string;
 	currentBalance?: number;
+	creditLimit?: number | null;
+	nextBillingDate?: string | null;
 	includeInNetWorth?: boolean;
 	isActive?: boolean;
 };

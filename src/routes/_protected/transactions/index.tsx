@@ -194,6 +194,27 @@ function TransactionsPage() {
 		});
 	}, [currencyCode]);
 
+	function getTransactionDisplayType(transaction: {
+		transactionType: "expense" | "income" | "transfer";
+		merchant: string;
+	}) {
+		const isCreditCardPayment =
+			transaction.transactionType === "transfer" &&
+			transaction.merchant.toLowerCase().startsWith("credit card");
+
+		if (isCreditCardPayment) {
+			return {
+				label: "card payment",
+				icon: TRANSACTION_TYPE_ICON.expense,
+			};
+		}
+
+		return {
+			label: transaction.transactionType,
+			icon: TRANSACTION_TYPE_ICON[transaction.transactionType],
+		};
+	}
+
 	const recentCategoryIds = useMemo(() => {
 		const q: string[] = [];
 
@@ -648,64 +669,68 @@ function TransactionsPage() {
 							</p>
 						) : null}
 						<div className="space-y-3">
-							{transactions.map((transaction) => (
-								<div
-									key={transaction.id}
-									className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-sm"
-								>
-									<div className="flex items-center justify-between gap-2">
-										<div>
-											<p className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
-												{TRANSACTION_TYPE_ICON[transaction.transactionType]}
-												{transaction.transactionType}
-											</p>
-											<p className="text-xl font-semibold">
-												{formatter.format(Number(transaction.amount))}
-											</p>
+							{transactions.map((transaction) => {
+								const displayType = getTransactionDisplayType(transaction);
+
+								return (
+									<div
+										key={transaction.id}
+										className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 shadow-sm"
+									>
+										<div className="flex items-center justify-between gap-2">
+											<div>
+												<p className="flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
+													{displayType.icon}
+													{displayType.label}
+												</p>
+												<p className="text-xl font-semibold">
+													{formatter.format(Number(transaction.amount))}
+												</p>
+											</div>
+											<div className="flex items-center gap-2 text-sm text-muted-foreground">
+												<CalendarIcon className="size-4" />
+												<span>
+													{new Date(
+														transaction.transactionDate,
+													).toLocaleDateString()}
+												</span>
+											</div>
 										</div>
-										<div className="flex items-center gap-2 text-sm text-muted-foreground">
-											<CalendarIcon className="size-4" />
+										<div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+											<ListChecks className="size-4" />
+											<span>{transaction.categoryName ?? "Uncategorized"}</span>
+											<Separator orientation="vertical" className="h-4" />
+											<Wallet className="size-4" />
 											<span>
-												{new Date(
-													transaction.transactionDate,
-												).toLocaleDateString()}
+												{transaction.accountName}
+												{transaction.transferAccountName
+													? ` → ${transaction.transferAccountName}`
+													: ""}
 											</span>
 										</div>
+										<div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+											{transaction.tags.map((tag) => (
+												<Badge key={tag} variant="outline">
+													#{tag}
+												</Badge>
+											))}
+										</div>
+										<div className="flex items-center justify-between">
+											<p className="text-sm text-muted-foreground">
+												{transaction.merchant || "Merchant not specified"}
+											</p>
+											<Button
+												size="sm"
+												variant="ghost"
+												onClick={() => handleDelete(transaction.id)}
+												disabled={deleteMutation.isPending}
+											>
+												Delete
+											</Button>
+										</div>
 									</div>
-									<div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-										<ListChecks className="size-4" />
-										<span>{transaction.categoryName ?? "Uncategorized"}</span>
-										<Separator orientation="vertical" className="h-4" />
-										<Wallet className="size-4" />
-										<span>
-											{transaction.accountName}
-											{transaction.transferAccountName
-												? ` → ${transaction.transferAccountName}`
-												: ""}
-										</span>
-									</div>
-									<div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
-										{transaction.tags.map((tag) => (
-											<Badge key={tag} variant="outline">
-												#{tag}
-											</Badge>
-										))}
-									</div>
-									<div className="flex items-center justify-between">
-										<p className="text-sm text-muted-foreground">
-											{transaction.merchant || "Merchant not specified"}
-										</p>
-										<Button
-											size="sm"
-											variant="ghost"
-											onClick={() => handleDelete(transaction.id)}
-											disabled={deleteMutation.isPending}
-										>
-											Delete
-										</Button>
-									</div>
-								</div>
-							))}
+								);
+							})}
 						</div>
 					</CardContent>
 				</Card>

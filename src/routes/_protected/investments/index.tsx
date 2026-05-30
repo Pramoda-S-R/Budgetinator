@@ -1,12 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import {
-	Cell,
-	Legend,
-	Pie,
-	PieChart,
-} from "recharts";
+import { Cell, Legend, Pie, PieChart } from "recharts";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Calendar } from "#/components/ui/calendar";
@@ -383,12 +378,18 @@ function InvestmentsPage() {
 														formatter={(value, name, item) => {
 															const numericValue = Number(value ?? 0);
 															const percentValue =
-																numericValue <= 1 ? numericValue * 100 : numericValue;
-															const color = item.color ?? "hsl(var(--foreground))";
+																numericValue <= 1
+																	? numericValue * 100
+																	: numericValue;
+															const color =
+																item.color ?? "hsl(var(--foreground))";
 
 															return (
 																<div className="flex w-full items-center justify-between gap-3">
-																	<span className="font-medium" style={{ color }}>
+																	<span
+																		className="font-medium"
+																		style={{ color }}
+																	>
 																		{String(name ?? "Allocation")}
 																	</span>
 																	<span

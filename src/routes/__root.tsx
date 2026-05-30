@@ -7,6 +7,7 @@ import {
 	Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "#/components/ui/tooltip";
 import TanstackQueryProvider from "#/integrations/tanstack-query/root-provider";
 import { authClient } from "../auth";
@@ -54,6 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 					<TooltipProvider>
 						<NeonAuthUIProvider authClient={authClient} persistClient>
 							{children}
+							<Toaster richColors position="top-right" />
 							<TanStackDevtools
 								config={{
 									position: "bottom-right",

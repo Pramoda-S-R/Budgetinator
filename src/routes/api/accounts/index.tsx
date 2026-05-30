@@ -4,12 +4,17 @@ import { z } from "zod";
 
 import { db } from "#/db";
 import { accountBalanceHistory, accounts } from "#/db/schema";
+import { settleDueCreditCardCycles } from "#/lib/credit-card-billing.server";
 import { requireCurrentUser } from "#/lib/server-auth";
+
+const localDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const createAccountSchema = z.object({
 	name: z.string().trim().min(1),
 	accountType: z.string().trim().min(1),
 	currentBalance: z.coerce.number(),
+	creditLimit: z.coerce.number().positive().optional(),
+	nextBillingDate: localDateSchema.optional(),
 	recordedAt: z.coerce.date().optional(),
 	includeInNetWorth: z.boolean().optional(),
 	isActive: z.boolean().optional(),
@@ -31,6 +36,8 @@ export const Route = createFileRoute("/api/accounts/")({
 		handlers: {
 			GET: async ({ request }) => {
 				const user = await requireCurrentUser(request);
+				await settleDueCreditCardCycles(user.id);
+
 				const userAccounts = await db
 					.select()
 					.from(accounts)
@@ -43,7 +50,11 @@ export const Route = createFileRoute("/api/accounts/")({
 					})
 					.from(accounts)
 					.where(
-						and(eq(accounts.userId, user.id), eq(accounts.isActive, true)),
+						and(
+							eq(accounts.userId, user.id),
+							eq(accounts.isActive, true),
+							sql`${accounts.accountType} <> 'credit_card'`,
+						),
 					);
 
 				return json({
@@ -64,6 +75,10 @@ export const Route = createFileRoute("/api/accounts/")({
 				}
 
 				const values = parsed.data;
+				const includeInNetWorth =
+					values.accountType === "credit_card"
+						? false
+						: (values.includeInNetWorth ?? true);
 
 				const [created] = await db
 					.insert(accounts)
@@ -72,7 +87,13 @@ export const Route = createFileRoute("/api/accounts/")({
 						name: values.name,
 						accountType: values.accountType,
 						currentBalance: toNumericString(values.currentBalance),
-						includeInNetWorth: values.includeInNetWorth ?? true,
+						...(typeof values.creditLimit === "number"
+							? { creditLimit: toNumericString(values.creditLimit) }
+							: {}),
+						...(values.nextBillingDate
+							? { nextBillingDate: values.nextBillingDate }
+							: {}),
+						includeInNetWorth,
 						isActive: values.isActive ?? true,
 					})
 					.returning();

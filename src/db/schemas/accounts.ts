@@ -19,6 +19,8 @@ export const accounts = pgTable("accounts", {
 	currentBalance: numeric("current_balance", { precision: 14, scale: 2 })
 		.notNull()
 		.default("0"),
+	creditLimit: numeric("credit_limit", { precision: 14, scale: 2 }),
+	nextBillingDate: text("next_billing_date"),
 	includeInNetWorth: boolean("include_in_net_worth").notNull().default(true),
 	isActive: boolean("is_active").notNull().default(true),
 	createdAt: timestamp("created_at", { withTimezone: true })

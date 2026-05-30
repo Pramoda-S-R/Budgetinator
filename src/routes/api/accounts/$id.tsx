@@ -1,18 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { db } from "#/db";
-import { accountBalanceHistory, accounts } from "#/db/schema";
+import { accountBalanceHistory, accounts, transactions } from "#/db/schema";
 import { requireCurrentUser } from "#/lib/server-auth";
 
 const accountIdSchema = z.object({ id: z.string().uuid() });
+const localDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 const updateAccountSchema = z
 	.object({
 		name: z.string().trim().min(1).optional(),
 		accountType: z.string().trim().min(1).optional(),
 		currentBalance: z.coerce.number().optional(),
+		creditLimit: z.union([z.coerce.number().positive(), z.null()]).optional(),
+		nextBillingDate: z.union([localDateSchema, z.null()]).optional(),
 		includeInNetWorth: z.boolean().optional(),
 		isActive: z.boolean().optional(),
 	})
@@ -29,6 +32,29 @@ function json(data: unknown, status = 200) {
 
 function toNumericString(value: number) {
 	return value.toFixed(2);
+}
+
+function isTransferAccountDeleteConstraintError(error: unknown): boolean {
+	let current: unknown = error;
+
+	while (current && typeof current === "object") {
+		const candidate = current as {
+			code?: unknown;
+			constraint?: unknown;
+			cause?: unknown;
+		};
+
+		if (
+			candidate.code === "23503" &&
+			candidate.constraint === "transactions_transfer_account_id_accounts_id_fk"
+		) {
+			return true;
+		}
+
+		current = candidate.cause;
+	}
+
+	return false;
 }
 
 export const Route = createFileRoute("/api/accounts/$id")({
@@ -75,6 +101,17 @@ export const Route = createFileRoute("/api/accounts/$id")({
 								),
 							}
 						: {}),
+					...("creditLimit" in parsedBody.data
+						? {
+								creditLimit:
+									typeof parsedBody.data.creditLimit === "number"
+										? toNumericString(parsedBody.data.creditLimit)
+										: null,
+							}
+						: {}),
+					...("nextBillingDate" in parsedBody.data
+						? { nextBillingDate: parsedBody.data.nextBillingDate }
+						: {}),
 				};
 
 				const [updated] = await db
@@ -109,16 +146,54 @@ export const Route = createFileRoute("/api/accounts/$id")({
 				const user = await requireCurrentUser(request);
 				const accountId = parsedParams.data.id;
 
-				const [deleted] = await db
-					.delete(accounts)
-					.where(and(eq(accounts.id, accountId), eq(accounts.userId, user.id)))
-					.returning({ id: accounts.id });
+				const [referenceSummary] = await db
+					.select({
+						transferReferencesCount: sql<number>`count(*)::int`,
+					})
+					.from(transactions)
+					.where(
+						and(
+							eq(transactions.userId, user.id),
+							eq(transactions.transferAccountId, accountId),
+						),
+					);
 
-				if (!deleted) {
-					return json({ error: "Account not found" }, 404);
+				if ((referenceSummary?.transferReferencesCount ?? 0) > 0) {
+					return json(
+						{
+							error:
+								"Account is used by transfer transactions. Update or remove those transfers before deleting this account.",
+						},
+						409,
+					);
 				}
 
-				return json({ success: true });
+				try {
+					const [deleted] = await db
+						.delete(accounts)
+						.where(
+							and(eq(accounts.id, accountId), eq(accounts.userId, user.id)),
+						)
+						.returning({ id: accounts.id });
+
+					if (!deleted) {
+						return json({ error: "Account not found" }, 404);
+					}
+
+					return json({ success: true });
+				} catch (error) {
+					if (isTransferAccountDeleteConstraintError(error)) {
+						return json(
+							{
+								error:
+									"Account is used by transfer transactions. Update or remove those transfers before deleting this account.",
+							},
+							409,
+						);
+					}
+
+					throw error;
+				}
 			},
 		},
 	},

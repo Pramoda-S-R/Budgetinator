@@ -41,6 +41,7 @@ export const Route = createFileRoute("/api/analytics/networth")({
             INNER JOIN ${accounts} a ON abh.account_id = a.id
             WHERE a.user_id    = ${user.id}
               AND a.include_in_net_worth = true
+              AND a.account_type <> 'credit_card'
               AND abh.recorded_at >= NOW() - (INTERVAL '1 month' * ${months})
           ),
           user_accts AS (
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/api/analytics/networth")({
             FROM ${accounts}
             WHERE user_id = ${user.id}
               AND include_in_net_worth = true
+              AND account_type <> 'credit_card'
           ),
           filled AS (
             SELECT
