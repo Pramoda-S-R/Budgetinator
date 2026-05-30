@@ -1,4 +1,5 @@
 import { pgTable, foreignKey, uuid, numeric, timestamp, unique, text, index, boolean, integer } from "drizzle-orm/pg-core"
+import { sql } from "drizzle-orm"
 
 
 
@@ -19,7 +20,7 @@ export const users = pgTable("users", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	email: text().notNull(),
 	name: text().notNull(),
-	currencyCode: text("currency_code").default('INR').notNull(),
+	currencyCode: text("currency_code").default('USD').notNull(),
 	timezone: text().default('UTC').notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -92,7 +93,7 @@ export const budgetPresets = pgTable("budget_presets", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	userId: uuid("user_id").notNull(),
 	name: text().notNull(),
-	description: text().default('').notNull(),
+	description: text().default(').notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
 	foreignKey({
@@ -181,8 +182,8 @@ export const transactions = pgTable("transactions", {
 	amount: numeric({ precision: 14, scale:  2 }).notNull(),
 	transactionType: text("transaction_type").notNull(),
 	transactionDate: timestamp("transaction_date", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	merchant: text().default('').notNull(),
-	notes: text().default('').notNull(),
+	merchant: text().default(').notNull(),
+	notes: text().default(').notNull(),
 	isRecurring: boolean("is_recurring").default(false).notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 }, (table) => [
@@ -249,7 +250,7 @@ export const investmentEntries = pgTable("investment_entries", {
 	amountInvested: numeric("amount_invested", { precision: 14, scale:  2 }).notNull(),
 	units: numeric({ precision: 14, scale:  4 }),
 	investedAt: timestamp("invested_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	notes: text().default('').notNull(),
+	notes: text().default(').notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.investmentId],
@@ -262,8 +263,8 @@ export const contacts = pgTable("contacts", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	userId: uuid("user_id").notNull(),
 	name: text().notNull(),
-	phone: text().default('').notNull(),
-	notes: text().default('').notNull(),
+	phone: text().default(').notNull(),
+	notes: text().default(').notNull(),
 }, (table) => [
 	foreignKey({
 			columns: [table.userId],
@@ -352,7 +353,7 @@ export const loans = pgTable("loans", {
 	startedAt: timestamp("started_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	expectedEndDate: timestamp("expected_end_date", { withTimezone: true, mode: 'string' }),
 	status: text().default('active').notNull(),
-	notes: text().default('').notNull(),
+	notes: text().default(').notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	accountId: uuid("account_id").notNull(),
 }, (table) => [
@@ -382,7 +383,7 @@ export const emis = pgTable("emis", {
 	startDate: timestamp("start_date", { withTimezone: true, mode: 'string' }).notNull(),
 	endDate: timestamp("end_date", { withTimezone: true, mode: 'string' }).notNull(),
 	nextDueDate: timestamp("next_due_date", { withTimezone: true, mode: 'string' }).notNull(),
-	lenderName: text("lender_name").default('').notNull(),
+	lenderName: text("lender_name").default(').notNull(),
 	status: text().default('active').notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	accountId: uuid("account_id").notNull(),

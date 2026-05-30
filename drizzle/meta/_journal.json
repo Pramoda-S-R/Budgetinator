@@ -92,6 +92,20 @@
       "when": 1780153200000,
       "tag": "0012_financial_posting_idempotency",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1780138627074,
+      "tag": "0013_useful_tarantula",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1782000000000,
+      "tag": "0014_financial_posting_idempotency_backfill",
+      "breakpoints": true
     }
   ]
 }
