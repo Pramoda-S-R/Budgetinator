@@ -25,15 +25,9 @@ import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "#/components/ui/button";
-import { Calendar } from "#/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "#/components/ui/card";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "#/components/ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -89,6 +83,21 @@ const ICON_COMPONENTS: Record<string, LucideIcon> = {
 	"trending-up": TrendingUp,
 };
 
+const MONTH_OPTIONS = [
+	"January",
+	"February",
+	"March",
+	"April",
+	"May",
+	"June",
+	"July",
+	"August",
+	"September",
+	"October",
+	"November",
+	"December",
+];
+
 function IconGlyph({ iconName }: { iconName: string }) {
 	const Icon = ICON_COMPONENTS[iconName] ?? Circle;
 	return <Icon className="size-4" />;
@@ -126,14 +135,23 @@ function BudgetsPage() {
 	const [showCreatePreset, setShowCreatePreset] = useState(false);
 
 	// Monthly budget
-	const [selectedDate, setSelectedDate] = useState(
-		() => new Date(initialYear, initialMonth, 1),
-	);
-	const monthKey = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}`;
+	const [selectedYear, setSelectedYear] = useState(initialYear);
+	const [selectedMonth, setSelectedMonth] = useState(initialMonth);
+	const monthKey = `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}`;
 	const [selectedPreset, setSelectedPreset] = useState<string>("");
 	const [expectedIncome, setExpectedIncome] = useState("0");
 	const [editingIncome, setEditingIncome] = useState(false);
 	const [incomeInput, setIncomeInput] = useState("0");
+	const yearOptions = useMemo(() => {
+		const currentYear = new Date().getFullYear();
+		const years = new Set<number>([selectedYear, currentYear]);
+
+		for (let offset = -5; offset <= 5; offset += 1) {
+			years.add(currentYear + offset);
+		}
+
+		return [...years].sort((a, b) => a - b);
+	}, [selectedYear]);
 
 	// Per-allocation edit state: id → draft amount string
 	const [editingAlloc, setEditingAlloc] = useState<Record<string, string>>({});
@@ -166,9 +184,9 @@ function BudgetsPage() {
 				allocationPercent?: number | null;
 			}>;
 		}) => budgetsApi.createBudgetPreset(input),
-		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ["budget-presets", currentUser?.id],
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({
+				queryKey: ["budget-presets"],
 			});
 			setPresetName("");
 			setPresetDesc("");
@@ -193,10 +211,12 @@ function BudgetsPage() {
 			month: number;
 			expectedIncome?: number;
 		}) => budgetsApi.applyPresetToMonth(input),
-		onSuccess: () =>
-			queryClient.invalidateQueries({
-				queryKey: ["monthly-budget", currentUser?.id, monthKey],
-			}),
+		onSuccess: async (_, input) => {
+			const appliedMonthKey = `${input.year}-${String(input.month).padStart(2, "0")}`;
+			await queryClient.invalidateQueries({
+				queryKey: ["monthly-budget", currentUser?.id, appliedMonthKey],
+			});
+		},
 	});
 
 	const updateIncomeMutation = useMutation({
@@ -295,11 +315,10 @@ function BudgetsPage() {
 
 	const handleApply = () => {
 		if (!selectedPreset) return;
-		const [yr, mo] = monthKey.split("-").map(Number);
 		applyMutation.mutate({
 			presetId: selectedPreset,
-			year: yr,
-			month: mo,
+			year: selectedYear,
+			month: selectedMonth + 1,
 			expectedIncome: Number(expectedIncome),
 		});
 	};
@@ -476,30 +495,42 @@ function BudgetsPage() {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					{/* Month picker */}
-					<div className="grid gap-4 sm:grid-cols-3">
+					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="space-y-2">
 							<Label>Month</Label>
-							<Popover>
-								<PopoverTrigger
-									nativeButton={false}
-									render={
-										<Input
-											readOnly
-											value={monthKey}
-											className="cursor-pointer"
-										/>
-									}
-								/>
-								<PopoverContent sideOffset={4} align="start">
-									<Calendar
-										mode="single"
-										captionLayout="dropdown"
-										selected={selectedDate}
-										onSelect={(date) => date && setSelectedDate(date)}
-										showOutsideDays={false}
-									/>
-								</PopoverContent>
-							</Popover>
+							<Select
+								value={String(selectedMonth)}
+								onValueChange={(value) => setSelectedMonth(Number(value))}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select month" />
+								</SelectTrigger>
+								<SelectContent>
+									{MONTH_OPTIONS.map((month, index) => (
+										<SelectItem key={month} value={String(index)}>
+											{month}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="space-y-2">
+							<Label>Year</Label>
+							<Select
+								value={String(selectedYear)}
+								onValueChange={(value) => setSelectedYear(Number(value))}
+							>
+								<SelectTrigger>
+									<SelectValue placeholder="Select year" />
+								</SelectTrigger>
+								<SelectContent>
+									{yearOptions.map((year) => (
+										<SelectItem key={year} value={String(year)}>
+											{year}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
 
