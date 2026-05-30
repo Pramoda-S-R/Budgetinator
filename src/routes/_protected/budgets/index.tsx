@@ -503,7 +503,16 @@ function BudgetsPage() {
 								onValueChange={(value) => setSelectedMonth(Number(value))}
 							>
 								<SelectTrigger>
-									<SelectValue placeholder="Select month" />
+									{MONTH_OPTIONS[selectedMonth] ? (
+										<span
+											data-slot="select-value"
+											className="flex flex-1 text-left text-sm"
+										>
+											{MONTH_OPTIONS[selectedMonth]}
+										</span>
+									) : (
+										<SelectValue placeholder="Select month" />
+									)}
 								</SelectTrigger>
 								<SelectContent>
 									{MONTH_OPTIONS.map((month, index) => (
